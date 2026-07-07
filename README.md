@@ -41,7 +41,9 @@ import { RsEditor } from 'rs-editor/react';  // React 18 ラッパー
 | [rs-grid](./rs-grid/) | 0.4.1 | Excel風データグリッド |
 | [rs-image](./rs-image/) | 0.6.0 | 依存ゼロの画像処理＆合成エディタ |
 | [rs-livecam](./rs-livecam/) | 0.2.0 | リアルタイムカメラ加工 |
+| [rs-pdf](./rs-pdf/) | 0.3.0 | 有料PDF SDKの機能網羅を目指す、依存ゼロのPDFビューア＆注釈ライブラリ |
 | [rs-pivot](./rs-pivot/) | 0.1.0 | 有料ピボットテーブルライブラリの機能網羅を目指す、依存ゼロのピボットテーブルライブラリ |
+| [rs-player](./rs-player/) | 0.1.0 | 有料動画プレイヤーの機能網羅を目指す、依存ゼロのHTML5動画プレイヤー |
 | [rs-qrcode](./rs-qrcode/) | 0.1.2 | QRコード/バーコード生成 |
 | [rs-replay](./rs-replay/) | 0.1.0 | 有料セッションリプレイSaaSの機能網羅を目指す、完全セルフホスト・依存ゼロのセッション記録/再生ライブラリ |
 | [rs-scanner](./rs-scanner/) | 0.1.0 | QR/バーコード読み取り |

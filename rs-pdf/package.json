@@ -1,0 +1,34 @@
+{
+    "name": "rs-pdf",
+    "version": "0.3.0",
+    "description": "有料PDF SDKの機能網羅を目指す、依存ゼロのPDFビューア＆注釈ライブラリ（レンダラはアダプタ注入・pdf.jsマッパー同梱）",
+    "type": "module",
+    "main": "./dist/rs-pdf.esm.min.js",
+    "module": "./dist/rs-pdf.esm.min.js",
+    "unpkg": "./dist/rs-pdf.min.js",
+    "jsdelivr": "./dist/rs-pdf.min.js",
+    "exports": {
+        ".": {
+            "types": "./dist/types/index.d.ts",
+            "import": "./dist/rs-pdf.esm.min.js",
+            "default": "./dist/rs-pdf.esm.min.js"
+        },
+        "./dist/*": "./dist/*",
+        "./rs-pdf.css": "./dist/rs-pdf.css"
+    },
+    "files": [
+        "dist"
+    ],
+    "keywords": [
+        "pdf",
+        "viewer",
+        "pdfjs",
+        "annotation",
+        "search",
+        "virtualization"
+    ],
+    "author": "ryusuke.sano <ryusuke.sano@parelabo.com>",
+    "license": "SEE LICENSE IN LICENSE.txt",
+    "types": "./dist/types/index.d.ts",
+    "style": "./dist/rs-pdf.css"
+}

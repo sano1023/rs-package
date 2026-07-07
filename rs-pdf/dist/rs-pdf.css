@@ -1,0 +1,365 @@
+/*
+ * rs-pdf スタイル（1枚もの）
+ * テーマは --rsp-* のCSSカスタムプロパティで差し替え可能。
+ * ダークモードはUIのみ追従し、ページ（紙面）は白のまま。
+ */
+
+.rsp-root {
+    --rsp-bg: #e8eaed;
+    --rsp-toolbar-bg: #f8f9fa;
+    --rsp-toolbar-text: #333;
+    --rsp-border: #d0d4d9;
+    --rsp-btn-hover: #e2e6ea;
+    --rsp-accent: #1a73e8;
+    --rsp-page-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+    --rsp-placeholder: #fff;
+    --rsp-sidebar-bg: #f1f3f4;
+    --rsp-hl: rgba(255, 213, 79, 0.55);
+    --rsp-hl-current: rgba(255, 130, 20, 0.6);
+    --rsp-selection: rgba(26, 115, 232, 0.35);
+
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    min-height: 240px;
+    overflow: hidden;
+    background: var(--rsp-bg);
+    color: var(--rsp-toolbar-text);
+    font-family: system-ui, -apple-system, "Segoe UI", "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+    font-size: 13px;
+    border: 1px solid var(--rsp-border);
+    border-radius: 6px;
+}
+
+@media (prefers-color-scheme: dark) {
+    .rsp-root {
+        --rsp-bg: #2b2d31;
+        --rsp-toolbar-bg: #1e1f22;
+        --rsp-toolbar-text: #e3e3e3;
+        --rsp-border: #3c3f44;
+        --rsp-btn-hover: #34363b;
+        --rsp-sidebar-bg: #232529;
+        --rsp-page-shadow: 0 1px 6px rgba(0, 0, 0, 0.7);
+    }
+}
+
+/* hidden 属性を display 指定より優先する（検索バー・ローディング・エラー） */
+.rsp-root [hidden] { display: none !important; }
+
+/* ---- ツールバー / 検索バー ------------------------------------------- */
+
+.rsp-toolbar,
+.rsp-searchbar {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex: none;
+    padding: 5px 8px;
+    background: var(--rsp-toolbar-bg);
+    border-bottom: 1px solid var(--rsp-border);
+    user-select: none;
+}
+
+.rsp-btn {
+    appearance: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: none;
+    border-radius: 4px;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+}
+
+.rsp-btn:hover { background: var(--rsp-btn-hover); }
+.rsp-btn:focus-visible { outline: 2px solid var(--rsp-accent); outline-offset: 1px; }
+.rsp-btn[aria-pressed="true"] { background: var(--rsp-btn-hover); color: var(--rsp-accent); }
+
+.rsp-btn svg {
+    width: 16px;
+    height: 16px;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.rsp-sep {
+    width: 1px;
+    height: 18px;
+    margin: 0 4px;
+    background: var(--rsp-border);
+}
+
+.rsp-page-input {
+    width: 44px;
+    padding: 3px 4px;
+    border: 1px solid var(--rsp-border);
+    border-radius: 4px;
+    background: var(--rsp-bg);
+    color: inherit;
+    font: inherit;
+    text-align: center;
+}
+
+.rsp-page-count { padding: 0 2px; white-space: nowrap; }
+
+.rsp-zoom-select {
+    max-width: 120px;
+    padding: 3px 4px;
+    border: 1px solid var(--rsp-border);
+    border-radius: 4px;
+    background: var(--rsp-bg);
+    color: inherit;
+    font: inherit;
+}
+
+.rsp-search-input {
+    flex: 0 1 260px;
+    padding: 4px 8px;
+    border: 1px solid var(--rsp-border);
+    border-radius: 4px;
+    background: var(--rsp-bg);
+    color: inherit;
+    font: inherit;
+}
+
+.rsp-search-count { min-width: 60px; padding: 0 4px; color: inherit; opacity: 0.75; }
+
+/* ---- 本体 ------------------------------------------------------------- */
+
+.rsp-body {
+    display: flex;
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+.rsp-sidebar {
+    flex: none;
+    width: 0;
+    overflow: hidden auto;
+    background: var(--rsp-sidebar-bg);
+    border-right: 1px solid transparent;
+    transition: width 0.15s ease;
+}
+
+.rsp-sidebar.rsp-open {
+    width: 156px;
+    border-right-color: var(--rsp-border);
+    padding: 8px 0;
+}
+
+.rsp-thumb {
+    display: block;
+    width: 120px;
+    margin: 0 auto 10px;
+    padding: 0;
+    border: 2px solid transparent;
+    border-radius: 4px;
+    background: transparent;
+    cursor: pointer;
+    text-align: center;
+    color: inherit;
+    font: inherit;
+}
+
+.rsp-thumb.rsp-active { border-color: var(--rsp-accent); }
+.rsp-thumb:focus-visible { outline: 2px solid var(--rsp-accent); }
+
+.rsp-thumb-pic {
+    display: block;
+    width: 100%;
+    background: #fff;
+    box-shadow: var(--rsp-page-shadow);
+    min-height: 40px;
+}
+
+.rsp-thumb-label { display: block; padding: 3px 0 1px; font-size: 11px; opacity: 0.8; }
+
+.rsp-scroller {
+    flex: 1 1 auto;
+    overflow: auto;
+    scrollbar-gutter: stable;
+    position: relative;
+    outline: none;
+}
+
+.rsp-scroller:focus-visible { box-shadow: inset 0 0 0 2px var(--rsp-accent); }
+
+.rsp-area { position: relative; }
+
+/* ---- ページ ------------------------------------------------------------ */
+
+.rsp-page {
+    position: absolute;
+    background: var(--rsp-placeholder);
+    box-shadow: var(--rsp-page-shadow);
+    overflow: hidden;
+}
+
+.rsp-page canvas {
+    position: absolute;
+    left: 0;
+    top: 0;
+    display: block;
+}
+
+/* 回転コンテンツ（テキストレイヤー・ハイライト）: 非回転座標系のままCSS回転する */
+.rsp-page-inner {
+    position: absolute;
+    left: 0;
+    top: 0;
+    transform-origin: 0 0;
+}
+
+.rsp-textlayer {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    line-height: 1;
+    z-index: 2;
+}
+
+.rsp-textlayer span {
+    position: absolute;
+    color: transparent;
+    white-space: pre;
+    cursor: text;
+    transform-origin: 0 0;
+    font-family: sans-serif;
+}
+
+.rsp-textlayer ::selection { background: var(--rsp-selection); }
+
+.rsp-highlights {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.rsp-hl {
+    position: absolute;
+    background: var(--rsp-hl);
+    border-radius: 2px;
+}
+
+.rsp-hl.rsp-hl-current { background: var(--rsp-hl-current); }
+
+/* ---- オーバーレイ ------------------------------------------------------ */
+
+.rsp-loading {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    pointer-events: none;
+    font-size: 14px;
+    opacity: 0.8;
+}
+
+.rsp-error {
+    position: absolute;
+    left: 50%;
+    top: 46%;
+    transform: translate(-50%, -50%);
+    max-width: min(80%, 480px);
+    padding: 16px 20px;
+    border: 1px solid #e57373;
+    border-radius: 8px;
+    background: #fdecea;
+    color: #b71c1c;
+    font-size: 13px;
+    line-height: 1.7;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+}
+
+@media (prefers-color-scheme: dark) {
+    .rsp-error { background: #3a2222; color: #ffb3ab; border-color: #8c4a42; }
+}
+
+/* ============================================================ v0.2 注釈 */
+
+.rsp-annot-layer {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: visible;
+    z-index: 3; /* textlayer(z=2)より上。svg自体はクリック透過・注釈要素だけ拾う */
+}
+.rsp-annot { pointer-events: auto; cursor: pointer; }
+.rsp-annot-capture .rsp-annot-layer { pointer-events: all; cursor: crosshair; }
+.rsp-annot-capture .rsp-annot { cursor: crosshair; }
+.rsp-annot-markup .rsp-textlayer { cursor: text; }
+.rsp-annot-markup .rsp-annot { pointer-events: none; } /* マークアップ中は注釈越しでも文字選択できる */
+.rsp-annot-selbox {
+    stroke: var(--rsp-accent, #2563eb);
+    stroke-width: 1.2;
+    stroke-dasharray: 4 3;
+    vector-effect: non-scaling-stroke;
+    pointer-events: none;
+}
+.rsp-annot-handle {
+    fill: #fff;
+    stroke: var(--rsp-accent, #2563eb);
+    stroke-width: 1.2;
+    vector-effect: non-scaling-stroke;
+    pointer-events: all;
+    cursor: move;
+}
+.rsp-annot-ui { pointer-events: none; }
+
+/* 注釈ツールバー */
+.rsp-annotbar {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border-bottom: 1px solid var(--rsp-border, #e2e8f0);
+    background: var(--rsp-toolbar-bg, #f8fafc);
+    flex-wrap: wrap;
+}
+.rsp-annot-tool.rsp-active {
+    background: var(--rsp-accent, #2563eb);
+    color: #fff;
+    border-radius: 6px;
+}
+.rsp-annot-color {
+    width: 26px;
+    height: 24px;
+    padding: 0;
+    border: 1px solid var(--rsp-border, #cbd5e1);
+    border-radius: 5px;
+    background: none;
+    cursor: pointer;
+}
+.rsp-annot-width { width: 72px; }
+.rsp-annot-act {
+    font-size: 12px;
+    padding: 3px 8px;
+    width: auto;
+}
+
+/* フリーテキストの浮動エディタ */
+.rsp-freetext-editor {
+    position: absolute;
+    z-index: 1000;
+    min-width: 160px;
+    min-height: 40px;
+    border: 1.5px dashed var(--rsp-accent, #2563eb);
+    background: rgba(255, 255, 255, 0.92);
+    font-family: system-ui, sans-serif;
+    padding: 2px 4px;
+    resize: both;
+    outline: none;
+}

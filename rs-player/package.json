@@ -1,0 +1,35 @@
+{
+    "name": "rs-player",
+    "version": "0.1.0",
+    "description": "有料動画プレイヤーの機能網羅を目指す、依存ゼロのHTML5動画プレイヤー",
+    "type": "module",
+    "main": "./dist/rs-player.esm.min.js",
+    "module": "./dist/rs-player.esm.min.js",
+    "unpkg": "./dist/rs-player.min.js",
+    "jsdelivr": "./dist/rs-player.min.js",
+    "exports": {
+        ".": {
+            "types": "./dist/types/index.d.ts",
+            "import": "./dist/rs-player.esm.min.js",
+            "default": "./dist/rs-player.esm.min.js"
+        },
+        "./dist/*": "./dist/*",
+        "./rs-player.css": "./dist/rs-player.css"
+    },
+    "files": [
+        "dist"
+    ],
+    "keywords": [
+        "video",
+        "player",
+        "html5",
+        "subtitles",
+        "vtt",
+        "youtube-like",
+        "zero-dependency"
+    ],
+    "author": "ryusuke.sano <ryusuke.sano@parelabo.com>",
+    "license": "SEE LICENSE IN LICENSE.txt",
+    "types": "./dist/types/index.d.ts",
+    "style": "./dist/rs-player.css"
+}

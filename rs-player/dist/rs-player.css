@@ -1,0 +1,567 @@
+/* ============================================================
+ * rs-player v0.1 スタイル
+ * クラスは .rsp-* で名前空間。テーマは CSSカスタムプロパティ --rsp-* で差し替え可。
+ * ============================================================ */
+
+.rsp {
+    /* テーマ変数 */
+    --rsp-accent: #f03;
+    --rsp-text: #fff;
+    --rsp-bg: #000;
+    --rsp-controls-gradient: linear-gradient(transparent, rgba(0, 0, 0, .72));
+    --rsp-menu-bg: rgba(28, 28, 28, .94);
+    --rsp-tooltip-bg: rgba(28, 28, 28, .9);
+    --rsp-font: system-ui, -apple-system, "Segoe UI", "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+    --rsp-font-size: 13px;
+    --rsp-caption-scale: 1;
+    --rsp-caption-bg: rgba(8, 8, 8, .75);
+
+    position: relative;
+    display: block;
+    aspect-ratio: 16 / 9;
+    background: var(--rsp-bg);
+    color: var(--rsp-text);
+    font-family: var(--rsp-font);
+    font-size: var(--rsp-font-size);
+    line-height: 1.4;
+    overflow: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    outline: none;
+    border-radius: 8px;
+}
+
+.rsp:focus-visible {
+    box-shadow: 0 0 0 2px var(--rsp-accent);
+}
+
+.rsp:fullscreen {
+    width: 100%;
+    height: 100%;
+    aspect-ratio: auto;
+    border-radius: 0;
+}
+
+.rsp-video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+    cursor: pointer;
+}
+
+/* 再生中にマウス静止3秒 → コントロールとカーソルを隠す */
+.rsp-user-idle,
+.rsp-user-idle .rsp-video {
+    cursor: none;
+}
+
+/* ------------------------------------------------------------ 中央再生ボタン */
+
+.rsp-center {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 72px;
+    height: 72px;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, .62);
+    color: var(--rsp-text);
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    transition: background .15s, opacity .2s, transform .2s;
+}
+
+.rsp-center svg {
+    width: 40px;
+    height: 40px;
+    fill: currentColor;
+}
+
+.rsp-center:hover {
+    background: var(--rsp-accent);
+}
+
+.rsp-center:focus-visible {
+    outline: 2px solid var(--rsp-accent);
+    outline-offset: 2px;
+}
+
+/* 再生中は中央ボタンを隠す（クリックは動画面が受ける） */
+.rsp-state-playing .rsp-center,
+.rsp-state-loading.rsp-started .rsp-center {
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-50%, -50%) scale(1.15);
+}
+
+/* ------------------------------------------------------------ スピナー / エラー */
+
+.rsp-spinner {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 48px;
+    height: 48px;
+    margin: -24px 0 0 -24px;
+    border: 4px solid rgba(255, 255, 255, .25);
+    border-top-color: var(--rsp-text);
+    border-radius: 50%;
+    animation: rsp-spin .8s linear infinite;
+    pointer-events: none;
+}
+
+@keyframes rsp-spin {
+    to { transform: rotate(360deg); }
+}
+
+.rsp-error {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    background: rgba(0, 0, 0, .8);
+    padding: 16px;
+    text-align: center;
+    font-size: 14px;
+}
+
+/* ------------------------------------------------------------ 下部バー */
+
+.rsp-bottom {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 24px 12px 4px;
+    background: var(--rsp-controls-gradient);
+    transition: opacity .2s, transform .2s;
+}
+
+.rsp-user-idle .rsp-bottom {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(4px);
+}
+
+.rsp-buttons {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.rsp-spacer {
+    flex: 1;
+}
+
+.rsp-btn {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--rsp-text);
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    flex: none;
+}
+
+.rsp-btn svg {
+    width: 24px;
+    height: 24px;
+    fill: currentColor;
+    opacity: .92;
+}
+
+.rsp-btn:hover svg {
+    opacity: 1;
+}
+
+.rsp-btn:hover {
+    background: rgba(255, 255, 255, .14);
+}
+
+.rsp-btn:focus-visible {
+    outline: 2px solid var(--rsp-accent);
+    outline-offset: -2px;
+}
+
+.rsp-btn[hidden] {
+    display: none;
+}
+
+.rsp-btn.rsp-active {
+    color: var(--rsp-accent);
+}
+
+.rsp-btn.rsp-active::before {
+    content: "";
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    bottom: 4px;
+    height: 2px;
+    border-radius: 1px;
+    background: var(--rsp-accent);
+}
+
+/* ホバーツールチップ（aria-label をそのまま表示） */
+@media (hover: hover) and (pointer: fine) {
+    .rsp-btn:hover::after {
+        content: attr(aria-label);
+        position: absolute;
+        bottom: calc(100% + 8px);
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--rsp-tooltip-bg);
+        color: var(--rsp-text);
+        font-size: 12px;
+        line-height: 1;
+        padding: 6px 8px;
+        border-radius: 4px;
+        white-space: nowrap;
+        pointer-events: none;
+        z-index: 5;
+    }
+}
+
+/* モバイルのタッチターゲットは44px以上 */
+@media (pointer: coarse) {
+    .rsp-btn {
+        width: 44px;
+        height: 44px;
+    }
+}
+
+.rsp-time {
+    font-size: var(--rsp-font-size);
+    font-variant-numeric: tabular-nums;
+    padding: 0 8px;
+    white-space: nowrap;
+    color: var(--rsp-text);
+}
+
+/* ------------------------------------------------------------ 音量 */
+
+.rsp-volume {
+    display: flex;
+    align-items: center;
+    flex: none;
+}
+
+.rsp-vol-slider {
+    position: relative;
+    width: 0;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    transition: width .2s;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.rsp-volume:hover .rsp-vol-slider,
+.rsp-volume:focus-within .rsp-vol-slider,
+.rsp-vol-slider:focus-visible {
+    width: 64px;
+    overflow: visible;
+}
+
+.rsp-vol-slider:focus-visible {
+    outline: 2px solid var(--rsp-accent);
+    outline-offset: -2px;
+}
+
+.rsp-vol-rail {
+    position: relative;
+    width: 52px;
+    height: 4px;
+    margin: 0 6px;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, .3);
+}
+
+.rsp-vol-fill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    border-radius: 2px;
+    background: var(--rsp-text);
+}
+
+.rsp-vol-thumb {
+    position: absolute;
+    top: 50%;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--rsp-text);
+    transform: translate(-50%, -50%);
+}
+
+/* 縦スライダ（volumeSlider: 'vertical'）: ホバーで上に伸びるポップアップ */
+.rsp-volume-vertical {
+    position: relative;
+}
+
+.rsp-volume-vertical .rsp-vol-slider {
+    position: absolute;
+    left: 50%;
+    bottom: 44px;
+    transform: translateX(-50%);
+    width: 32px;
+    height: 0;
+    background: var(--rsp-menu-bg);
+    border-radius: 6px;
+    transition: height .2s;
+    justify-content: center;
+    align-items: stretch;
+}
+
+.rsp-volume-vertical:hover .rsp-vol-slider,
+.rsp-volume-vertical:focus-within .rsp-vol-slider {
+    width: 32px;
+    height: 110px;
+    padding: 10px 0;
+    overflow: visible;
+}
+
+.rsp-volume-vertical .rsp-vol-rail {
+    width: 4px;
+    height: auto;
+    margin: 0 auto;
+}
+
+.rsp-volume-vertical .rsp-vol-fill {
+    top: auto;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.rsp-volume-vertical .rsp-vol-thumb {
+    top: auto;
+    left: 50%;
+    transform: translate(-50%, 50%);
+}
+
+/* ------------------------------------------------------------ シークバー */
+
+.rsp-seek {
+    position: relative;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    margin: 0 4px;
+    touch-action: none;
+}
+
+.rsp-seek:focus-visible {
+    outline: 2px solid var(--rsp-accent);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+.rsp-seek-rail {
+    position: relative;
+    width: 100%;
+    height: 3px;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, .25);
+    transition: height .1s;
+    overflow: hidden;
+}
+
+.rsp-seek:hover .rsp-seek-rail,
+.rsp-seek-dragging .rsp-seek-rail {
+    height: 5px;
+}
+
+.rsp-seek-buffered {
+    position: absolute;
+    inset: 0;
+}
+
+.rsp-seek-buffered-seg {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, .38);
+}
+
+.rsp-seek-played {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    background: var(--rsp-accent);
+}
+
+.rsp-seek-thumb {
+    position: absolute;
+    top: 50%;
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    background: var(--rsp-accent);
+    transform: translate(-50%, -50%) scale(0);
+    transition: transform .1s;
+    pointer-events: none;
+}
+
+.rsp-seek:hover .rsp-seek-thumb,
+.rsp-seek:focus-visible .rsp-seek-thumb,
+.rsp-seek-dragging .rsp-seek-thumb {
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.rsp-seek-tooltip {
+    position: absolute;
+    bottom: calc(100% + 6px);
+    transform: translateX(-50%);
+    background: var(--rsp-tooltip-bg);
+    color: var(--rsp-text);
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    padding: 5px 7px;
+    border-radius: 4px;
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: 6;
+}
+
+/* ------------------------------------------------------------ 設定メニュー */
+
+.rsp-menu {
+    position: absolute;
+    right: 12px;
+    bottom: 64px;
+    min-width: 220px;
+    max-width: calc(100% - 24px);
+    max-height: calc(100% - 80px);
+    overflow: auto;
+    background: var(--rsp-menu-bg);
+    border-radius: 10px;
+    padding: 6px 0;
+    z-index: 10;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, .4);
+}
+
+.rsp-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 10px 14px;
+    border: 0;
+    background: transparent;
+    color: var(--rsp-text);
+    font-family: inherit;
+    font-size: var(--rsp-font-size);
+    text-align: left;
+    cursor: pointer;
+}
+
+.rsp-menu-item:hover,
+.rsp-menu-item:focus-visible {
+    background: rgba(255, 255, 255, .12);
+    outline: none;
+}
+
+.rsp-menu-item svg {
+    width: 18px;
+    height: 18px;
+    fill: currentColor;
+    flex: none;
+    opacity: .8;
+}
+
+.rsp-menu-label {
+    flex: 1;
+}
+
+.rsp-menu-value {
+    color: rgba(255, 255, 255, .68);
+    font-size: 12px;
+}
+
+.rsp-menu-back {
+    border-bottom: 1px solid rgba(255, 255, 255, .16);
+    margin-bottom: 4px;
+    font-weight: 600;
+}
+
+.rsp-menu-check {
+    width: 18px;
+    height: 18px;
+    flex: none;
+    display: grid;
+    place-items: center;
+}
+
+.rsp-menu-check svg {
+    fill: var(--rsp-accent);
+    opacity: 1;
+}
+
+/* ------------------------------------------------------------ 字幕（自前レンダリング層） */
+
+.rsp-captions {
+    position: absolute;
+    left: 8%;
+    right: 8%;
+    bottom: 60px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    text-align: center;
+    pointer-events: none;
+    transition: bottom .2s;
+    z-index: 4;
+}
+
+.rsp-user-idle .rsp-captions {
+    bottom: 24px;
+}
+
+.rsp-cue {
+    display: inline-block;
+    background: var(--rsp-caption-bg);
+    padding: .18em .45em;
+    border-radius: 3px;
+    font-size: calc(var(--rsp-font-size) * 1.45 * var(--rsp-caption-scale));
+    line-height: 1.35;
+    white-space: pre-wrap;
+    text-shadow: 0 0 3px rgba(0, 0, 0, .6);
+}
+
+.rsp-caption-nobg .rsp-cue {
+    background: transparent;
+    text-shadow: 0 0 4px #000, 0 0 6px #000;
+}
+
+/* ------------------------------------------------------------ アニメーション抑制 */
+
+@media (prefers-reduced-motion: reduce) {
+    .rsp *,
+    .rsp *::before,
+    .rsp *::after {
+        transition-duration: 0s !important;
+        animation-duration: 1.2s;
+    }
+}
