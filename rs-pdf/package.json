@@ -1,6 +1,6 @@
 {
     "name": "rs-pdf",
-    "version": "0.4.1",
+    "version": "0.5.0",
     "description": "有料PDF SDKの機能網羅を目指す、依存ゼロのPDFビューア＆注釈ライブラリ（レンダラはアダプタ注入・pdf.jsマッパー同梱）",
     "type": "module",
     "main": "./dist/rs-pdf.esm.min.js",

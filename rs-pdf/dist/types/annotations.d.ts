@@ -137,6 +137,18 @@ export class AnnotationManager {
      * @returns {Promise<Blob>}
      */
     flatten(opts?: object): Promise<Blob>;
+    /** リダクション（黒塗り）注釈があるか */
+    hasRedactions(): boolean;
+    /**
+     * リダクション（黒塗り）を適用した画像PDFを生成する。
+     * 該当領域は下地ごと不透明で塗りつぶされ、ページは画像化されるため
+     * テキストのコピー・検索・抽出でも復元できない（真の消去）。
+     * 中身は flatten と同じ（全注釈も焼き込まれる）。黒塗りだけを反映したい場合は
+     * 他の注釈を一時的に外すか、別モデルで呼ぶこと。
+     * @param {object} opts { pages?, scale?, quality?, download?, filename? }
+     * @returns {Promise<Blob>}
+     */
+    applyRedactions(opts?: object): Promise<Blob>;
     /** 元PDFのバイト列を取得する（saveAnnotated用） */
     _sourceBytes(): Promise<Uint8Array<any>>;
     /** 見た目を画像APで与えるタイプ（freetext/stamp/datestamp）のAP用canvasを作る */

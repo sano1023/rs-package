@@ -21,5 +21,11 @@ export const note: any;
 export const stamp: any;
 /** 日付印（承認/日付/氏名の3段・依存ゼロ描画。rs-sign連携なしでも押せる円形印） */
 export const datestamp: any;
+/**
+ * リダクション（黒塗り）。編集中は「これから消える範囲」が分かるよう半透明の黒＋赤破線枠で表示する。
+ * 実際の消去は flatten / applyRedactions 時に canvas へ不透明で塗りつぶして行う
+ * （ページを画像化するため、下地のテキストごと復元不能に消える）。
+ */
+export const redact: any;
 /** 組み込み注釈タイプ一式 */
 export const builtinAnnotationTypes: any[];

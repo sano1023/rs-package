@@ -6,7 +6,7 @@
 
 ```bash
 # npm（GitHubのtarball指定）
-npm install https://github.com/sano1023/ryusuke-packages-dist/raw/main/tarballs/rs-pdf-0.4.1.tgz
+npm install https://github.com/sano1023/ryusuke-packages-dist/raw/main/tarballs/rs-pdf-0.5.0.tgz
 ```
 
 ```html
@@ -97,6 +97,18 @@ AcroForm付きPDFを開くと、テキスト / チェック / ラジオ / コン
 - `pdf.form.toJSON() / fromJSON()` で入力値の入出力、`setValue/getValue/listFields`、`formLoad / formChange` イベント
 - flatten 出力には入力値が焼き込まれる（テキスト・チェック✓・ラジオ●）
 - レンダラ非依存: アダプタ契約の `getFormFields()`（pdf.jsマッパー実装済み）
+
+## リダクション（黒塗り・真の消去）（v0.5）
+
+機密箇所を**下地ごと復元不能に消す**。編集ソフトのように文字だけ削るのではなく、ページを画像化して消す方式。
+
+1. ツールバーの**「黒塗り」ツール**を選び、消したい範囲をドラッグで囲む（編集中は半透明の黒＋赤破線で「これから消える範囲」が見え、位置を確認できる）
+2. `await pdf.applyRedactions({ download: true })` を呼ぶ → 該当領域を不透明で塗り、ページを画像化したPDFを出力
+3. 出力PDFは**コピー・検索・テキスト抽出しても黒塗り部分は復元できない**（該当ページのテキストが物理的に無くなる）
+
+- 塗り色は `style.color` で変更可（白塗りも可）。`pdf.applyRedactions` は黒塗りが1つも無ければ明確にエラー
+- **安全策**: 黒塗りがある状態で `saveAnnotated()`（元PDF無改変の追記保存）を呼ぶと**拒否される**。追記保存では下地のテキストが残り「消したつもりの情報漏洩」になるため
+- 注意: リダクションは対象ページが画像になる（そのページの他の文字も選択不可になる）。これは真の消去と引き換えの仕様
 
 ## 保存の3形態（v0.4）
 
