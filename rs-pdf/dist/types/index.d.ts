@@ -9,6 +9,7 @@
  * @returns {Viewer}
  */
 export function createRSPDF(target: string | HTMLElement, options?: object): Viewer;
+export { FormManager } from "./forms.js";
 import { Viewer } from './viewer.js';
 import { pdfjsAdapter } from './adapters/pdfjs.js';
 import { AnnotationManager } from './annotations.js';
@@ -20,3 +21,4 @@ import { validateDocument } from './adapter.js';
 import { validatePage } from './adapter.js';
 import { noRendererMessage } from './adapter.js';
 export { Viewer, pdfjsAdapter, AnnotationManager, defineAnnotationType, builtinAnnotationTypes, buildImagePDF, validateAdapter, validateDocument, validatePage, noRendererMessage };
+export { exportXFDF, importXFDF } from "./xfdf.js";

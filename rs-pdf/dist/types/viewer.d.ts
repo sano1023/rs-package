@@ -86,6 +86,7 @@ export class Viewer {
     _emit(event: any, payload: any): void;
     /** PDF を開く（src: URL | ArrayBuffer | Uint8Array | File） */
     open(src: any): Promise<void>;
+    _srcData: any;
     /** 現在のドキュメントを破棄する（open し直し・destroy 用） */
     _teardownDoc(): void;
     _thumbObserver: IntersectionObserver | null | undefined;

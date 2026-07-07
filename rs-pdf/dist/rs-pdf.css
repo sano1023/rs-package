@@ -363,3 +363,30 @@
     resize: both;
     outline: none;
 }
+
+/* ============================================================ v0.3 フォーム */
+
+.rsp-form-layer {
+    position: absolute;
+    inset: 0;
+    z-index: 2; /* textlayerと同層・注釈svg(3)の下 */
+    pointer-events: none;
+}
+.rsp-field {
+    position: absolute;
+    pointer-events: auto;
+    box-sizing: border-box;
+    border: 1px solid rgba(37, 99, 235, 0.45);
+    background: rgba(219, 234, 254, 0.35);
+    border-radius: 2px;
+    font-family: system-ui, sans-serif;
+    color: #111;
+    padding: 0 2px;
+}
+.rsp-field:focus {
+    outline: 2px solid var(--rsp-accent, #2563eb);
+    background: #fff;
+}
+.rsp-field-check { accent-color: var(--rsp-accent, #2563eb); }
+textarea.rsp-field { resize: none; }
+.rsp-field-select { padding: 0; }

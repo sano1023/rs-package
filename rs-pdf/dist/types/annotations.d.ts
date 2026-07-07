@@ -135,6 +135,17 @@ export class AnnotationManager {
      * @returns {Promise<Blob>}
      */
     flatten(opts?: object): Promise<Blob>;
+    /** 元PDFのバイト列を取得する（saveAnnotated用） */
+    _sourceBytes(): Promise<Uint8Array<any>>;
+    /** 見た目を画像APで与えるタイプ（freetext/stamp/datestamp）のAP用canvasを作る */
+    _apCanvasFor(a: any): Promise<HTMLCanvasElement | null>;
+    /**
+     * 元PDFへ注釈を「本物のPDF注釈」として増分更新で追記して保存する。
+     * 元のバイト列は一切変更されない（末尾追記のみ）。Acrobat等で開ける。
+     * @param {object} opts { download?, filename? }
+     * @returns {Promise<Blob>}
+     */
+    saveAnnotated(opts?: object): Promise<Blob>;
     /** ページの注釈だけを含むスタンドアロンSVG文字列（flatten用・選択UIなし） */
     _standaloneSVG(i: any, pxW: any, pxH: any): string | null;
 }
