@@ -6,7 +6,7 @@
 
 ```bash
 # npm（GitHubのtarball指定）
-npm install https://github.com/sano1023/ryusuke-packages-dist/raw/main/tarballs/rs-pdf-0.4.0.tgz
+npm install https://github.com/sano1023/ryusuke-packages-dist/raw/main/tarballs/rs-pdf-0.4.1.tgz
 ```
 
 ```html

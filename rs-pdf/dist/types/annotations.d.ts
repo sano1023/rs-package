@@ -86,6 +86,8 @@ export class AnnotationManager {
     redrawPage(i: any): void;
     _bbox(a: any): any;
     _drawSelectionUI(svg: any, i: any, w: any, h: any): void;
+    /** 付箋の本文を吹き出しで描く（本文が空なら「（ダブルクリックで入力）」を薄く表示） */
+    _drawNoteBubble(ui: any, b: any, w: any, h: any, contents: any): void;
     _svgFromEvent(e: any): any;
     /** クライアント座標 → 正規化ページ座標（0〜1） */
     _toNorm(svg: any, e: any): {

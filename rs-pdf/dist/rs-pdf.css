@@ -390,3 +390,14 @@
 .rsp-field-check { accent-color: var(--rsp-accent, #2563eb); }
 textarea.rsp-field { resize: none; }
 .rsp-field-select { padding: 0; }
+
+/* 付箋の吹き出し（選択時） */
+.rsp-note-bubble {
+    fill: #fffde7;
+    stroke: #f9a825;
+    stroke-width: 1;
+    vector-effect: non-scaling-stroke;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.25));
+}
+.rsp-note-bubble-text { fill: #4e342e; }
+.rsp-note-bubble-empty { fill: #bfa76a; font-style: italic; }
