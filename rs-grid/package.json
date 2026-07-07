@@ -1,0 +1,33 @@
+{
+    "name": "rs-grid",
+    "version": "0.4.1",
+    "description": "Excel風データグリッド（依存ゼロ・仮想スクロール・Excel互換コピペ・フィルハンドル・undo/redo）",
+    "type": "module",
+    "main": "./dist/rs-grid.esm.min.js",
+    "module": "./dist/rs-grid.esm.min.js",
+    "unpkg": "./dist/rs-grid.min.js",
+    "jsdelivr": "./dist/rs-grid.min.js",
+    "exports": {
+        ".": {
+            "types": "./dist/types/index.d.ts",
+            "import": "./dist/rs-grid.esm.min.js",
+            "default": "./dist/rs-grid.esm.min.js"
+        },
+        "./dist/*": "./dist/*",
+        "./rs-grid.css": "./dist/rs-grid.css"
+    },
+    "files": [
+        "dist"
+    ],
+    "keywords": [
+        "datagrid",
+        "spreadsheet",
+        "excel",
+        "handsontable",
+        "table"
+    ],
+    "author": "ryusuke.sano <ryusuke.sano@parelabo.com>",
+    "license": "SEE LICENSE IN LICENSE.txt",
+    "types": "./dist/types/index.d.ts",
+    "style": "./dist/rs-grid.css"
+}

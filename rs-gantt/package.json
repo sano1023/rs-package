@@ -1,0 +1,34 @@
+{
+    "name": "rs-gantt",
+    "version": "0.1.0",
+    "description": "有料ガントチャートライブラリの機能網羅を目指す、依存ゼロの対話型プロジェクトガント（日本の祝日・営業日カレンダー内蔵）",
+    "type": "module",
+    "main": "./dist/rs-gantt.esm.min.js",
+    "module": "./dist/rs-gantt.esm.min.js",
+    "unpkg": "./dist/rs-gantt.min.js",
+    "jsdelivr": "./dist/rs-gantt.min.js",
+    "exports": {
+        ".": {
+            "types": "./dist/types/index.d.ts",
+            "import": "./dist/rs-gantt.esm.min.js",
+            "default": "./dist/rs-gantt.esm.min.js"
+        },
+        "./dist/*": "./dist/*",
+        "./rs-gantt.css": "./dist/rs-gantt.css"
+    },
+    "files": [
+        "dist"
+    ],
+    "keywords": [
+        "gantt",
+        "project-management",
+        "scheduler",
+        "timeline",
+        "wbs",
+        "japanese-holidays"
+    ],
+    "author": "ryusuke.sano <ryusuke.sano@parelabo.com>",
+    "license": "SEE LICENSE IN LICENSE.txt",
+    "types": "./dist/types/index.d.ts",
+    "style": "./dist/rs-gantt.css"
+}

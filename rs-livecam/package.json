@@ -1,0 +1,32 @@
+{
+    "name": "rs-livecam",
+    "version": "0.2.0",
+    "description": "リアルタイムカメラ加工（美肌・仮想背景/モザイク・2Dアバター・消えるフェイルセーフ・WebRTC配信対応）",
+    "type": "module",
+    "main": "./dist/rs-livecam.esm.min.js",
+    "module": "./dist/rs-livecam.esm.min.js",
+    "unpkg": "./dist/rs-livecam.min.js",
+    "jsdelivr": "./dist/rs-livecam.min.js",
+    "exports": {
+        ".": {
+            "types": "./dist/types/index.d.ts",
+            "import": "./dist/rs-livecam.esm.min.js",
+            "default": "./dist/rs-livecam.esm.min.js"
+        },
+        "./dist/*": "./dist/*"
+    },
+    "files": [
+        "dist"
+    ],
+    "keywords": [
+        "camera",
+        "webrtc",
+        "beauty-filter",
+        "virtual-background",
+        "avatar",
+        "vtuber"
+    ],
+    "author": "ryusuke.sano <ryusuke.sano@parelabo.com>",
+    "license": "SEE LICENSE IN LICENSE.txt",
+    "types": "./dist/types/index.d.ts"
+}

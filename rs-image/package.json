@@ -1,0 +1,55 @@
+{
+    "name": "rs-image",
+    "version": "0.6.0",
+    "description": "依存ゼロの画像処理＆合成エディタ（リサイズ・圧縮・トリミング・円形切り抜き・WebP変換・レイヤー合成）",
+    "type": "module",
+    "main": "./dist/rs-image.esm.min.js",
+    "module": "./dist/rs-image.esm.min.js",
+    "unpkg": "./dist/rs-image.min.js",
+    "jsdelivr": "./dist/rs-image.min.js",
+    "exports": {
+        ".": {
+            "types": "./dist/types/index.d.ts",
+            "import": "./dist/rs-image.esm.min.js",
+            "default": "./dist/rs-image.esm.min.js"
+        },
+        "./dist/*": "./dist/*",
+        "./rs-image.css": "./dist/rs-image.css",
+        "./vue": {
+            "types": "./dist/types/vue.d.ts",
+            "import": "./dist/rs-image.vue.esm.min.js"
+        },
+        "./react": {
+            "types": "./dist/types/react.d.ts",
+            "import": "./dist/rs-image.react.esm.min.js"
+        }
+    },
+    "files": [
+        "dist"
+    ],
+    "keywords": [
+        "image",
+        "resize",
+        "compress",
+        "crop",
+        "webp",
+        "canvas",
+        "image-editor"
+    ],
+    "author": "ryusuke.sano <ryusuke.sano@parelabo.com>",
+    "license": "SEE LICENSE IN LICENSE.txt",
+    "types": "./dist/types/index.d.ts",
+    "style": "./dist/rs-image.css",
+    "peerDependencies": {
+        "vue": "^3.0.0",
+        "react": ">=18"
+    },
+    "peerDependenciesMeta": {
+        "vue": {
+            "optional": true
+        },
+        "react": {
+            "optional": true
+        }
+    }
+}

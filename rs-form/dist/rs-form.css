@@ -1,0 +1,421 @@
+/**
+ * rs-form 標準スタイル
+ * テーマは CSS カスタムプロパティ（--rsf-*）で差し替え可能。
+ */
+
+.rsf {
+    --rsf-primary: #2563eb;
+    --rsf-primary-text: #ffffff;
+    --rsf-text: #1f2937;
+    --rsf-muted: #6b7280;
+    --rsf-border: #d1d5db;
+    --rsf-bg: #ffffff;
+    --rsf-error: #dc2626;
+    --rsf-error-bg: #fef2f2;
+    --rsf-focus: rgba(37, 99, 235, 0.35);
+    --rsf-radius: 8px;
+    --rsf-star: #f59e0b;
+    --rsf-font: system-ui, -apple-system, "Segoe UI", "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic UI", Meiryo, sans-serif;
+
+    font-family: var(--rsf-font);
+    color: var(--rsf-text);
+    background: var(--rsf-bg);
+    line-height: 1.6;
+    max-width: 720px;
+    box-sizing: border-box;
+}
+
+.rsf *,
+.rsf *::before,
+.rsf *::after {
+    box-sizing: inherit;
+}
+
+/* ---------------------------------------------------------------- 見出し */
+
+.rsf-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0 0 4px;
+}
+
+.rsf-description {
+    color: var(--rsf-muted);
+    margin: 0 0 16px;
+}
+
+.rsf-page-title {
+    font-size: 1.125rem;
+    font-weight: 700;
+    margin: 16px 0 4px;
+    padding-bottom: 6px;
+    border-bottom: 2px solid var(--rsf-primary);
+}
+
+.rsf-page-desc {
+    color: var(--rsf-muted);
+    margin: 0 0 8px;
+}
+
+/* ---------------------------------------------------------------- 進捗バー */
+
+.rsf-progress {
+    margin: 12px 0 4px;
+}
+
+.rsf-progress-track {
+    height: 8px;
+    border-radius: 4px;
+    background: #e5e7eb;
+    overflow: hidden;
+}
+
+.rsf-progress-bar {
+    height: 100%;
+    width: 0;
+    border-radius: 4px;
+    background: var(--rsf-primary);
+    transition: width 0.25s ease;
+}
+
+.rsf-progress-text {
+    margin-top: 4px;
+    font-size: 0.8125rem;
+    color: var(--rsf-muted);
+    text-align: right;
+}
+
+/* ---------------------------------------------------------------- 質問 */
+
+.rsf-question {
+    margin: 20px 0;
+}
+
+.rsf-question[hidden] {
+    display: none;
+}
+
+.rsf-label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+.rsf-req {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 1px 6px;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    color: #ffffff;
+    background: var(--rsf-error);
+    border-radius: 3px;
+    vertical-align: 2px;
+}
+
+.rsf-desc {
+    font-size: 0.875rem;
+    color: var(--rsf-muted);
+    margin: -2px 0 6px;
+}
+
+.rsf-fieldset {
+    border: 0;
+    margin: 0;
+    padding: 0;
+    min-width: 0;
+}
+
+.rsf-fieldset legend {
+    padding: 0;
+}
+
+/* ---------------------------------------------------------------- 入力 */
+
+.rsf-input {
+    font: inherit;
+    color: inherit;
+    width: 100%;
+    min-height: 44px;
+    padding: 8px 12px;
+    border: 1px solid var(--rsf-border);
+    border-radius: var(--rsf-radius);
+    background: var(--rsf-bg);
+    outline: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.rsf-input:focus {
+    border-color: var(--rsf-primary);
+    box-shadow: 0 0 0 3px var(--rsf-focus);
+}
+
+.rsf-invalid .rsf-input,
+.rsf-input[aria-invalid="true"] {
+    border-color: var(--rsf-error);
+    background: var(--rsf-error-bg);
+}
+
+.rsf-textarea {
+    resize: vertical;
+    min-height: 88px;
+}
+
+.rsf-counter {
+    text-align: right;
+    font-size: 0.8125rem;
+    color: var(--rsf-muted);
+    margin-top: 2px;
+}
+
+.rsf-counter-over {
+    color: var(--rsf-error);
+    font-weight: 700;
+}
+
+.rsf-postal {
+    max-width: 180px;
+}
+
+.rsf-number-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.rsf-number-wrap .rsf-input {
+    max-width: 200px;
+}
+
+.rsf-unit {
+    color: var(--rsf-muted);
+}
+
+.rsf-date-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.rsf-date-wrap .rsf-input {
+    max-width: 220px;
+}
+
+.rsf-wareki {
+    color: var(--rsf-muted);
+    font-size: 0.875rem;
+}
+
+.rsf-select {
+    appearance: auto;
+    max-width: 320px;
+}
+
+/* ---------------------------------------------------------------- 選択肢 */
+
+.rsf-choices {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.rsf-choice {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 44px;
+    padding: 4px 10px;
+    border-radius: var(--rsf-radius);
+    cursor: pointer;
+}
+
+.rsf-choice:hover {
+    background: rgba(37, 99, 235, 0.06);
+}
+
+.rsf-choice-input {
+    width: 20px;
+    height: 20px;
+    margin: 0;
+    accent-color: var(--rsf-primary);
+    flex: none;
+}
+
+.rsf-choice-input:focus-visible {
+    outline: 3px solid var(--rsf-focus);
+    outline-offset: 2px;
+}
+
+.rsf-other-wrap {
+    margin: 2px 0 4px 40px;
+}
+
+/* ---------------------------------------------------------------- rating / nps */
+
+.rsf-sr-input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.rsf-rating {
+    display: flex;
+    gap: 4px;
+}
+
+.rsf-star-label {
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+}
+
+.rsf-star {
+    font-size: 1.75rem;
+    color: #d1d5db;
+    transition: color 0.1s ease, transform 0.1s ease;
+}
+
+.rsf-star.rsf-on {
+    color: var(--rsf-star);
+}
+
+.rsf-star-label:hover .rsf-star {
+    transform: scale(1.15);
+}
+
+.rsf-sr-input:focus-visible + .rsf-star,
+.rsf-sr-input:focus-visible + .rsf-nps-box {
+    outline: 3px solid var(--rsf-focus);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+.rsf-nps-scale {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+}
+
+.rsf-nps-label {
+    cursor: pointer;
+}
+
+.rsf-nps-box {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+    border: 1px solid var(--rsf-border);
+    border-radius: var(--rsf-radius);
+    font-weight: 600;
+    transition: background 0.1s ease, color 0.1s ease;
+}
+
+.rsf-nps-label:hover .rsf-nps-box {
+    border-color: var(--rsf-primary);
+}
+
+.rsf-sr-input:checked + .rsf-nps-box {
+    background: var(--rsf-primary);
+    color: var(--rsf-primary-text);
+    border-color: var(--rsf-primary);
+}
+
+.rsf-nps-legends {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 4px;
+    font-size: 0.8125rem;
+    color: var(--rsf-muted);
+}
+
+/* ---------------------------------------------------------------- エラー */
+
+/* エラー領域は常に1行分の高さを確保する。
+   表示/消去でレイアウトが動くと、blur 時の再検証でボタンがずれて
+   「1回目のクリックが効かない」問題（CLS）が起きるため */
+.rsf-error {
+    color: var(--rsf-error);
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-top: 4px;
+    min-height: 1.3125rem;
+}
+
+/* ---------------------------------------------------------------- ナビ */
+
+.rsf-nav {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.rsf-btn {
+    font: inherit;
+    font-weight: 700;
+    min-height: 44px;
+    padding: 10px 28px;
+    border-radius: var(--rsf-radius);
+    border: 1px solid var(--rsf-border);
+    background: var(--rsf-bg);
+    color: var(--rsf-text);
+    cursor: pointer;
+    transition: filter 0.1s ease;
+}
+
+.rsf-btn:hover {
+    filter: brightness(0.96);
+}
+
+.rsf-btn:focus-visible {
+    outline: 3px solid var(--rsf-focus);
+    outline-offset: 2px;
+}
+
+.rsf-btn-next {
+    margin-left: auto;
+    background: var(--rsf-primary);
+    border-color: var(--rsf-primary);
+    color: var(--rsf-primary-text);
+}
+
+.rsf-btn[hidden] {
+    display: none;
+}
+
+/* ---------------------------------------------------------------- 完了・その他 */
+
+.rsf-completed {
+    padding: 32px 16px;
+    text-align: center;
+    font-size: 1.125rem;
+    font-weight: 600;
+}
+
+.rsf-empty {
+    color: var(--rsf-muted);
+    padding: 16px 0;
+}
+
+.rsf-readonly .rsf-input,
+.rsf-readonly .rsf-choice {
+    cursor: default;
+}
+
+@media (max-width: 480px) {
+    .rsf-nps-box {
+        min-width: 38px;
+    }
+}

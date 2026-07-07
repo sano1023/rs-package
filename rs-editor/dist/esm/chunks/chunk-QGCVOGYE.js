@@ -1,0 +1,2 @@
+/*! rs-editor v0.5.0 | (c) ryusuke.sano | 利用無償・改変/再配布禁止 (Free to use, no modification/redistribution) — see LICENSE.txt */
+import{r as n}from"./chunk-RSFDM342.js";var t=n({name:"history",buttons:{undo:{icon:"\u21B6",tooltip:"\u5143\u306B\u623B\u3059 (Ctrl+Z)",onAction:o=>o.commands.undo(),isDisabled:o=>!o.core.canUndo()},redo:{icon:"\u21B7",tooltip:"\u3084\u308A\u76F4\u3059 (Ctrl+Y)",onAction:o=>o.commands.redo(),isDisabled:o=>!o.core.canRedo()}}});export{t as a};

@@ -1,0 +1,107 @@
+/**
+ * rs-scanner 標準スタイル
+ * テーマは CSS カスタムプロパティ（--rssc-*）の上書きで差し替えられる。
+ */
+
+.rssc {
+    --rssc-accent: #22c55e;
+    --rssc-frame: rgba(255, 255, 255, 0.9);
+    --rssc-radius: 12px;
+
+    position: relative;
+    background: #0f172a;
+    border-radius: var(--rssc-radius);
+    overflow: hidden;
+    aspect-ratio: 4 / 3;
+}
+
+.rssc-video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* 照準枠 */
+
+.rssc-frame {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 62%;
+    height: 52%;
+    pointer-events: none;
+}
+
+.rssc-corner {
+    position: absolute;
+    width: 26px;
+    height: 26px;
+    border: 3px solid var(--rssc-frame);
+    border-radius: 2px;
+}
+
+.rssc-tl { top: 0; left: 0; border-right: none; border-bottom: none; }
+.rssc-tr { top: 0; right: 0; border-left: none; border-bottom: none; }
+.rssc-bl { bottom: 0; left: 0; border-right: none; border-top: none; }
+.rssc-br { bottom: 0; right: 0; border-left: none; border-top: none; }
+
+.rssc-scanline {
+    position: absolute;
+    left: 6%;
+    right: 6%;
+    top: 0;
+    height: 2px;
+    background: var(--rssc-accent);
+    box-shadow: 0 0 8px var(--rssc-accent);
+    opacity: 0;
+}
+
+.rssc-active .rssc-scanline {
+    opacity: 0.9;
+    animation: rssc-sweep 1.8s ease-in-out infinite;
+}
+
+@keyframes rssc-sweep {
+    0% { top: 2%; }
+    50% { top: 96%; }
+    100% { top: 2%; }
+}
+
+/* 読み取り成功フラッシュ */
+
+.rssc-flash {
+    position: absolute;
+    inset: 0;
+    background: var(--rssc-accent);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.rssc-flash.rssc-hit {
+    animation: rssc-flash 0.35s ease-out;
+}
+
+@keyframes rssc-flash {
+    0% { opacity: 0.45; }
+    100% { opacity: 0; }
+}
+
+/* ステータス */
+
+.rssc-status {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 8px 12px;
+    background: rgba(15, 23, 42, 0.65);
+    color: #e2e8f0;
+    font-family: system-ui, -apple-system, "Segoe UI", "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+    font-size: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

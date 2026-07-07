@@ -1,0 +1,35 @@
+{
+    "name": "rs-form",
+    "version": "0.1.0",
+    "description": "有料フォームビルダー製品の機能網羅を目指す、依存ゼロのスキーマ駆動フォームライブラリ",
+    "type": "module",
+    "main": "./dist/rs-form.esm.min.js",
+    "module": "./dist/rs-form.esm.min.js",
+    "unpkg": "./dist/rs-form.min.js",
+    "jsdelivr": "./dist/rs-form.min.js",
+    "exports": {
+        ".": {
+            "types": "./dist/types/index.d.ts",
+            "import": "./dist/rs-form.esm.min.js",
+            "default": "./dist/rs-form.esm.min.js"
+        },
+        "./dist/*": "./dist/*",
+        "./rs-form.css": "./dist/rs-form.css"
+    },
+    "files": [
+        "dist"
+    ],
+    "keywords": [
+        "form",
+        "survey",
+        "questionnaire",
+        "schema",
+        "validation",
+        "japanese",
+        "plugin"
+    ],
+    "author": "ryusuke.sano <ryusuke.sano@parelabo.com>",
+    "license": "SEE LICENSE IN LICENSE.txt",
+    "types": "./dist/types/index.d.ts",
+    "style": "./dist/rs-form.css"
+}

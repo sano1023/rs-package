@@ -1,0 +1,2 @@
+/*! rs-editor v0.5.0 | (c) ryusuke.sano | 利用無償・改変/再配布禁止 (Free to use, no modification/redistribution) — see LICENSE.txt */
+import{r as n}from"../chunks/chunk-RSFDM342.js";var t=n({name:"nonbreaking",buttons:{nonbreaking:{icon:'<span class="rse-ic-h">NB<br>SP</span>',tooltip:"\u30CE\u30FC\u30D6\u30EC\u30FC\u30AF\u30B9\u30DA\u30FC\u30B9 (Ctrl+Shift+Space)",onAction:o=>o.insertContent("&nbsp;")}},keymaps:{"Mod-Shift- ":"nonbreaking"}});export{t as nonbreaking};

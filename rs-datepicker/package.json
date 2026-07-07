@@ -1,0 +1,33 @@
+{
+    "name": "rs-datepicker",
+    "version": "0.3.0",
+    "description": "日本語ファースト・依存ゼロの日付ピッカー（単一/複数/期間・時刻・年スクロールナビ・マーカー）",
+    "type": "module",
+    "main": "./dist/rs-datepicker.esm.min.js",
+    "module": "./dist/rs-datepicker.esm.min.js",
+    "unpkg": "./dist/rs-datepicker.min.js",
+    "jsdelivr": "./dist/rs-datepicker.min.js",
+    "exports": {
+        ".": {
+            "types": "./dist/types/index.d.ts",
+            "import": "./dist/rs-datepicker.esm.min.js",
+            "default": "./dist/rs-datepicker.esm.min.js"
+        },
+        "./dist/*": "./dist/*",
+        "./rs-datepicker.css": "./dist/rs-datepicker.css"
+    },
+    "files": [
+        "dist"
+    ],
+    "keywords": [
+        "datepicker",
+        "calendar",
+        "date-range",
+        "datetime",
+        "japanese"
+    ],
+    "author": "ryusuke.sano <ryusuke.sano@parelabo.com>",
+    "license": "SEE LICENSE IN LICENSE.txt",
+    "types": "./dist/types/index.d.ts",
+    "style": "./dist/rs-datepicker.css"
+}

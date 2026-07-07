@@ -1,0 +1,367 @@
+/**
+ * rs-gantt スタイル
+ * テーマは --rsgt-* カスタムプロパティで差し替え（--rsg-* は rs-grid が使用済みのため rsgt）。
+ */
+
+.rsgt {
+    --rsgt-font: 12px/1.4 system-ui, -apple-system, "Segoe UI", "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+    --rsgt-border: #e2e8f0;
+    --rsgt-header-bg: #f8fafc;
+    --rsgt-header-text: #475569;
+    --rsgt-text: #334155;
+    --rsgt-row-stripe: #fbfcfe;
+    --rsgt-row-selected: #eef4ff;
+    --rsgt-bar-bg: #4e79a7;
+    --rsgt-bar-progress: rgba(15, 30, 60, 0.30);
+    --rsgt-bar-text: #ffffff;
+    --rsgt-summary-bg: #64748b;
+    --rsgt-milestone: #b45309;
+    --rsgt-nonwork-bg: rgba(100, 116, 139, 0.10);
+    --rsgt-today: #ef4444;
+    --rsgt-link: #94a3b8;
+    --rsgt-link-selected: #2563eb;
+    --rsgt-handle: #1d4ed8;
+
+    display: flex;
+    position: relative;
+    height: 100%;
+    min-height: 200px;
+    border: 1px solid var(--rsgt-border);
+    border-radius: 6px;
+    overflow: hidden;
+    font: var(--rsgt-font);
+    color: var(--rsgt-text);
+    background: #fff;
+    outline: none;
+    box-sizing: border-box;
+}
+
+.rsgt *, .rsgt *::before, .rsgt *::after { box-sizing: border-box; }
+
+/* ---------------------------------------------------------------- 左: グリッド */
+
+.rsgt-grid {
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-right: 1px solid var(--rsgt-border);
+    background: #fff;
+}
+
+.rsgt-grid-header {
+    flex: none;
+    display: flex;
+    height: 53px;
+    align-items: stretch;
+    background: var(--rsgt-header-bg);
+    border-bottom: 1px solid var(--rsgt-border);
+    color: var(--rsgt-header-text);
+    font-weight: 600;
+}
+
+.rsgt-gh-cell {
+    position: relative;
+    flex: none;
+    display: flex;
+    align-items: center;
+    padding: 0 8px;
+    border-right: 1px solid var(--rsgt-border);
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.rsgt-col-grip {
+    position: absolute;
+    top: 0; right: -3px;
+    width: 7px; height: 100%;
+    cursor: col-resize;
+    z-index: 2;
+    touch-action: none;
+}
+
+.rsgt-grid-scroll {
+    flex: 1;
+    overflow: hidden;
+}
+
+.rsgt-row {
+    display: flex;
+    align-items: stretch;
+    border-bottom: 1px solid var(--rsgt-border);
+    cursor: pointer;
+}
+
+.rsgt-row:nth-child(even) { background: var(--rsgt-row-stripe); }
+.rsgt-row.rsgt-selected { background: var(--rsgt-row-selected); }
+
+.rsgt-cell {
+    flex: none;
+    display: flex;
+    align-items: center;
+    padding: 0 8px;
+    border-right: 1px solid var(--rsgt-border);
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.rsgt-cell-text { overflow: hidden; text-overflow: ellipsis; }
+.rsgt-cell[style*="text-align: right"] { justify-content: flex-end; }
+
+.rsgt-toggle {
+    flex: none;
+    width: 16px;
+    margin-right: 2px;
+    text-align: center;
+    color: var(--rsgt-header-text);
+    user-select: none;
+}
+.rsgt-toggle.rsgt-leaf { visibility: hidden; }
+
+/* ---------------------------------------------------------------- スプリッタ */
+
+.rsgt-splitter {
+    flex: none;
+    width: 5px;
+    margin-left: -3px;
+    cursor: col-resize;
+    z-index: 5;
+    touch-action: none;
+}
+.rsgt-splitter:hover { background: rgba(37, 99, 235, 0.25); }
+
+/* ---------------------------------------------------------------- 右: タイムライン */
+
+.rsgt-tl {
+    flex: 1;
+    overflow: auto;
+    position: relative;
+    background: #fff;
+}
+
+.rsgt-tl-header {
+    position: sticky;
+    top: 0;
+    z-index: 4;
+    background: var(--rsgt-header-bg);
+    border-bottom: 1px solid var(--rsgt-border);
+    color: var(--rsgt-header-text);
+}
+
+.rsgt-tl-h1 { position: relative; height: 24px; border-bottom: 1px solid var(--rsgt-border); }
+.rsgt-tl-h2 { position: relative; height: 28px; }
+
+.rsgt-h-cell {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-right: 1px solid var(--rsgt-border);
+    overflow: hidden;
+    white-space: nowrap;
+    font-size: 11px;
+}
+
+.rsgt-tl-h1 .rsgt-h-cell { justify-content: center; font-weight: 600; }
+.rsgt-h-nonwork { background: var(--rsgt-nonwork-bg); color: #b91c1c; }
+.rsgt-h-today .rsgt-h-d {
+    background: var(--rsgt-today);
+    color: #fff;
+    border-radius: 8px;
+    padding: 0 4px;
+}
+.rsgt-h-d { font-size: 11px; line-height: 1.2; }
+.rsgt-h-w { font-size: 9px; line-height: 1.1; opacity: 0.75; }
+
+.rsgt-tl-body {
+    position: relative;
+    background-image: linear-gradient(
+        to bottom,
+        transparent 0, transparent 31px, var(--rsgt-border) 31px, var(--rsgt-border) 32px,
+        var(--rsgt-row-stripe) 32px, var(--rsgt-row-stripe) 63px, var(--rsgt-border) 63px, var(--rsgt-border) 64px
+    );
+}
+
+.rsgt-layer { position: absolute; inset: 0; pointer-events: none; }
+.rsgt-layer-under { z-index: 0; }
+.rsgt-links { position: absolute; left: 0; top: 0; z-index: 1; pointer-events: none; overflow: visible; }
+/* バーはリンクより上。コンテナ自体は素通しにして、空白部分のクリックを依存線へ通す */
+.rsgt-bars { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
+.rsgt-bar, .rsgt-milestone { pointer-events: auto; }
+.rsgt-layer-over { z-index: 3; }
+
+.rsgt-vline { position: absolute; top: 0; width: 1px; background: var(--rsgt-border); opacity: 0.6; }
+.rsgt-nonwork { position: absolute; top: 0; background: var(--rsgt-nonwork-bg); }
+.rsgt-today { position: absolute; top: 0; width: 2px; background: var(--rsgt-today); opacity: 0.8; }
+
+/* ---------------------------------------------------------------- バー */
+
+.rsgt-bar {
+    position: absolute;
+    height: 20px;
+    border-radius: 4px;
+    background: var(--rsgt-bar-bg);
+    color: var(--rsgt-bar-text);
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+    outline-offset: 1px;
+}
+.rsgt-bar:active { cursor: grabbing; }
+.rsgt-bar.rsgt-selected { box-shadow: 0 0 0 2px var(--rsgt-handle); }
+
+.rsgt-bar-progress {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    background: var(--rsgt-bar-progress);
+    border-radius: 4px 0 0 4px;
+    pointer-events: none;
+}
+
+.rsgt-bar-label {
+    position: absolute;
+    inset: 0;
+    padding: 2px 8px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-size: 11px;
+    line-height: 16px;
+    pointer-events: none;
+}
+
+/* サマリータスク: 両端が下に伸びるブラケット形 */
+.rsgt-bar-summary {
+    height: 8px;
+    margin-top: 4px;
+    border-radius: 2px;
+    background: var(--rsgt-summary-bg);
+    cursor: default;
+}
+.rsgt-bar-summary::before, .rsgt-bar-summary::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    border-style: solid;
+}
+.rsgt-bar-summary::before { left: 0; border-width: 13px 6px 0 0; border-color: var(--rsgt-summary-bg) transparent transparent transparent; }
+.rsgt-bar-summary::after { right: 0; border-width: 13px 0 0 6px; border-color: var(--rsgt-summary-bg) transparent transparent transparent; }
+
+/* リサイズハンドル（ホバーで見える・透明でもヒットする） */
+.rsgt-handle {
+    position: absolute;
+    top: 0;
+    width: 8px; height: 100%;
+    cursor: ew-resize;
+    opacity: 0;
+    background: rgba(255, 255, 255, 0.55);
+    touch-action: none;
+}
+.rsgt-handle-l { left: 0; border-radius: 4px 0 0 4px; }
+.rsgt-handle-r { right: 0; border-radius: 0 4px 4px 0; }
+.rsgt-bar:hover .rsgt-handle { opacity: 1; }
+
+/* 進捗ハンドル */
+.rsgt-progress-handle {
+    position: absolute;
+    bottom: -5px;
+    width: 10px; height: 10px;
+    margin-left: -5px;
+    background: var(--rsgt-handle);
+    clip-path: polygon(50% 0, 100% 100%, 0 100%);
+    cursor: ew-resize;
+    opacity: 0;
+    touch-action: none;
+}
+.rsgt-bar:hover .rsgt-progress-handle,
+.rsgt-bar.rsgt-selected .rsgt-progress-handle { opacity: 1; }
+
+/* リンク作成の端点○ */
+.rsgt-conn {
+    position: absolute;
+    top: 50%;
+    width: 12px; height: 12px;
+    margin-top: -6px;
+    border-radius: 50%;
+    border: 2px solid var(--rsgt-handle);
+    background: #fff;
+    cursor: crosshair;
+    opacity: 0;
+    z-index: 2;
+    touch-action: none;
+}
+.rsgt-conn-l { left: -14px; }
+.rsgt-conn-r { right: -14px; }
+.rsgt-bar:hover .rsgt-conn, .rsgt-milestone:hover .rsgt-conn { opacity: 1; }
+
+/* マイルストーン ◆ */
+.rsgt-milestone {
+    position: absolute;
+    width: 16px; height: 16px;
+    background: var(--rsgt-milestone);
+    transform: rotate(45deg);
+    border-radius: 2px;
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+}
+.rsgt-milestone.rsgt-selected { box-shadow: 0 0 0 2px var(--rsgt-handle); }
+.rsgt-milestone .rsgt-conn-l { left: -16px; transform: rotate(-45deg); }
+.rsgt-milestone .rsgt-conn-r { right: -16px; transform: rotate(-45deg); }
+
+.rsgt-ms-label {
+    position: absolute;
+    left: 22px; top: 1px;
+    transform: rotate(-45deg);
+    transform-origin: left top;
+    white-space: nowrap;
+    font-size: 11px;
+    color: var(--rsgt-text);
+    pointer-events: none;
+}
+
+/* ドラッグ中 */
+.rsgt-ghost {
+    opacity: 0.6;
+    outline: 1px dashed var(--rsgt-handle);
+    pointer-events: none;
+    z-index: 3;
+}
+.rsgt-drag-src { opacity: 0.35; }
+.rsgt-link-target { box-shadow: 0 0 0 2px #16a34a; }
+
+.rsgt-tip {
+    position: fixed;
+    z-index: 1000;
+    padding: 4px 8px;
+    background: rgba(15, 23, 42, 0.92);
+    color: #fff;
+    font: 11px/1.4 system-ui, sans-serif;
+    border-radius: 4px;
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+/* ---------------------------------------------------------------- 依存線 */
+
+path.rsgt-link {
+    fill: none;
+    stroke: var(--rsgt-link);
+    stroke-width: 1.5;
+    pointer-events: none;
+}
+path.rsgt-link-hit {
+    fill: none;
+    stroke: transparent;
+    stroke-width: 10;
+    pointer-events: stroke;
+    cursor: pointer;
+}
+path.rsgt-link-selected { stroke: var(--rsgt-link-selected); stroke-width: 2; }
+path.rsgt-link-temp { stroke: var(--rsgt-link-selected); stroke-dasharray: 4 3; }
+.rsgt-arrowhead { fill: var(--rsgt-link); }
+path.rsgt-link-selected + .rsgt-arrowhead { fill: var(--rsgt-link-selected); }

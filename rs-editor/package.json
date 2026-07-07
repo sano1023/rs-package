@@ -1,0 +1,62 @@
+{
+    "name": "rs-editor",
+    "version": "0.5.0",
+    "description": "プラグインアーキテクチャを持つ、依存ゼロのWYSIWYGエディタライブラリ（TinyMCE代替を目指す）",
+    "type": "module",
+    "main": "./dist/rs-editor.esm.min.js",
+    "module": "./dist/rs-editor.esm.min.js",
+    "unpkg": "./dist/rs-editor.min.js",
+    "jsdelivr": "./dist/rs-editor.min.js",
+    "exports": {
+        ".": {
+            "types": "./dist/types/index.d.ts",
+            "import": "./dist/rs-editor.esm.min.js",
+            "default": "./dist/rs-editor.esm.min.js"
+        },
+        "./dist/*": "./dist/*",
+        "./rs-editor.css": "./dist/rs-editor.css",
+        "./vue": {
+            "types": "./dist/types/vue.d.ts",
+            "import": "./dist/rs-editor.vue.esm.min.js"
+        },
+        "./react": {
+            "types": "./dist/types/react.d.ts",
+            "import": "./dist/rs-editor.react.esm.min.js"
+        },
+        "./plugins/*.js": {
+            "types": "./dist/types/plugins/*.d.ts",
+            "import": "./dist/esm/plugins/*.js"
+        },
+        "./plugins/*": {
+            "types": "./dist/types/plugins/*.d.ts",
+            "import": "./dist/esm/plugins/*.js"
+        }
+    },
+    "files": [
+        "dist"
+    ],
+    "keywords": [
+        "wysiwyg",
+        "editor",
+        "rich-text",
+        "contenteditable",
+        "tinymce-alternative",
+        "plugin"
+    ],
+    "author": "ryusuke.sano <ryusuke.sano@parelabo.com>",
+    "license": "SEE LICENSE IN LICENSE.txt",
+    "types": "./dist/types/index.d.ts",
+    "style": "./dist/rs-editor.css",
+    "peerDependencies": {
+        "vue": "^3.0.0",
+        "react": ">=18"
+    },
+    "peerDependenciesMeta": {
+        "vue": {
+            "optional": true
+        },
+        "react": {
+            "optional": true
+        }
+    }
+}

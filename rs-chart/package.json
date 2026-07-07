@@ -1,0 +1,34 @@
+{
+    "name": "rs-chart",
+    "version": "0.5.0",
+    "description": "有料チャートライブラリの機能網羅を目指す、依存ゼロのSVGチャートライブラリ",
+    "type": "module",
+    "main": "./dist/rs-chart.esm.min.js",
+    "module": "./dist/rs-chart.esm.min.js",
+    "unpkg": "./dist/rs-chart.min.js",
+    "jsdelivr": "./dist/rs-chart.min.js",
+    "exports": {
+        ".": {
+            "types": "./dist/types/index.d.ts",
+            "import": "./dist/rs-chart.esm.min.js",
+            "default": "./dist/rs-chart.esm.min.js"
+        },
+        "./dist/*": "./dist/*",
+        "./rs-chart.css": "./dist/rs-chart.css"
+    },
+    "files": [
+        "dist"
+    ],
+    "keywords": [
+        "chart",
+        "graph",
+        "svg",
+        "visualization",
+        "dashboard",
+        "plugin"
+    ],
+    "author": "ryusuke.sano <ryusuke.sano@parelabo.com>",
+    "license": "SEE LICENSE IN LICENSE.txt",
+    "types": "./dist/types/index.d.ts",
+    "style": "./dist/rs-chart.css"
+}

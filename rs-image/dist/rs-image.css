@@ -1,0 +1,306 @@
+/**
+ * rs-image エディタ標準スタイル
+ * テーマは CSS カスタムプロパティ（--rsi-*）の上書きで差し替えられる。
+ */
+
+.rsi {
+    --rsi-bg: #ffffff;
+    --rsi-stage-bg: #eef2f7;
+    --rsi-text: #1e293b;
+    --rsi-muted: #64748b;
+    --rsi-border: #e2e8f0;
+    --rsi-accent: #4e79a7;
+    --rsi-accent-text: #ffffff;
+    --rsi-danger: #e15759;
+    --rsi-radius: 10px;
+    --rsi-font: system-ui, -apple-system, "Segoe UI", "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+
+    font-family: var(--rsi-font);
+    font-size: 13px;
+    color: var(--rsi-text);
+    background: var(--rsi-bg);
+    border: 1px solid var(--rsi-border);
+    border-radius: var(--rsi-radius);
+    overflow: hidden;
+}
+
+/* ---------------------------------------------------------------- toolbar */
+
+.rsi-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 8px;
+    border-bottom: 1px solid var(--rsi-border);
+    flex-wrap: wrap;
+}
+
+.rsi-tool {
+    appearance: none;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--rsi-text);
+    font-family: inherit;
+    font-size: 13px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.rsi-tool:hover {
+    background: var(--rsi-stage-bg);
+}
+
+.rsi-tool.rsi-active {
+    background: var(--rsi-accent);
+    color: var(--rsi-accent-text);
+}
+
+.rsi-tool:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+
+.rsi-spacer {
+    flex: 1;
+}
+
+/* ---------------------------------------------------------------- main */
+
+.rsi-main {
+    display: flex;
+    align-items: stretch;
+}
+
+.rsi-stage {
+    flex: 1;
+    min-width: 0;
+    background:
+        repeating-conic-gradient(var(--rsi-stage-bg) 0% 25%, #ffffff 0% 50%) 50% / 18px 18px;
+}
+
+.rsi-canvas {
+    display: block;
+    width: 100%;
+    touch-action: none;
+    cursor: default;
+}
+
+.rsi-panel {
+    width: 220px;
+    flex-shrink: 0;
+    border-left: 1px solid var(--rsi-border);
+    padding: 12px;
+    overflow-y: auto;
+    background: var(--rsi-bg);
+}
+
+/* ---------------------------------------------------------------- panel parts */
+
+.rsi-section + .rsi-section {
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px solid var(--rsi-border);
+}
+
+.rsi-section-title {
+    font-weight: 700;
+    font-size: 12px;
+    color: var(--rsi-muted);
+    margin-bottom: 8px;
+}
+
+.rsi-help {
+    font-size: 12px;
+    color: var(--rsi-muted);
+    margin: 4px 0;
+    line-height: 1.6;
+}
+
+.rsi-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 8px 0;
+}
+
+.rsi-btn {
+    appearance: none;
+    border: 1px solid var(--rsi-border);
+    background: var(--rsi-bg);
+    color: var(--rsi-text);
+    font-family: inherit;
+    font-size: 12px;
+    padding: 6px 12px;
+    border-radius: 7px;
+    cursor: pointer;
+}
+
+.rsi-btn:hover {
+    background: var(--rsi-stage-bg);
+}
+
+.rsi-btn.rsi-primary {
+    background: var(--rsi-accent);
+    border-color: var(--rsi-accent);
+    color: var(--rsi-accent-text);
+}
+
+.rsi-btn.rsi-danger {
+    color: var(--rsi-danger);
+    border-color: var(--rsi-danger);
+}
+
+.rsi-chip {
+    appearance: none;
+    border: 1px solid var(--rsi-border);
+    background: var(--rsi-bg);
+    color: var(--rsi-text);
+    font-family: inherit;
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    cursor: pointer;
+}
+
+.rsi-chip.rsi-active {
+    background: var(--rsi-accent);
+    border-color: var(--rsi-accent);
+    color: var(--rsi-accent-text);
+}
+
+.rsi-field {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 8px 0;
+    font-size: 12px;
+}
+
+.rsi-field > span {
+    width: 48px;
+    color: var(--rsi-muted);
+    flex-shrink: 0;
+}
+
+.rsi-input {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid var(--rsi-border);
+    border-radius: 7px;
+    padding: 6px 8px;
+    font-family: inherit;
+    font-size: 13px;
+    background: var(--rsi-bg);
+    color: var(--rsi-text);
+}
+
+.rsi-range {
+    width: 100%;
+}
+
+/* ---------------------------------------------------------------- stamps */
+
+.rsi-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-bottom: 8px;
+}
+
+.rsi-tab {
+    appearance: none;
+    border: none;
+    background: transparent;
+    color: var(--rsi-muted);
+    font-family: inherit;
+    font-size: 12px;
+    padding: 5px 10px;
+    border-radius: 7px;
+    cursor: pointer;
+}
+
+.rsi-tab:hover {
+    background: var(--rsi-stage-bg);
+}
+
+.rsi-tab.rsi-active {
+    background: var(--rsi-accent);
+    color: var(--rsi-accent-text);
+    font-weight: 700;
+}
+
+.rsi-stamp-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+}
+
+.rsi-stamp {
+    appearance: none;
+    border: 1px solid var(--rsi-border);
+    background: var(--rsi-bg);
+    border-radius: 8px;
+    padding: 6px;
+    cursor: pointer;
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.rsi-stamp:hover {
+    border-color: var(--rsi-accent);
+    background: var(--rsi-stage-bg);
+}
+
+.rsi-stamp img {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+@media (max-width: 640px) {
+    .rsi-main {
+        flex-direction: column;
+    }
+
+    .rsi-panel {
+        width: auto;
+        border-left: none;
+        border-top: 1px solid var(--rsi-border);
+    }
+}
+
+/* v0.5: スポイト・レイヤー効果・カーブエディタ */
+.rsi-swatch {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    border-radius: 5px;
+    border: 1px solid var(--rsi-border, #cbd5e1);
+    background: repeating-conic-gradient(#e2e8f0 0% 25%, #fff 0% 50%) 50%/10px 10px;
+}
+.rsi-field.rsi-sub {
+    padding-left: 16px;
+}
+.rsi-curve {
+    width: 100%;
+    border: 1px solid var(--rsi-border, #cbd5e1);
+    border-radius: 6px;
+    background: #fff;
+    touch-action: none;
+    cursor: crosshair;
+}
+.rsi-range-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+.rsi-hue-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 4px;
+    vertical-align: -1px;
+}

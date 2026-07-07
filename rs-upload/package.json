@@ -1,0 +1,35 @@
+{
+    "name": "rs-upload",
+    "version": "0.1.0",
+    "description": "有料アップロードSaaS/ウィジェットの機能網羅を目指す、依存ゼロのファイルアップロードUI＋転送エンジン",
+    "type": "module",
+    "main": "./dist/rs-upload.esm.min.js",
+    "module": "./dist/rs-upload.esm.min.js",
+    "unpkg": "./dist/rs-upload.min.js",
+    "jsdelivr": "./dist/rs-upload.min.js",
+    "exports": {
+        ".": {
+            "types": "./dist/types/index.d.ts",
+            "import": "./dist/rs-upload.esm.min.js",
+            "default": "./dist/rs-upload.esm.min.js"
+        },
+        "./dist/*": "./dist/*",
+        "./rs-upload.css": "./dist/rs-upload.css"
+    },
+    "files": [
+        "dist"
+    ],
+    "keywords": [
+        "upload",
+        "file",
+        "drag-and-drop",
+        "dropzone",
+        "uploader",
+        "progress",
+        "widget"
+    ],
+    "author": "ryusuke.sano <ryusuke.sano@parelabo.com>",
+    "license": "SEE LICENSE IN LICENSE.txt",
+    "types": "./dist/types/index.d.ts",
+    "style": "./dist/rs-upload.css"
+}

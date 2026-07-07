@@ -1,0 +1,196 @@
+/**
+ * rs-replay プレイヤーUIスタイル
+ * テーマはCSSカスタムプロパティ（--rsr-*）で上書きできる。
+ */
+
+.rsr {
+    --rsr-bg: #0f172a;
+    --rsr-controls-bg: #1e293b;
+    --rsr-fg: #e2e8f0;
+    --rsr-accent: #38bdf8;
+    --rsr-timeline-bg: #334155;
+    --rsr-ripple: rgba(56, 189, 248, 0.9);
+    --rsr-radius: 8px;
+
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    min-height: 240px;
+    background: var(--rsr-bg);
+    border-radius: var(--rsr-radius);
+    overflow: hidden;
+    font-family: system-ui, -apple-system, "Segoe UI", "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+    outline: none;
+}
+
+.rsr:focus-visible {
+    box-shadow: 0 0 0 2px var(--rsr-accent);
+}
+
+/* ---------------------------------------------------------------- ステージ */
+.rsr-stage {
+    position: relative;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.rsr-scaler {
+    position: absolute;
+    left: 0;
+    top: 0;
+    transform-origin: 0 0;
+}
+
+.rsr-frame {
+    display: block;
+    border: 0;
+    background: #fff;
+}
+
+.rsr-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+/* 仮想カーソル */
+.rsr-cursor {
+    position: absolute;
+    width: 20px;
+    height: 22px;
+    margin: -2px 0 0 -2px;
+    transition: left 0.08s linear, top 0.08s linear;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5));
+    z-index: 2;
+}
+
+.rsr-cursor-instant {
+    transition: none;
+}
+
+/* クリックリップル */
+.rsr-ripple {
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border: 3px solid var(--rsr-ripple);
+    border-radius: 50%;
+    transform: translate(-50%, -50%) scale(0.4);
+    opacity: 1;
+    animation: rsr-ripple 0.6s ease-out forwards;
+    z-index: 1;
+}
+
+@keyframes rsr-ripple {
+    to {
+        transform: translate(-50%, -50%) scale(3);
+        opacity: 0;
+    }
+}
+
+/* ---------------------------------------------------------------- コントロール */
+.rsr-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 0 0 auto;
+    padding: 8px 12px;
+    background: var(--rsr-controls-bg);
+    color: var(--rsr-fg);
+}
+
+.rsr-btn {
+    width: 34px;
+    height: 30px;
+    padding: 0;
+    margin: 0;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--rsr-fg);
+    font-size: 14px;
+    line-height: 1;
+    cursor: pointer;
+    box-sizing: border-box;
+}
+
+.rsr-btn:hover {
+    background: rgba(148, 163, 184, 0.2);
+}
+
+.rsr-btn:focus-visible {
+    outline: 2px solid var(--rsr-accent);
+    outline-offset: 1px;
+}
+
+.rsr-time {
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    opacity: 0.9;
+}
+
+.rsr-timeline {
+    position: relative;
+    flex: 1 1 auto;
+    min-width: 60px; /* ホストページのCSSに潰されない下限 */
+    height: 8px;
+    border-radius: 4px;
+    background: var(--rsr-timeline-bg);
+    cursor: pointer;
+}
+
+.rsr-timeline:focus-visible {
+    outline: 2px solid var(--rsr-accent);
+    outline-offset: 2px;
+}
+
+.rsr-timeline-fill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 0;
+    border-radius: 4px;
+    background: var(--rsr-accent);
+}
+
+.rsr-timeline-handle {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--rsr-accent);
+    transform: translate(-50%, -50%);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+    pointer-events: none;
+}
+
+.rsr-speed {
+    flex: 0 0 auto;
+    width: auto; /* ホストページの select { width:100% } 等に負けない */
+    height: 28px;
+    margin: 0;
+    border: 1px solid rgba(148, 163, 184, 0.4);
+    border-radius: 6px;
+    background: transparent;
+    color: var(--rsr-fg);
+    font-size: 12px;
+    padding: 0 6px;
+    cursor: pointer;
+    box-sizing: border-box;
+}
+
+.rsr-speed:focus-visible {
+    outline: 2px solid var(--rsr-accent);
+    outline-offset: 1px;
+}
+
+.rsr-speed option {
+    color: #111;
+}

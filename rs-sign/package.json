@@ -1,0 +1,34 @@
+{
+    "name": "rs-sign",
+    "version": "0.1.0",
+    "description": "電子署名SaaSの画面部品網羅を目指す、依存ゼロの署名パッド＋電子印鑑ライブラリ",
+    "type": "module",
+    "main": "./dist/rs-sign.esm.min.js",
+    "module": "./dist/rs-sign.esm.min.js",
+    "unpkg": "./dist/rs-sign.min.js",
+    "jsdelivr": "./dist/rs-sign.min.js",
+    "exports": {
+        ".": {
+            "types": "./dist/types/index.d.ts",
+            "import": "./dist/rs-sign.esm.min.js",
+            "default": "./dist/rs-sign.esm.min.js"
+        },
+        "./dist/*": "./dist/*",
+        "./rs-sign.css": "./dist/rs-sign.css"
+    },
+    "files": [
+        "dist"
+    ],
+    "keywords": [
+        "signature",
+        "signature-pad",
+        "hanko",
+        "seal",
+        "e-sign",
+        "canvas"
+    ],
+    "author": "ryusuke.sano <ryusuke.sano@parelabo.com>",
+    "license": "SEE LICENSE IN LICENSE.txt",
+    "types": "./dist/types/index.d.ts",
+    "style": "./dist/rs-sign.css"
+}

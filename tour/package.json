@@ -1,0 +1,32 @@
+{
+    "name": "@knoweble/spotlight-tour",
+    "version": "0.1.0",
+    "description": "依存ゼロ・フレームワーク非依存のスポットライト型ガイドツアーライブラリ",
+    "type": "module",
+    "main": "./dist/tour.esm.min.js",
+    "module": "./dist/tour.esm.min.js",
+    "unpkg": "./dist/tour.min.js",
+    "jsdelivr": "./dist/tour.min.js",
+    "exports": {
+        ".": {
+            "types": "./dist/types/index.d.ts",
+            "import": "./dist/tour.esm.min.js",
+            "default": "./dist/tour.esm.min.js"
+        },
+        "./dist/*": "./dist/*"
+    },
+    "files": [
+        "dist"
+    ],
+    "keywords": [
+        "tour",
+        "onboarding",
+        "spotlight",
+        "walkthrough",
+        "guide",
+        "tutorial"
+    ],
+    "author": "ryusuke.sano <ryusuke.sano@parelabo.com>",
+    "license": "SEE LICENSE IN LICENSE.txt",
+    "types": "./dist/types/index.d.ts"
+}

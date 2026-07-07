@@ -1,0 +1,32 @@
+{
+    "name": "rs-qrcode",
+    "version": "0.1.2",
+    "description": "QRコード/バーコード生成（依存ゼロ・SVG/PNG・300dpi・ロゴ・ラベル・連番・CSV一括）",
+    "type": "module",
+    "main": "./dist/rs-qrcode.esm.min.js",
+    "module": "./dist/rs-qrcode.esm.min.js",
+    "unpkg": "./dist/rs-qrcode.min.js",
+    "jsdelivr": "./dist/rs-qrcode.min.js",
+    "exports": {
+        ".": {
+            "types": "./dist/types/index.d.ts",
+            "import": "./dist/rs-qrcode.esm.min.js",
+            "default": "./dist/rs-qrcode.esm.min.js"
+        },
+        "./dist/*": "./dist/*"
+    },
+    "files": [
+        "dist"
+    ],
+    "keywords": [
+        "qrcode",
+        "barcode",
+        "code128",
+        "ean13",
+        "svg",
+        "png"
+    ],
+    "author": "ryusuke.sano <ryusuke.sano@parelabo.com>",
+    "license": "SEE LICENSE IN LICENSE.txt",
+    "types": "./dist/types/index.d.ts"
+}

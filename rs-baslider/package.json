@@ -1,0 +1,32 @@
+{
+    "name": "rs-baslider",
+    "version": "0.1.0",
+    "description": "Before/After比較スライダー（依存ゼロ・横/縦・タッチ対応・ラベル・複数設置）",
+    "type": "module",
+    "main": "./dist/rs-baslider.esm.min.js",
+    "module": "./dist/rs-baslider.esm.min.js",
+    "unpkg": "./dist/rs-baslider.min.js",
+    "jsdelivr": "./dist/rs-baslider.min.js",
+    "exports": {
+        ".": {
+            "types": "./dist/types/index.d.ts",
+            "import": "./dist/rs-baslider.esm.min.js",
+            "default": "./dist/rs-baslider.esm.min.js"
+        },
+        "./dist/*": "./dist/*",
+        "./rs-baslider.css": "./dist/rs-baslider.css"
+    },
+    "files": [
+        "dist"
+    ],
+    "keywords": [
+        "before-after",
+        "image-comparison",
+        "slider",
+        "twentytwenty"
+    ],
+    "author": "ryusuke.sano <ryusuke.sano@parelabo.com>",
+    "license": "SEE LICENSE IN LICENSE.txt",
+    "types": "./dist/types/index.d.ts",
+    "style": "./dist/rs-baslider.css"
+}

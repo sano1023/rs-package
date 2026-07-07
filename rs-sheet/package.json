@@ -1,0 +1,34 @@
+{
+    "name": "rs-sheet",
+    "version": "0.1.0",
+    "description": "本格数式エンジン内蔵・依存ゼロのセル指向スプレッドシートライブラリ（有料スプレッドシート製品の機能網羅を目指す）",
+    "type": "module",
+    "main": "./dist/rs-sheet.esm.min.js",
+    "module": "./dist/rs-sheet.esm.min.js",
+    "unpkg": "./dist/rs-sheet.min.js",
+    "jsdelivr": "./dist/rs-sheet.min.js",
+    "exports": {
+        ".": {
+            "types": "./dist/types/index.d.ts",
+            "import": "./dist/rs-sheet.esm.min.js",
+            "default": "./dist/rs-sheet.esm.min.js"
+        },
+        "./dist/*": "./dist/*",
+        "./rs-sheet.css": "./dist/rs-sheet.css"
+    },
+    "files": [
+        "dist"
+    ],
+    "keywords": [
+        "spreadsheet",
+        "excel",
+        "formula",
+        "grid",
+        "datagrid",
+        "worksheet"
+    ],
+    "author": "ryusuke.sano <ryusuke.sano@parelabo.com>",
+    "license": "SEE LICENSE IN LICENSE.txt",
+    "types": "./dist/types/index.d.ts",
+    "style": "./dist/rs-sheet.css"
+}

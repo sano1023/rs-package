@@ -1,0 +1,310 @@
+/**
+ * rs-sheet 標準スタイル
+ * テーマは CSS カスタムプロパティ（--rss-*）で差し替え可能
+ */
+
+.rss {
+    --rss-border: #d4d9e1;
+    --rss-header-bg: #f4f6f9;
+    --rss-header-text: #5b6470;
+    --rss-header-hl: #dfe8f6;
+    --rss-cell-bg: #ffffff;
+    --rss-text: #24292f;
+    --rss-accent: #1a73e8;
+    --rss-sel-bg: rgba(26, 115, 232, 0.09);
+    --rss-error: #d93025;
+    --rss-font: 13px/1.4 -apple-system, "Segoe UI", "Hiragino Kaku Gothic ProN", "Noto Sans JP", Meiryo, sans-serif;
+
+    position: relative;
+    font: var(--rss-font);
+    color: var(--rss-text);
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* クリップボード/キーボードプロキシ（不可視） */
+.rss-proxy {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 2px;
+    height: 2px;
+    padding: 0;
+    border: 0;
+    opacity: 0;
+    resize: none;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: -1;
+}
+
+.rss-scroller {
+    position: relative;
+    overflow: auto;
+    border: 1px solid var(--rss-border);
+    background: var(--rss-cell-bg);
+    -webkit-overflow-scrolling: touch; /* タッチの慣性スクロール */
+    overscroll-behavior: contain;
+}
+
+.rss-canvas {
+    position: relative;
+}
+
+/* ------------------------------------------------------------ ヘッダー（sticky固定） */
+
+.rss-colhdr {
+    position: sticky;
+    top: 0;
+    left: 0;
+    z-index: 30;
+    background: var(--rss-header-bg);
+    border-bottom: 1px solid var(--rss-border);
+    box-sizing: border-box;
+}
+
+.rss-colcells {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.rss-corner {
+    position: sticky;
+    left: 0;
+    display: inline-block;
+    vertical-align: top;
+    z-index: 3;
+    background: var(--rss-header-bg);
+    border-right: 1px solid var(--rss-border);
+    box-sizing: border-box;
+    cursor: pointer;
+}
+
+.rss-colhead {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    box-sizing: border-box;
+    border-right: 1px solid var(--rss-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--rss-header-text);
+    font-size: 11px;
+    user-select: none;
+    cursor: pointer;
+    background: var(--rss-header-bg);
+}
+
+.rss-rowhdr {
+    position: sticky;
+    left: 0;
+    z-index: 20;
+    background: var(--rss-header-bg);
+    border-right: 1px solid var(--rss-border);
+    box-sizing: border-box;
+}
+
+.rss-rowhead {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    box-sizing: border-box;
+    border-bottom: 1px solid var(--rss-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--rss-header-text);
+    font-size: 11px;
+    user-select: none;
+    cursor: pointer;
+    background: var(--rss-header-bg);
+}
+
+.rss-colhead.rss-hl,
+.rss-rowhead.rss-hl,
+.rss-corner:hover {
+    background: var(--rss-header-hl);
+    color: var(--rss-accent);
+    font-weight: 600;
+}
+
+/* リサイズグリップ */
+.rss-colgrip {
+    position: absolute;
+    right: -3px;
+    top: 0;
+    width: 7px;
+    height: 100%;
+    cursor: col-resize;
+    z-index: 2;
+}
+
+.rss-rowgrip {
+    position: absolute;
+    left: 0;
+    bottom: -3px;
+    width: 100%;
+    height: 7px;
+    cursor: row-resize;
+    z-index: 2;
+}
+
+/* ------------------------------------------------------------ セル本体 */
+
+.rss-body {
+    position: absolute;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.rss-cells,
+.rss-row {
+    position: absolute;
+    left: 0;
+    width: 100%;
+}
+
+.rss-cells {
+    top: 0;
+    height: 100%;
+}
+
+.rss-cell {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    box-sizing: border-box;
+    border-right: 1px solid var(--rss-border);
+    border-bottom: 1px solid var(--rss-border);
+    padding: 0 6px;
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+    overflow: hidden;
+    user-select: none;
+    cursor: cell;
+}
+
+.rss-cell.rss-num {
+    justify-content: flex-end;
+}
+
+.rss-cell.rss-bool {
+    justify-content: center;
+}
+
+.rss-cell.rss-err {
+    justify-content: center;
+    color: var(--rss-error);
+    font-weight: 600;
+}
+
+/* ------------------------------------------------------------ 選択・カーソル・フィル */
+
+.rss-selrect {
+    position: absolute;
+    background: var(--rss-sel-bg);
+    border: 1px solid var(--rss-accent);
+    pointer-events: none;
+    z-index: 4;
+    box-sizing: border-box;
+}
+
+.rss-cursor {
+    position: absolute;
+    border: 2px solid var(--rss-accent);
+    pointer-events: none;
+    z-index: 5;
+    box-sizing: border-box;
+}
+
+.rss-fill {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: var(--rss-accent);
+    border: 1px solid #fff;
+    cursor: crosshair;
+    z-index: 6;
+    box-sizing: border-box;
+}
+
+.rss-fillpreview {
+    position: absolute;
+    border: 1.5px dashed var(--rss-accent);
+    pointer-events: none;
+    z-index: 4;
+    box-sizing: border-box;
+}
+
+/* ------------------------------------------------------------ エディタ */
+
+.rss-editorwrap {
+    position: absolute;
+    z-index: 10;
+}
+
+.rss-editor {
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    border: 2px solid var(--rss-accent);
+    outline: none;
+    padding: 0 4px;
+    font: inherit;
+    color: inherit;
+    background: var(--rss-cell-bg);
+}
+
+/* ------------------------------------------------------------ ステータスバー・メニュー */
+
+.rss-status {
+    height: 24px;
+    line-height: 24px;
+    padding: 0 10px;
+    font-size: 12px;
+    color: var(--rss-header-text);
+    background: var(--rss-header-bg);
+    border: 1px solid var(--rss-border);
+    border-top: none;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.rss-menu {
+    position: absolute;
+    z-index: 100;
+    min-width: 180px;
+    background: #fff;
+    border: 1px solid var(--rss-border);
+    border-radius: 6px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.14);
+    padding: 4px;
+}
+
+.rss-menu-item {
+    display: block;
+    width: 100%;
+    text-align: left;
+    border: none;
+    background: none;
+    font: inherit;
+    color: var(--rss-text);
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.rss-menu-item:hover {
+    background: var(--rss-sel-bg);
+    color: var(--rss-accent);
+}
+
+.rss-menu-sep {
+    height: 1px;
+    background: var(--rss-border);
+    margin: 4px 6px;
+}

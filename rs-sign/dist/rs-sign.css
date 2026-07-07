@@ -1,0 +1,29 @@
+/**
+ * rs-sign 既定スタイル
+ * テーマは CSSカスタムプロパティ（--rss-*）で差し替え可能。
+ */
+
+:root {
+    --rss-seal-color: #d33a2c;      /* 印影の朱色 */
+    --rss-pad-bg: #ffffff;
+    --rss-pad-border: #d5d9e0;
+    --rss-pad-radius: 8px;
+}
+
+/* 署名パッド（コンテナに付与される） */
+.rss-pad {
+    position: relative;
+    display: inline-block;
+    background: var(--rss-pad-bg);
+    border: 1px solid var(--rss-pad-border);
+    border-radius: var(--rss-pad-radius);
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+.rss-pad .rss-pad-canvas {
+    display: block;
+    border-radius: inherit;
+    cursor: crosshair;
+}

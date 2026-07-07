@@ -1,0 +1,37 @@
+{
+    "name": "rs-slider",
+    "version": "0.1.0",
+    "description": "依存ゼロの画像スライダーコレクション（基本/フェード/ヒーロー/カード・サムネイル/商品ギャラリー・フルスクリーン・無限ループ/マルチ行・Masonry・3Dカバーフロー・ストーリーズ）",
+    "type": "module",
+    "main": "./dist/rs-slider.esm.min.js",
+    "module": "./dist/rs-slider.esm.min.js",
+    "unpkg": "./dist/rs-slider.min.js",
+    "jsdelivr": "./dist/rs-slider.min.js",
+    "exports": {
+        ".": {
+            "types": "./dist/types/index.d.ts",
+            "import": "./dist/rs-slider.esm.min.js",
+            "default": "./dist/rs-slider.esm.min.js"
+        },
+        "./dist/*": "./dist/*",
+        "./rs-slider.css": "./dist/rs-slider.css"
+    },
+    "files": [
+        "dist"
+    ],
+    "keywords": [
+        "slider",
+        "carousel",
+        "gallery",
+        "coverflow",
+        "marquee",
+        "masonry",
+        "stories",
+        "lightbox",
+        "swipe"
+    ],
+    "author": "ryusuke.sano <ryusuke.sano@parelabo.com>",
+    "license": "SEE LICENSE IN LICENSE.txt",
+    "types": "./dist/types/index.d.ts",
+    "style": "./dist/rs-slider.css"
+}

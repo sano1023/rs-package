@@ -1,0 +1,34 @@
+{
+    "name": "rs-scanner",
+    "version": "0.1.0",
+    "description": "QR/バーコード読み取り（依存ゼロコア・内蔵1Dデコーダ・BarcodeDetector・アダプタ注入）",
+    "type": "module",
+    "main": "./dist/rs-scanner.esm.min.js",
+    "module": "./dist/rs-scanner.esm.min.js",
+    "unpkg": "./dist/rs-scanner.min.js",
+    "jsdelivr": "./dist/rs-scanner.min.js",
+    "exports": {
+        ".": {
+            "types": "./dist/types/index.d.ts",
+            "import": "./dist/rs-scanner.esm.min.js",
+            "default": "./dist/rs-scanner.esm.min.js"
+        },
+        "./dist/*": "./dist/*",
+        "./rs-scanner.css": "./dist/rs-scanner.css"
+    },
+    "files": [
+        "dist"
+    ],
+    "keywords": [
+        "barcode",
+        "qrcode",
+        "scanner",
+        "code128",
+        "ean13",
+        "camera"
+    ],
+    "author": "ryusuke.sano <ryusuke.sano@parelabo.com>",
+    "license": "SEE LICENSE IN LICENSE.txt",
+    "types": "./dist/types/index.d.ts",
+    "style": "./dist/rs-scanner.css"
+}

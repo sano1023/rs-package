@@ -1,0 +1,514 @@
+/**
+ * rs-grid 標準スタイル
+ * テーマは CSS カスタムプロパティ（--rsg-*）の上書きで差し替えられる。
+ */
+
+.rsg {
+    --rsg-border: #d7dde6;
+    --rsg-header-bg: #f4f6f9;
+    --rsg-header-text: #334155;
+    --rsg-text: #1e293b;
+    --rsg-bg: #ffffff;
+    --rsg-sel-bg: rgba(78, 121, 167, 0.12);
+    --rsg-focus-border: #4e79a7;
+    --rsg-readonly-bg: #f8fafc;
+    --rsg-font: system-ui, -apple-system, "Segoe UI", "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+
+    position: relative;
+    font-family: var(--rsg-font);
+    font-size: 13px;
+    color: var(--rsg-text);
+    border: 1px solid var(--rsg-border);
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--rsg-bg);
+}
+
+.rsg-proxy {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 2px;
+    height: 2px;
+    opacity: 0;
+    border: none;
+    resize: none;
+    pointer-events: none;
+    z-index: -1;
+}
+
+.rsg-scroller {
+    position: relative;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.rsg-table {
+    border-collapse: separate;
+    border-spacing: 0;
+    table-layout: fixed;
+    width: max-content;
+    min-width: 100%;
+    user-select: none;
+}
+
+/* ---------------------------------------------------------------- header */
+
+.rsg-table th {
+    position: sticky;
+    background: var(--rsg-header-bg);
+    color: var(--rsg-header-text);
+    font-weight: 600;
+    border-right: 1px solid var(--rsg-border);
+    border-bottom: 1px solid var(--rsg-border);
+    box-sizing: border-box;
+}
+
+.rsg-table thead th {
+    top: 0;
+    height: 36px;
+    padding: 0 8px;
+    text-align: left;
+    z-index: 3;
+    white-space: nowrap;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.rsg-corner {
+    left: 0;
+    z-index: 4 !important;
+    cursor: pointer;
+}
+
+.rsg-rowheader {
+    left: 0;
+    z-index: 2;
+    width: 52px;
+    text-align: center;
+    font-weight: 400;
+    font-size: 12px;
+    color: #64748b;
+    cursor: pointer;
+}
+
+.rsg-colheader {
+    position: relative;
+}
+
+.rsg-colheader.rsg-hl,
+.rsg-rowheader.rsg-hl {
+    background: #e3ebf3;
+    color: #1e293b;
+}
+
+.rsg-sortmark {
+    margin-left: 4px;
+    font-size: 10px;
+    color: var(--rsg-focus-border);
+}
+
+.rsg-resizer {
+    position: absolute;
+    top: 0;
+    right: -3px;
+    width: 7px;
+    height: 100%;
+    cursor: col-resize;
+    z-index: 5;
+}
+
+/* ---------------------------------------------------------------- cells */
+
+.rsg-cell {
+    height: 32px;
+    box-sizing: border-box;
+    padding: 0 8px;
+    border-right: 1px solid var(--rsg-border);
+    border-bottom: 1px solid var(--rsg-border);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    background: var(--rsg-bg);
+    cursor: cell;
+}
+
+.rsg-spacer td,
+.rsg-spacer {
+    padding: 0;
+    border: none;
+}
+
+.rsg-cell.rsg-readonly {
+    background: var(--rsg-readonly-bg);
+    color: #64748b;
+}
+
+.rsg-cell.rsg-sel {
+    background: var(--rsg-sel-bg);
+}
+
+.rsg-cell.rsg-focus {
+    outline: 2px solid var(--rsg-focus-border);
+    outline-offset: -2px;
+}
+
+.rsg-cell.rsg-fillrange {
+    outline: 1.5px dashed var(--rsg-focus-border);
+    outline-offset: -1.5px;
+}
+
+.rsg-type-checkbox {
+    text-align: center;
+}
+
+.rsg-type-checkbox input {
+    vertical-align: middle;
+    accent-color: var(--rsg-focus-border);
+}
+
+/* ---------------------------------------------------------------- editor / fill / menu */
+
+.rsg-editorwrap {
+    position: absolute;
+    z-index: 6;
+    height: 32px;
+}
+
+.rsg-editor {
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    border: 2px solid var(--rsg-focus-border);
+    padding: 0 6px;
+    font: inherit;
+    color: var(--rsg-text);
+    background: #fff;
+    outline: none;
+}
+
+.rsg-fill {
+    position: absolute;
+    z-index: 5;
+    width: 8px;
+    height: 8px;
+    background: var(--rsg-focus-border);
+    border: 1px solid #fff;
+    cursor: crosshair;
+}
+
+.rsg-menu {
+    position: absolute;
+    z-index: 20;
+    background: #fff;
+    border: 1px solid var(--rsg-border);
+    border-radius: 8px;
+    box-shadow: 0 8px 28px rgba(15, 23, 42, 0.18);
+    padding: 4px;
+    min-width: 170px;
+}
+
+.rsg-menu-item {
+    display: block;
+    width: 100%;
+    appearance: none;
+    border: none;
+    background: transparent;
+    text-align: left;
+    font: inherit;
+    color: var(--rsg-text);
+    padding: 7px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.rsg-menu-item:hover {
+    background: var(--rsg-sel-bg);
+}
+
+.rsg-menu-sep {
+    height: 1px;
+    background: var(--rsg-border);
+    margin: 4px 6px;
+}
+
+/* ---------------------------------------------------------------- v0.2: 数式・ステータスバー */
+
+.rsg-colletter {
+    display: inline-block;
+    min-width: 16px;
+    margin-right: 4px;
+    font-size: 10px;
+    font-weight: 400;
+    color: #94a3b8;
+}
+
+.rsg-cell.rsg-formula {
+    color: #1d4ed8;
+}
+
+.rsg-cell.rsg-error {
+    color: #dc2626;
+    font-weight: 700;
+}
+
+.rsg-status {
+    padding: 5px 12px;
+    border-top: 1px solid var(--rsg-border);
+    background: var(--rsg-header-bg);
+    color: #475569;
+    font-size: 12px;
+    min-height: 16px;
+}
+
+.rsg-status:empty {
+    display: none;
+}
+
+/* ---------------------------------------------------------------- v0.3: 列メニュー・フィルタ・固定列・レンダラ */
+
+.rsg-colmenu-btn {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    font-size: 11px;
+    padding: 2px 4px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.rsg-colmenu-btn:hover {
+    background: #dbe4ee;
+    color: #1e293b;
+}
+
+.rsg-colheader.rsg-filtered .rsg-colmenu-btn {
+    color: var(--rsg-focus-border);
+    font-weight: 700;
+}
+
+.rsg-fixedcell {
+    position: sticky;
+    z-index: 1;
+    background: var(--rsg-bg);
+}
+
+.rsg-fixedcell.rsg-sel {
+    background: #e7edf4;
+}
+
+.rsg-fixedhead {
+    z-index: 4 !important;
+}
+
+.rsg-filter {
+    padding: 6px 10px;
+    max-width: 240px;
+}
+
+.rsg-filter-cond,
+.rsg-filter-val {
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 5px;
+    padding: 5px 7px;
+    border: 1px solid var(--rsg-border);
+    border-radius: 6px;
+    font: inherit;
+    font-size: 12px;
+}
+
+.rsg-filter-toggles {
+    display: flex;
+    gap: 6px;
+    margin: 4px 0;
+}
+
+.rsg-filter-toggles button,
+.rsg-filter-actions button {
+    appearance: none;
+    border: 1px solid var(--rsg-border);
+    background: #fff;
+    font: inherit;
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.rsg-filter-list {
+    max-height: 180px;
+    overflow-y: auto;
+    border: 1px solid var(--rsg-border);
+    border-radius: 6px;
+    padding: 4px;
+    margin-bottom: 6px;
+}
+
+.rsg-filter-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 4px;
+    font-size: 12px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.rsg-filter-item:hover {
+    background: var(--rsg-sel-bg);
+}
+
+.rsg-filter-more {
+    font-size: 11px;
+    color: #94a3b8;
+    padding: 4px;
+}
+
+.rsg-filter-actions {
+    display: flex;
+    gap: 6px;
+}
+
+.rsg-filter-apply {
+    background: var(--rsg-focus-border) !important;
+    border-color: var(--rsg-focus-border) !important;
+    color: #fff;
+}
+
+/* レンダラ */
+
+.rsg-progress {
+    height: 12px;
+    background: #e9eef4;
+    border-radius: 6px;
+    overflow: hidden;
+    margin-top: 2px;
+}
+
+.rsg-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #4e79a7, #76b7b2);
+    border-radius: 6px;
+}
+
+.rsg-stars {
+    color: #edc949;
+    letter-spacing: 1px;
+}
+
+.rsg-badge {
+    display: inline-block;
+    padding: 1px 10px;
+    border-radius: 999px;
+    background: #94a3b8;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.rsg-cell.rsg-invalid {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.rsg-cell.rsg-search {
+    background: #fef3c7;
+}
+
+.rsg-cell.rsg-hot {
+    color: #b91c1c;
+    font-weight: 700;
+}
+
+/* ---------------------------------------------------------------- v0.4: 結合・コメント・ドラッグ・ネストヘッダー */
+
+.rsg-dragline {
+    background: var(--rsg-focus-border);
+    z-index: 8;
+    pointer-events: none;
+}
+
+.rsg-cell.rsg-merged {
+    vertical-align: middle;
+    text-align: center;
+    background: var(--rsg-bg);
+}
+
+.rsg-groupheader {
+    top: 0;
+    height: 36px;
+    padding: 0 8px;
+    text-align: center;
+    z-index: 3;
+    font-size: 12px;
+    background: #e9eef5 !important;
+    border-bottom: 1px solid var(--rsg-border);
+}
+
+.rsg-group-corner {
+    top: 0 !important;
+    left: 0;
+    z-index: 5 !important;
+}
+
+.rsg-cell.rsg-commented:not(.rsg-fixedcell) {
+    position: relative; /* 固定列は sticky を維持（上書きすると left がずれる） */
+}
+
+.rsg-cell.rsg-commented::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    border-style: solid;
+    border-width: 0 7px 7px 0;
+    border-color: transparent #e15759 transparent transparent;
+}
+
+.rsg-comment-pop,
+.rsg-comment-edit {
+    position: absolute;
+    z-index: 15;
+    background: #fffbeb;
+    border: 1px solid #f2d16b;
+    border-radius: 8px;
+    box-shadow: 0 6px 20px rgba(15, 23, 42, 0.18);
+    padding: 8px 10px;
+    font-size: 12px;
+    max-width: 240px;
+    white-space: pre-wrap;
+}
+
+.rsg-comment-edit {
+    background: #fff;
+    border-color: var(--rsg-border);
+}
+
+.rsg-comment-edit textarea {
+    width: 200px;
+    font: inherit;
+    border: 1px solid var(--rsg-border);
+    border-radius: 6px;
+    padding: 5px;
+    resize: vertical;
+}
+
+.rsg-comment-actions {
+    display: flex;
+    gap: 6px;
+    margin-top: 6px;
+}
+
+.rsg-comment-actions button {
+    appearance: none;
+    border: 1px solid var(--rsg-border);
+    background: #fff;
+    font: inherit;
+    font-size: 12px;
+    padding: 4px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+}

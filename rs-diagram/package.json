@@ -1,0 +1,34 @@
+{
+    "name": "rs-diagram",
+    "version": "0.2.0",
+    "description": "有料ダイアグラムライブラリの機能網羅を目指す、依存ゼロのSVG作図ライブラリ",
+    "type": "module",
+    "main": "./dist/rs-diagram.esm.min.js",
+    "module": "./dist/rs-diagram.esm.min.js",
+    "unpkg": "./dist/rs-diagram.min.js",
+    "jsdelivr": "./dist/rs-diagram.min.js",
+    "exports": {
+        ".": {
+            "types": "./dist/types/index.d.ts",
+            "import": "./dist/rs-diagram.esm.min.js",
+            "default": "./dist/rs-diagram.esm.min.js"
+        },
+        "./dist/*": "./dist/*",
+        "./rs-diagram.css": "./dist/rs-diagram.css"
+    },
+    "files": [
+        "dist"
+    ],
+    "keywords": [
+        "diagram",
+        "flowchart",
+        "editor",
+        "svg",
+        "graph",
+        "plugin"
+    ],
+    "author": "ryusuke.sano <ryusuke.sano@parelabo.com>",
+    "license": "SEE LICENSE IN LICENSE.txt",
+    "types": "./dist/types/index.d.ts",
+    "style": "./dist/rs-diagram.css"
+}

@@ -1,0 +1,34 @@
+{
+    "name": "rs-replay",
+    "version": "0.1.0",
+    "description": "有料セッションリプレイSaaSの機能網羅を目指す、完全セルフホスト・依存ゼロのセッション記録/再生ライブラリ",
+    "type": "module",
+    "main": "./dist/rs-replay.esm.min.js",
+    "module": "./dist/rs-replay.esm.min.js",
+    "unpkg": "./dist/rs-replay.min.js",
+    "jsdelivr": "./dist/rs-replay.min.js",
+    "exports": {
+        ".": {
+            "types": "./dist/types/index.d.ts",
+            "import": "./dist/rs-replay.esm.min.js",
+            "default": "./dist/rs-replay.esm.min.js"
+        },
+        "./dist/*": "./dist/*",
+        "./rs-replay.css": "./dist/rs-replay.css"
+    },
+    "files": [
+        "dist"
+    ],
+    "keywords": [
+        "session-replay",
+        "recording",
+        "heatmap",
+        "analytics",
+        "privacy",
+        "rrweb-alternative"
+    ],
+    "author": "ryusuke.sano <ryusuke.sano@parelabo.com>",
+    "license": "SEE LICENSE IN LICENSE.txt",
+    "types": "./dist/types/index.d.ts",
+    "style": "./dist/rs-replay.css"
+}

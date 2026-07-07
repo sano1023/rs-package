@@ -1,0 +1,495 @@
+/**
+ * rs-pivot 標準スタイル（1枚のみ・テーマはCSSカスタムプロパティで差し替え）
+ */
+
+.rs-pivot {
+    --rsp-font: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Noto Sans JP", Meiryo, sans-serif;
+    --rsp-font-size: 13px;
+    --rsp-fg: #24292f;
+    --rsp-bg: #ffffff;
+    --rsp-border: #d0d7de;
+    --rsp-accent: #0969da;
+    --rsp-accent-bg: #ddf4ff;
+    --rsp-header-bg: #f6f8fa;
+    --rsp-subtotal-bg: #f0f4f8;
+    --rsp-grand-bg: #e7edf3;
+    --rsp-hover-bg: #f3f6f9;
+    --rsp-pill-bg: #eef1f5;
+    --rsp-pill-border: #c8d0d9;
+    --rsp-warning-bg: #fff8c5;
+    --rsp-warning-border: #d4a72c;
+    --rsp-radius: 6px;
+
+    display: flex;
+    gap: 12px;
+    align-items: stretch;
+    font-family: var(--rsp-font);
+    font-size: var(--rsp-font-size);
+    color: var(--rsp-fg);
+    background: var(--rsp-bg);
+    /* コンテナに高さがあればフィットし、内側（テーブル/ゾーン）がスクロールする */
+    height: 100%;
+    box-sizing: border-box;
+    min-height: 0;
+}
+
+/* ---------------------------------------------------- フィールドパネル */
+.rs-pivot .rsp-panel {
+    flex: 0 0 240px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+}
+
+.rs-pivot .rsp-zone {
+    border: 1px solid var(--rsp-border);
+    border-radius: var(--rsp-radius);
+    background: var(--rsp-bg);
+    display: flex;
+    flex-direction: column;
+    min-height: 58px;
+}
+
+.rs-pivot .rsp-fields {
+    flex: 0 1 auto;
+    max-height: 220px;
+}
+
+.rs-pivot .rsp-zone-title {
+    padding: 4px 8px;
+    font-weight: 600;
+    font-size: 11px;
+    color: #57606a;
+    background: var(--rsp-header-bg);
+    border-bottom: 1px solid var(--rsp-border);
+    border-radius: var(--rsp-radius) var(--rsp-radius) 0 0;
+}
+
+.rs-pivot .rsp-zone-body {
+    padding: 6px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    align-content: flex-start;
+    overflow: auto;
+    flex: 1;
+    min-height: 30px;
+}
+
+.rs-pivot .rsp-zonegrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    flex: 1;
+}
+
+.rs-pivot .rsp-zone-hint {
+    color: #8b949e;
+    font-size: 11px;
+    padding: 4px;
+}
+
+.rs-pivot .rsp-drop-over {
+    border-color: var(--rsp-accent);
+    box-shadow: 0 0 0 2px var(--rsp-accent-bg);
+}
+
+.rsp-drop-marker {
+    width: 3px;
+    min-height: 20px;
+    background: var(--rsp-accent);
+    border-radius: 2px;
+}
+
+/* ピル */
+.rs-pivot .rsp-pill,
+.rsp-ghost {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    max-width: 100%;
+    padding: 2px 6px;
+    border: 1px solid var(--rsp-pill-border);
+    border-radius: var(--rsp-radius);
+    background: var(--rsp-pill-bg);
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: none;
+    line-height: 1.5;
+}
+
+.rs-pivot .rsp-pill:focus-visible {
+    outline: 2px solid var(--rsp-accent);
+    outline-offset: 1px;
+}
+
+.rs-pivot .rsp-pill.rsp-placed {
+    opacity: 0.55;
+}
+
+.rs-pivot .rsp-pill.rsp-filtered .rsp-btn-filter {
+    color: var(--rsp-accent);
+    font-weight: 700;
+}
+
+.rs-pivot .rsp-pill.rsp-dragging {
+    opacity: 0.4;
+}
+
+.rs-pivot .rsp-pill.rsp-grabbed {
+    border-color: var(--rsp-accent);
+    background: var(--rsp-accent-bg);
+}
+
+.rsp-ghost {
+    position: fixed;
+    z-index: 1000;
+    pointer-events: none;
+    opacity: 0.85;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+    font-size: 13px;
+}
+
+.rs-pivot .rsp-pill-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rs-pivot .rsp-pill-btn {
+    border: 0;
+    background: transparent;
+    padding: 0 2px;
+    cursor: pointer;
+    color: #57606a;
+    font-size: 11px;
+    line-height: 1.4;
+    border-radius: 3px;
+}
+
+.rs-pivot .rsp-pill-btn:hover {
+    background: rgba(0, 0, 0, 0.08);
+    color: var(--rsp-fg);
+}
+
+.rs-pivot .rsp-live {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+
+/* ---------------------------------------------------- 結果テーブル */
+.rs-pivot .rsp-table-area {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.rs-pivot .rsp-warning {
+    padding: 6px 10px;
+    background: var(--rsp-warning-bg);
+    border: 1px solid var(--rsp-warning-border);
+    border-radius: var(--rsp-radius);
+    font-size: 12px;
+}
+
+.rs-pivot .rsp-table-wrap {
+    overflow: auto;
+    border: 1px solid var(--rsp-border);
+    border-radius: var(--rsp-radius);
+    flex: 1;
+    min-height: 120px;
+    background: var(--rsp-bg);
+}
+
+.rs-pivot .rsp-empty {
+    padding: 32px;
+    text-align: center;
+    color: #8b949e;
+}
+
+.rs-pivot table.rsp-table {
+    border-collapse: separate;
+    border-spacing: 0;
+    width: max-content;
+    min-width: 100%;
+}
+
+.rs-pivot .rsp-table th,
+.rs-pivot .rsp-table td {
+    border-right: 1px solid var(--rsp-border);
+    border-bottom: 1px solid var(--rsp-border);
+    padding: 3px 8px;
+    white-space: nowrap;
+}
+
+.rs-pivot .rsp-table thead th {
+    background: var(--rsp-header-bg);
+    font-weight: 600;
+    text-align: center;
+}
+
+/* 横に長いグループ見出しはスクロールしても読めるよう左寄せ */
+.rs-pivot .rsp-table thead th.rsp-h-colgroup {
+    text-align: left;
+}
+
+.rs-pivot .rsp-table th.rsp-h-subtotal,
+.rs-pivot .rsp-table th.rsp-h-grand {
+    background: var(--rsp-grand-bg);
+}
+
+.rs-pivot .rsp-table tbody th.rsp-rowhead {
+    background: var(--rsp-header-bg);
+    font-weight: 500;
+    text-align: left;
+    vertical-align: top;
+}
+
+.rs-pivot .rsp-table td.rsp-cell {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    cursor: cell;
+}
+
+.rs-pivot .rsp-table td.rsp-cell:hover {
+    background: var(--rsp-hover-bg);
+}
+
+.rs-pivot .rsp-table tr.rsp-row-subtotal th,
+.rs-pivot .rsp-table td.rsp-cell-subtotal {
+    background: var(--rsp-subtotal-bg);
+    font-weight: 600;
+}
+
+.rs-pivot .rsp-table tr.rsp-row-grand th,
+.rs-pivot .rsp-table td.rsp-cell-grand {
+    background: var(--rsp-grand-bg);
+    font-weight: 700;
+}
+
+/* ---------------------------------------------------- ポップアップ / メニュー */
+.rsp-popup {
+    position: fixed;
+    z-index: 1001;
+    background: #fff;
+    border: 1px solid #d0d7de;
+    border-radius: 6px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+    padding: 6px;
+    font-size: 13px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Noto Sans JP", Meiryo, sans-serif;
+    max-width: 280px;
+}
+
+.rsp-menu {
+    display: flex;
+    flex-direction: column;
+    min-width: 160px;
+    padding: 4px;
+}
+
+.rsp-menu-item {
+    border: 0;
+    background: transparent;
+    text-align: left;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.rsp-menu-item:hover {
+    background: #f3f6f9;
+}
+
+.rsp-filter-popup {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 240px;
+}
+
+.rsp-filter-search {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 4px 8px;
+    border: 1px solid #d0d7de;
+    border-radius: 4px;
+    font-size: 13px;
+}
+
+.rsp-filter-list {
+    max-height: 220px;
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.rsp-filter-item {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding: 2px 4px;
+    border-radius: 4px;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.rsp-filter-item:hover {
+    background: #f3f6f9;
+}
+
+.rsp-filter-note {
+    font-size: 11px;
+    color: #8b949e;
+}
+
+.rsp-filter-buttons {
+    display: flex;
+    gap: 4px;
+    justify-content: flex-end;
+}
+
+.rsp-btn {
+    border: 1px solid #d0d7de;
+    background: #f6f8fa;
+    border-radius: 4px;
+    padding: 3px 10px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.rsp-btn:hover {
+    background: #eef1f5;
+}
+
+.rsp-btn-primary {
+    background: #0969da;
+    border-color: #0969da;
+    color: #fff;
+}
+
+.rsp-btn-primary:hover {
+    background: #0a5fc4;
+}
+
+/* ---------------------------------------------------- 明細モーダル */
+.rsp-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 1002;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+
+.rsp-modal {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+    max-width: min(920px, 100%);
+    max-height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    font-size: 13px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Noto Sans JP", Meiryo, sans-serif;
+}
+
+.rsp-modal-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    border-bottom: 1px solid #d0d7de;
+    background: #f6f8fa;
+}
+
+.rsp-modal-title {
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rsp-modal-count {
+    color: #57606a;
+    flex: 0 0 auto;
+}
+
+.rsp-modal-close {
+    margin-left: auto;
+    border: 0;
+    background: transparent;
+    font-size: 18px;
+    cursor: pointer;
+    line-height: 1;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.rsp-modal-close:hover {
+    background: rgba(0, 0, 0, 0.08);
+}
+
+.rsp-modal-body {
+    overflow: auto;
+    padding: 0;
+}
+
+.rsp-detail-table {
+    border-collapse: collapse;
+    width: max-content;
+    min-width: 100%;
+}
+
+.rsp-detail-table th,
+.rsp-detail-table td {
+    border-bottom: 1px solid #eaeef2;
+    padding: 4px 10px;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.rsp-detail-table thead th {
+    position: sticky;
+    top: 0;
+    background: #f6f8fa;
+    border-bottom: 1px solid #d0d7de;
+}
+
+.rsp-detail-table td.rsp-num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.rsp-modal-note {
+    padding: 8px 14px;
+    color: #8b949e;
+    font-size: 12px;
+}
+
+/* ---------------------------------------------------- レスポンシブ */
+@media (max-width: 720px) {
+    .rs-pivot {
+        flex-direction: column;
+    }
+
+    .rs-pivot .rsp-panel {
+        flex: 0 0 auto;
+        width: 100%;
+    }
+}

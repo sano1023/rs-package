@@ -1,0 +1,261 @@
+/**
+ * rs-diagram スタイル（CSSファイル1枚）
+ *
+ * テーマは CSSカスタムプロパティ（--rsd-*）で差し替える。
+ * 描画要素（SVG）の色は exportSVG の単体表示のためコアが属性として解決するので、
+ * ここでは UI（パレット・メニュー・カーソル・フォーカス）と既定テーマ値を定義する。
+ */
+
+.rsd {
+    /* テーマ（--rsd-* を上書きして差し替え） */
+    --rsd-bg: #ffffff;
+    --rsd-grid: #e5eaf1;
+    --rsd-grid-strong: #d3dbe6;
+    --rsd-node-fill: #ffffff;
+    --rsd-node-stroke: #475569;
+    --rsd-text: #1e293b;
+    --rsd-link: #64748b;
+    --rsd-selection: #2563eb;
+    --rsd-guide: #ef4444;
+    --rsd-anchor: #2563eb;
+    --rsd-handle: #ffffff;
+
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background: var(--rsd-bg);
+    overflow: hidden;
+    outline: none;
+}
+
+.rsd:focus-visible {
+    box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--rsd-selection) 45%, transparent);
+}
+
+.rsd svg {
+    display: block;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.rsd svg text {
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+/* ---------------------------------------------------------------- ノード */
+
+.rsd-node {
+    cursor: move;
+}
+
+.rsd-readonly .rsd-node {
+    cursor: pointer;
+}
+
+/* 接続アンカー: ホバー/選択時のみ表示・操作可能 */
+.rsd-anchor {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.12s ease;
+    cursor: crosshair;
+}
+
+.rsd-node:hover .rsd-anchor,
+.rsd-node.rsd-selected .rsd-anchor {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.rsd-readonly .rsd-anchor {
+    display: none;
+}
+
+/* リサイズハンドルのカーソル */
+.rsd-handle[data-dir="nw"], .rsd-handle[data-dir="se"] { cursor: nwse-resize; }
+.rsd-handle[data-dir="ne"], .rsd-handle[data-dir="sw"] { cursor: nesw-resize; }
+.rsd-handle[data-dir="n"], .rsd-handle[data-dir="s"] { cursor: ns-resize; }
+.rsd-handle[data-dir="e"], .rsd-handle[data-dir="w"] { cursor: ew-resize; }
+
+/* ---------------------------------------------------------------- パレット */
+
+.rsd-palette {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+    gap: 8px;
+    padding: 8px;
+}
+
+.rsd-palette-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 4px 6px;
+    border: 1px solid #dbe2ec;
+    border-radius: 8px;
+    background: #fff;
+    cursor: grab;
+    transition: border-color 0.12s ease, box-shadow 0.12s ease;
+}
+
+.rsd-palette-item:hover {
+    border-color: var(--rsd-selection, #2563eb);
+    box-shadow: 0 1px 4px rgba(15, 23, 42, 0.12);
+}
+
+.rsd-palette-item:active {
+    cursor: grabbing;
+}
+
+.rsd-palette-preview {
+    width: 100%;
+    height: 40px;
+    pointer-events: none;
+}
+
+.rsd-palette-label {
+    font-size: 11px;
+    color: #475569;
+    line-height: 1.2;
+    text-align: center;
+}
+
+/* パレットD&Dのゴースト */
+.rsd-ghost {
+    position: fixed;
+    z-index: 9999;
+    pointer-events: none;
+    opacity: 0.85;
+    filter: drop-shadow(0 2px 6px rgba(15, 23, 42, 0.25));
+}
+
+/* ---------------------------------------------------------------- コンテキストメニュー */
+
+.rsd-menu {
+    position: fixed;
+    z-index: 10000;
+    min-width: 168px;
+    padding: 4px;
+    background: #fff;
+    border: 1px solid #dbe2ec;
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.16);
+    font-family: system-ui, -apple-system, "Segoe UI", "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+}
+
+.rsd-menu-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    width: 100%;
+    padding: 6px 10px;
+    border: 0;
+    border-radius: 5px;
+    background: none;
+    font-size: 13px;
+    color: #1e293b;
+    text-align: left;
+    cursor: pointer;
+}
+
+.rsd-menu-item:hover:not(:disabled) {
+    background: #eef2ff;
+}
+
+.rsd-menu-item:disabled {
+    color: #94a3b8;
+    cursor: default;
+}
+
+.rsd-menu-shortcut {
+    font-size: 11px;
+    color: #94a3b8;
+}
+
+.rsd-menu-sep {
+    height: 1px;
+    margin: 4px 6px;
+    background: #e2e8f0;
+}
+
+/* ============================================================ v0.2 追加分 */
+
+/* パン（カメラ移動） */
+.rsd.rsd-pan-ready svg { cursor: grab; }
+.rsd.rsd-panning svg { cursor: grabbing !important; }
+.rsd.rsd-drawing svg { cursor: crosshair; }
+
+/* アンカー: ホバーで拡大表示（当たり判定は透明円で常に大きい） */
+.rsd-anchors { opacity: 0; transition: opacity 0.12s; }
+.rsd-node:hover .rsd-anchors, .rsd-anchors:hover { opacity: 1; }
+.rsd-anchor-hit { cursor: crosshair; }
+.rsd-anchor-hit:hover + .rsd-anchor-dot { r: 6; }
+
+/* リンク */
+.rsd-link { cursor: pointer; }
+.rsd-linkend { cursor: move; }
+
+/* パレットの線ツール */
+.rsd-palette-tool.rsd-active {
+    outline: 2px solid var(--rsd-selection, #2563eb);
+    outline-offset: -2px;
+    border-radius: 8px;
+    background: #eff6ff;
+}
+
+/* スタイルバー */
+.rsd-stylebar {
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    box-shadow: 0 6px 20px rgba(15, 23, 42, 0.12);
+    padding: 6px 10px;
+    z-index: 20;
+    font-size: 12px;
+    color: #475569;
+}
+.rsd { position: relative; }
+.rsd-stylebar-field { display: flex; align-items: center; gap: 4px; cursor: pointer; }
+.rsd-stylebar-field input[type="color"] {
+    width: 26px;
+    height: 22px;
+    padding: 0;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    background: none;
+    cursor: pointer;
+}
+.rsd-stylebar-field input[type="range"] { width: 70px; }
+.rsd-stylebar-btn {
+    border: 1px solid #cbd5e1;
+    background: #fff;
+    border-radius: 5px;
+    padding: 2px 8px;
+    font-size: 11.5px;
+    cursor: pointer;
+}
+.rsd-stylebar-btn:hover { background: #f1f5f9; }
+
+/* ラベルエディタ */
+.rsd-label-editor {
+    position: absolute;
+    z-index: 30;
+    border: 1.5px solid var(--rsd-selection, #2563eb);
+    border-radius: 6px;
+    padding: 4px 6px;
+    font: inherit;
+    font-size: 13px;
+    resize: none;
+    background: #fff;
+    box-shadow: 0 6px 20px rgba(15, 23, 42, 0.15);
+    text-align: center;
+}
