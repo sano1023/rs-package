@@ -42,6 +42,8 @@ export class Calendar {
     countWorkdays(start: any, end: any): number;
     /** 開始稼働日 + 営業日数 duration（>=1）→ 終了日（含む）。duration=1 なら開始日当日 */
     endFromDuration(start: any, duration: any): any;
+    /** 終了稼働日 − 営業日数 duration（>=1）→ 開始日。endFromDuration の逆（SS/FF/SF・後退パス用） */
+    startFromDuration(end: any, duration: any): any;
     /** 開始〜終了（両端含む）→ 営業日数（最低1） */
     durationFromRange(start: any, end: any): number;
 }

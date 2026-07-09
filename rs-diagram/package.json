@@ -1,7 +1,7 @@
 {
-    "name": "rs-diagram",
-    "version": "0.2.0",
-    "description": "有料ダイアグラムライブラリの機能網羅を目指す、依存ゼロのSVG作図ライブラリ",
+    "name": "@parelabo/rs-diagram",
+    "version": "0.5.0",
+    "description": "依存ゼロのSVG作図・ダイアグラムライブラリ",
     "type": "module",
     "main": "./dist/rs-diagram.esm.min.js",
     "module": "./dist/rs-diagram.esm.min.js",
@@ -14,7 +14,15 @@
             "default": "./dist/rs-diagram.esm.min.js"
         },
         "./dist/*": "./dist/*",
-        "./rs-diagram.css": "./dist/rs-diagram.css"
+        "./rs-diagram.css": "./dist/rs-diagram.css",
+        "./vue": {
+            "types": "./dist/types/vue.d.ts",
+            "import": "./dist/rs-diagram.vue.esm.min.js"
+        },
+        "./react": {
+            "types": "./dist/types/react.d.ts",
+            "import": "./dist/rs-diagram.react.esm.min.js"
+        }
     },
     "files": [
         "dist"
@@ -29,6 +37,31 @@
     ],
     "author": "ryusuke.sano <ryusuke.sano@parelabo.com>",
     "license": "SEE LICENSE IN LICENSE.txt",
+    "homepage": "https://github.com/sano1023/rs-package/tree/main/rs-diagram#readme",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/sano1023/rs-package.git",
+        "directory": "rs-diagram"
+    },
+    "bugs": {
+        "url": "https://parelabo.com",
+        "email": "contact@parelabo.com"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
     "types": "./dist/types/index.d.ts",
-    "style": "./dist/rs-diagram.css"
+    "style": "./dist/rs-diagram.css",
+    "peerDependencies": {
+        "vue": "^3.0.0",
+        "react": ">=18"
+    },
+    "peerDependenciesMeta": {
+        "vue": {
+            "optional": true
+        },
+        "react": {
+            "optional": true
+        }
+    }
 }

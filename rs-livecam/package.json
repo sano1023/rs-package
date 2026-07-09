@@ -1,5 +1,5 @@
 {
-    "name": "rs-livecam",
+    "name": "@parelabo/rs-livecam",
     "version": "0.2.0",
     "description": "リアルタイムカメラ加工（美肌・仮想背景/モザイク・2Dアバター・消えるフェイルセーフ・WebRTC配信対応）",
     "type": "module",
@@ -13,7 +13,15 @@
             "import": "./dist/rs-livecam.esm.min.js",
             "default": "./dist/rs-livecam.esm.min.js"
         },
-        "./dist/*": "./dist/*"
+        "./dist/*": "./dist/*",
+        "./vue": {
+            "types": "./dist/types/vue.d.ts",
+            "import": "./dist/rs-livecam.vue.esm.min.js"
+        },
+        "./react": {
+            "types": "./dist/types/react.d.ts",
+            "import": "./dist/rs-livecam.react.esm.min.js"
+        }
     },
     "files": [
         "dist"
@@ -28,5 +36,30 @@
     ],
     "author": "ryusuke.sano <ryusuke.sano@parelabo.com>",
     "license": "SEE LICENSE IN LICENSE.txt",
-    "types": "./dist/types/index.d.ts"
+    "homepage": "https://github.com/sano1023/rs-package/tree/main/rs-livecam#readme",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/sano1023/rs-package.git",
+        "directory": "rs-livecam"
+    },
+    "bugs": {
+        "url": "https://parelabo.com",
+        "email": "contact@parelabo.com"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
+    "types": "./dist/types/index.d.ts",
+    "peerDependencies": {
+        "vue": "^3.0.0",
+        "react": ">=18"
+    },
+    "peerDependenciesMeta": {
+        "vue": {
+            "optional": true
+        },
+        "react": {
+            "optional": true
+        }
+    }
 }

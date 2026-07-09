@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>rs-image デモ</title>
+<link rel="stylesheet" href="../dist/rs-image.css">
+<style>
+    body {
+        font-family: system-ui, -apple-system, "Segoe UI", "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+        margin: 0; background: #f1f5f9; color: #1e293b;
+    }
+    .page { max-width: 1100px; margin: 0 auto; padding: 32px 20px 120px; }
+    h1 { font-size: 24px; }
+    h1 small { font-size: 13px; color: #64748b; font-weight: 400; margin-left: 10px; }
+    .lead { color: #475569; font-size: 14px; margin-bottom: 20px; }
+    .card { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 18px; margin-bottom: 16px; }
+    .card h2 { font-size: 15px; margin: 0 0 12px; }
+    .controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 14px; }
+    .controls label { font-size: 13px; display: inline-flex; align-items: center; gap: 5px; }
+    select, input[type=number] {
+        padding: 5px 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; font-family: inherit;
+    }
+    input[type=range] { vertical-align: middle; }
+    button.demo-btn {
+        appearance: none; border: 1px solid #4e79a7; background: #4e79a7; color: #fff;
+        padding: 7px 16px; border-radius: 7px; font-size: 13px; cursor: pointer; font-family: inherit;
+    }
+    button.demo-btn.ghost { background: #fff; color: #334155; border-color: #cbd5e1; }
+    #export-result { font-size: 12px; color: #64748b; }
+    #export-result img { max-height: 160px; display: block; margin-top: 8px; border: 1px solid #e2e8f0; border-radius: 8px;
+        background: repeating-conic-gradient(#f1f5f9 0% 25%, #fff 0% 50%) 50%/16px 16px; }
+</style>
+</head>
+<body>
+<div class="page">
+    <h1>rs-image <small>v0.5.0 デモ — インタラクティブ画像エディタ（すべてリアルタイム反映）</small></h1>
+    <p class="lead">
+        トリミング・ペン切り抜き・マジックワンド・自動切り抜き（ML・アダプタ注入）・消しゴム・回転/反転・色調整・<strong>トーンカーブ/レベル補正・色域別HSL・コピースタンプ・覆い焼き/焼き込み/ぼかしブラシ・スポイト</strong>・フィルタ・文字・スタンプ・画像・図形（四角/円/台形/星/吹き出し/多角形/線/矢印・角丸/破線/グラデ塗り・ブレンドモード・影/縁取り/グロー・辺ハンドルで縦横比変更・頂点ドラッグ変形・ペンで多角形を描ける）・ペン・モザイク・フレーム。複数選択（Shift+クリック）で整列・分布、移動はスナップガイド付き、Ctrl+Z/矢印キー対応。
+    </p>
+
+    <div class="card">
+        <div class="controls">
+            <input type="file" id="editor-file" accept="image/*">
+            <button class="demo-btn ghost" id="btn-editor-sample">サンプル画像を読み込む</button>
+            <span style="flex:1"></span>
+            <label>書き出し
+                <select id="export-format">
+                    <option value="png">PNG</option>
+                    <option value="webp">WebP</option>
+                    <option value="jpeg">JPEG</option>
+                </select>
+            </label>
+            <button class="demo-btn" id="btn-export">書き出す</button>
+            <button class="demo-btn ghost" id="btn-download">ダウンロード</button>
+        </div>
+        <div id="editor"></div>
+        <div class="controls" style="margin-top:8px">
+            <strong>自動切り抜きアダプタ:</strong>
+            <button class="demo-btn ghost" id="btn-seg-person">人物用を読み込む（MediaPipe・約3MB）</button>
+            <button class="demo-btn ghost" id="btn-seg-general">汎用を読み込む（RMBG-1.4・約44MB）</button>
+            <span id="seg-status" style="font-size:12px;color:#64748b">未読み込み（読み込むとツールバーの「自動切り抜き」で実行できます。人物用は人物写真専用・汎用はどんな被写体でもOK。写真をアップロードしてお試しください）</span>
+        </div>
+        <p id="export-result"></p>
+    </div>
+
+    <div class="card">
+        <h2>設定で機能を絞った例 — tools: ['crop','filter','text'] ＋ 比率・プリセットもカスタム</h2>
+        <div id="editor-mini"></div>
+    </div>
+
+</div>
+
+<script type="module">
+    import { processImage, createRSImageEditor } from '../dist/rs-image.esm.min.js';
+    window.__mod = { processImage, createRSImageEditor };
+    window.state = { source: null };
+
+    const $ = (id) => document.getElementById(id);
+    const fmtBytes = (n) => n < 1024 ? `${n} B` : n < 1048576 ? `${(n / 1024).toFixed(1)} KB` : `${(n / 1048576).toFixed(2)} MB`;
+
+    // ---------------------------------------------------------------- スタンプ生成（外部ファイル不要のデモ用）
+    function stampDataURL(draw) {
+        const c = document.createElement('canvas');
+        c.width = 120; c.height = 120;
+        draw(c.getContext('2d'));
+        return c.toDataURL('image/png');
+    }
+    const stamps = [
+        { name: 'ハート', category: 'きもち', url: stampDataURL((x) => {
+            x.fillStyle = '#e15759';
+            x.beginPath();
+            x.moveTo(60, 100);
+            x.bezierCurveTo(10, 62, 18, 18, 60, 42);
+            x.bezierCurveTo(102, 18, 110, 62, 60, 100);
+            x.fill();
+        }) },
+        { name: 'スター', category: 'きもち', url: stampDataURL((x) => {
+            x.fillStyle = '#edc949';
+            x.beginPath();
+            for (let i = 0; i < 10; i++) {
+                const r = i % 2 ? 24 : 54;
+                const a = (Math.PI / 5) * i - Math.PI / 2;
+                x[i ? 'lineTo' : 'moveTo'](60 + r * Math.cos(a), 60 + r * Math.sin(a));
+            }
+            x.closePath(); x.fill();
+        }) },
+        { name: 'びっくり', category: 'きもち', url: stampDataURL((x) => {
+            x.fillStyle = '#f28e2b';
+            x.font = '900 90px sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle';
+            x.fillText('！', 60, 62);
+        }) },
+        { name: 'まる', category: '図形', url: stampDataURL((x) => {
+            x.strokeStyle = '#4e79a7'; x.lineWidth = 12;
+            x.beginPath(); x.arc(60, 60, 42, 0, Math.PI * 2); x.stroke();
+        }) },
+        { name: 'さんかく', category: '図形', url: stampDataURL((x) => {
+            x.fillStyle = '#59a14f';
+            x.beginPath(); x.moveTo(60, 14); x.lineTo(108, 102); x.lineTo(12, 102);
+            x.closePath(); x.fill();
+        }) },
+        { name: 'やじるし', category: '図形', url: stampDataURL((x) => {
+            x.fillStyle = '#76b7b2';
+            x.beginPath();
+            x.moveTo(10, 48); x.lineTo(70, 48); x.lineTo(70, 24); x.lineTo(112, 60);
+            x.lineTo(70, 96); x.lineTo(70, 72); x.lineTo(10, 72);
+            x.closePath(); x.fill();
+        }) },
+        { name: 'SALE', category: 'ラベル', url: stampDataURL((x) => {
+            x.fillStyle = '#e15759';
+            x.beginPath(); x.arc(60, 60, 54, 0, Math.PI * 2); x.fill();
+            x.fillStyle = '#fff'; x.font = '900 34px sans-serif';
+            x.textAlign = 'center'; x.textBaseline = 'middle';
+            x.fillText('SALE', 60, 60);
+        }) },
+        { name: 'NEW', category: 'ラベル', url: stampDataURL((x) => {
+            x.fillStyle = '#4e79a7';
+            x.beginPath();
+            const r = 12;
+            x.roundRect ? x.roundRect(8, 34, 104, 52, r) : x.rect(8, 34, 104, 52);
+            x.fill();
+            x.fillStyle = '#fff'; x.font = '900 32px sans-serif';
+            x.textAlign = 'center'; x.textBaseline = 'middle';
+            x.fillText('NEW', 60, 60);
+        }) },
+    ];
+
+    // ---------------------------------------------------------------- エディタ
+    window.editor = createRSImageEditor('#editor', {
+        stamps,
+        height: 460,
+    });
+
+    function makeSample() {
+        const c = document.createElement('canvas');
+        c.width = 1200; c.height = 800;
+        const ctx = c.getContext('2d');
+        const g = ctx.createLinearGradient(0, 0, 1200, 800);
+        g.addColorStop(0, '#4e79a7'); g.addColorStop(1, '#f28e2b');
+        ctx.fillStyle = g; ctx.fillRect(0, 0, 1200, 800);
+        ctx.fillStyle = 'rgba(255,255,255,0.85)';
+        ctx.beginPath(); ctx.arc(360, 300, 160, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#e15759';
+        ctx.fillRect(680, 180, 360, 240);
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 90px system-ui, sans-serif';
+        ctx.fillText('rs-image', 400, 620);
+        return c.toDataURL('image/png');
+    }
+
+    $('btn-editor-sample').addEventListener('click', () => window.editor.setImage(makeSample()));
+    $('editor-file').addEventListener('change', (e) => {
+        const f = e.target.files[0];
+        if (f) window.editor.setImage(f);
+    });
+
+    $('btn-export').addEventListener('click', async () => {
+        const format = $('export-format').value;
+        const t0 = performance.now();
+        const r = await window.editor.export({ format, quality: 0.9, output: 'dataURL' });
+        window.state.lastExport = r;
+        $('export-result').innerHTML = '';
+        const label = document.createElement('span');
+        label.textContent = `${r.format.toUpperCase()} ${r.width}×${r.height} — ${fmtBytes(r.bytes)}（${Math.round(performance.now() - t0)}ms）`;
+        const img = document.createElement('img');
+        img.src = r.dataURL;
+        $('export-result').appendChild(label);
+        $('export-result').appendChild(img);
+    });
+
+    $('btn-download').addEventListener('click', async () => {
+        const format = $('export-format').value;
+        const r = await window.editor.export({ format, quality: 0.9, output: 'blob' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(r.blob);
+        a.download = `rs-image.${format === 'jpeg' ? 'jpg' : format}`;
+        a.click();
+        URL.revokeObjectURL(a.href);
+    });
+
+    // 初期状態でサンプルを読み込んでおく
+    window.editor.setImage(makeSample());
+
+    // ---------------------------------------------------------------- 自動切り抜きアダプタ（CDN・アダプタ注入）
+    const segStatus = $('seg-status');
+
+    // 人物用: MediaPipe Image Segmenter（selfie model・軽量）
+    $('btn-seg-person').addEventListener('click', async () => {
+        try {
+            segStatus.textContent = '読み込み中…';
+            const { FilesetResolver, ImageSegmenter } = await import('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/+esm');
+            const fileset = await FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm');
+            const seg = await ImageSegmenter.createFromOptions(fileset, {
+                baseOptions: { modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/image_segmenter/selfie_segmenter/float16/latest/selfie_segmenter.tflite' },
+                runningMode: 'IMAGE',
+                outputConfidenceMasks: true,
+            });
+            window.editor.setSegmentation({
+                name: 'MediaPipe Selfie Segmentation（人物）',
+                segment(canvas) {
+                    const res = seg.segment(canvas);
+                    const m = res.confidenceMasks && res.confidenceMasks[0];
+                    if (!m) return null;
+                    const conf = m.getAsFloat32Array();
+                    const mc = document.createElement('canvas');
+                    mc.width = m.width;
+                    mc.height = m.height;
+                    const mctx = mc.getContext('2d');
+                    const img = mctx.createImageData(m.width, m.height);
+                    for (let i = 0; i < conf.length; i++) img.data[i * 4 + 3] = Math.round(conf[i] * 255);
+                    mctx.putImageData(img, 0, 0);
+                    res.close();
+                    return mc;
+                },
+            });
+            segStatus.textContent = '設定しました: MediaPipe（人物） → ツールバー「自動切り抜き」から実行。※人物が写った写真専用です';
+        } catch (e) {
+            // WebGLが無い環境（リモートデスクトップ・VM等）ではMediaPipeは動かない
+            segStatus.textContent = /kGpuService|webgl/i.test(String(e && e.message))
+                ? '読み込み失敗: このブラウザではWebGLが使えないため人物用（MediaPipe）を実行できません。「汎用を読み込む（RMBG-1.4）」はWebGL不要なのでそちらをお試しください。'
+                : `読み込み失敗: ${e.message}`;
+        }
+    });
+
+    // 汎用: RMBG-1.4（BRIA・任意オブジェクトの背景除去。初回はモデルDLあり）
+    $('btn-seg-general').addEventListener('click', async () => {
+        try {
+            segStatus.textContent = '読み込み中…（初回は約44MBのモデルを取得します。しばらくお待ちください）';
+            const { AutoModel, AutoProcessor, RawImage, env } = await import('https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2/+esm');
+            env.allowLocalModels = false;
+            const model = await AutoModel.from_pretrained('briaai/RMBG-1.4', { config: { model_type: 'custom' } });
+            const processor = await AutoProcessor.from_pretrained('briaai/RMBG-1.4', {
+                config: {
+                    do_normalize: true,
+                    do_pad: false,
+                    do_rescale: true,
+                    do_resize: true,
+                    image_mean: [0.5, 0.5, 0.5],
+                    image_std: [1, 1, 1],
+                    feature_extractor_type: 'ImageFeatureExtractor',
+                    resample: 2,
+                    rescale_factor: 0.00392156862745098,
+                    size: { width: 1024, height: 1024 },
+                },
+            });
+            window.editor.setSegmentation({
+                name: 'RMBG-1.4（汎用オブジェクト）',
+                async segment(canvas) {
+                    const image = await RawImage.fromURL(canvas.toDataURL('image/png'));
+                    const { pixel_values } = await processor(image);
+                    const { output } = await model({ input: pixel_values });
+                    const gray = await RawImage.fromTensor(output[0].mul(255).to('uint8')).resize(canvas.width, canvas.height);
+                    const mc = document.createElement('canvas');
+                    mc.width = canvas.width;
+                    mc.height = canvas.height;
+                    const mctx = mc.getContext('2d');
+                    const img = mctx.createImageData(mc.width, mc.height);
+                    for (let i = 0; i < gray.data.length; i++) img.data[i * 4 + 3] = gray.data[i];
+                    mctx.putImageData(img, 0, 0);
+                    return mc;
+                },
+            });
+            segStatus.textContent = '設定しました: RMBG-1.4（汎用） → ツールバー「自動切り抜き」から実行';
+        } catch (e) {
+            segStatus.textContent = `読み込み失敗: ${e.message}`;
+        }
+    });
+
+    // ---- 設定で機能を絞ったエディタ（表示する機能・順序・中身を構成できる）
+    window.editorMini = createRSImageEditor('#editor-mini', {
+        height: 320,
+        tools: ['crop', 'filter', 'text'],
+        crop: { ratios: [['フリー', null], ['正方形', 1], ['横長 16:9', 16 / 9]], circle: false },
+        filter: { presets: ['mono', 'sepia', { key: 'night', label: 'ナイト', css: 'brightness(0.75) saturate(0.8) hue-rotate(30deg)' }] },
+    });
+    window.editorMini.setImage(makeSample());
+
+</script>
+</body>
+</html>

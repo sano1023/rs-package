@@ -19,6 +19,7 @@ export class Player {
     spinnerEl: HTMLDivElement;
     errorEl: HTMLDivElement;
     centerBtn: HTMLButtonElement;
+    endScreen: HTMLElement;
     bottomEl: HTMLDivElement;
     menu: {
         el: HTMLElement;
@@ -26,6 +27,20 @@ export class Player {
         toggle(force?: boolean): void;
         destroy(): void;
     };
+    _gestureCleanup: (() => void) | null;
+    _miniCleanup: (() => void) | null;
+    watermarkEl: HTMLElement | null;
+    playlistPanel: {
+        el: HTMLElement;
+        isOpen(): boolean;
+        toggle(force?: boolean): void;
+        destroy(): void;
+    } | null;
+    _autoThumbs: {
+        destroy(): void;
+    } | null;
+    /** thumbnails:'auto' 指定時、現在ソースが同一オリジンなら自動サムネイル生成器を起動する */
+    _setupAutoThumbnails(): void;
     on(type: any, cb: any): this;
     off(type: any, cb: any): this;
     play(): Promise<void>;
@@ -37,6 +52,13 @@ export class Player {
     toggleMute(): void;
     setRate(r: any): void;
     setQuality(label: any): boolean;
+    setLevel(index: any): boolean;
+    seekToLiveEdge(): void;
+    setPreservesPitch(on: any): void;
+    get isLive(): boolean;
+    setStream(stream: any): boolean;
+    clearStream(): boolean;
+    get isStream(): boolean;
     setCaption(index: any): Promise<void>;
     get state(): string;
     toJSON(): {
@@ -50,9 +72,30 @@ export class Player {
         rate: number;
         quality: any;
         caption: any;
+        chapter: any;
+        playlistIndex: any;
+        ab: {
+            a: any;
+            b: any;
+            active: boolean;
+        };
+        live: boolean;
+        level: string | number | null;
+        preservesPitch: boolean;
+        stream: boolean;
     };
     /** 設定メニューの開閉 */
     toggleMenu(force: any): void;
+    /** プレイリストのサイドリストの開閉 */
+    togglePlaylistPanel(force: any): void;
+    playlistNext(): boolean;
+    playlistPrev(): boolean;
+    playlistGoto(i: any): boolean;
+    setLoopA(t: any): void;
+    setLoopB(t: any): void;
+    toggleABPoint(t: any): void;
+    clearABLoop(): void;
+    frameStep(dir: any): void;
     isFullscreen(): boolean;
     /** コンテナ要素のフルスクリーン切替（iOS Safari は video のネイティブ全画面へフォールバック） */
     toggleFullscreen(): void;

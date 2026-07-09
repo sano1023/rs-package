@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>rs-slider デモ — 9. 無限ループ画像スライダー</title>
+<link rel="stylesheet" href="../dist/rs-slider.css">
+<link rel="stylesheet" href="demo.css">
+<style>
+    #m-basic { --rss-marquee-h: 140px; }
+    #m-reverse { --rss-marquee-h: 110px; }
+    @media (max-width: 640px) {
+        #m-basic { --rss-marquee-h: 100px; }
+        #m-reverse { --rss-marquee-h: 84px; }
+    }
+</style>
+</head>
+<body>
+<div class="page">
+    <p class="back"><a href="./">← デモ一覧へ</a></p>
+    <h1>9. 無限ループ画像スライダー <small>createRSMarquee</small></h1>
+    <p class="lead">途切れないシームレスなループ・速度調整・逆方向・ホバーで停止。行を増やす場合は <a href="multirow.html">No.10 マルチ行</a> へ。</p>
+
+    <div class="card">
+        <h2>基本（左方向・ホバーで一時停止）</h2>
+        <p class="note">rAFベースでシームレスに流れ続けます。画像高さはCSS変数 <code>--rss-marquee-h</code> で調整。</p>
+        <div id="m-basic"></div>
+        <div class="controls">
+            <label>速度 <input type="range" id="r-speed" min="10" max="240" value="60"> <span id="v-speed">60</span> px/秒</label>
+            <button class="ctl" id="b-reverse">逆方向に切替</button>
+            <button class="ctl" id="b-playpause">停止 / 再開</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>逆方向スタート（reverse: true・速め）</h2>
+        <p class="note"><code>{ reverse: true, speed: 110 }</code></p>
+        <div id="m-reverse"></div>
+    </div>
+</div>
+
+<script type="module">
+    import { createRSMarquee } from '../dist/rs-slider.esm.min.js';
+    import { photo } from './assets.js';
+
+    const items = (base, n, w, h) => Array.from({ length: n }, (_, i) => ({
+        image: photo(base + i, { w, h, label: `#${i + 1}` }),
+        alt: `マーキー画像 ${i + 1}`,
+    }));
+
+    const m = createRSMarquee('#m-basic', {
+        items: items(600, 8, 460, 300),
+        speed: 60,
+        pauseOnHover: true,
+    });
+
+    const rSpeed = document.getElementById('r-speed');
+    rSpeed.addEventListener('input', () => {
+        m.setSpeed(Number(rSpeed.value));
+        document.getElementById('v-speed').textContent = rSpeed.value;
+    });
+    let reversed = false;
+    document.getElementById('b-reverse').addEventListener('click', (e) => {
+        reversed = !reversed;
+        m.setReverse(reversed);
+        e.currentTarget.classList.toggle('is-on', reversed);
+    });
+    document.getElementById('b-playpause').addEventListener('click', () => {
+        m.isPlaying() ? m.pause() : m.play();
+    });
+
+    createRSMarquee('#m-reverse', {
+        items: items(650, 10, 360, 240),
+        speed: 110,
+        reverse: true,
+    });
+</script>
+</body>
+</html>

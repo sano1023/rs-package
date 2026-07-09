@@ -1,7 +1,7 @@
 {
-    "name": "rs-upload",
-    "version": "0.1.0",
-    "description": "有料アップロードSaaS/ウィジェットの機能網羅を目指す、依存ゼロのファイルアップロードUI＋転送エンジン",
+    "name": "@parelabo/rs-upload",
+    "version": "0.4.0",
+    "description": "依存ゼロのファイルアップロードUI＋転送エンジン",
     "type": "module",
     "main": "./dist/rs-upload.esm.min.js",
     "module": "./dist/rs-upload.esm.min.js",
@@ -14,7 +14,15 @@
             "default": "./dist/rs-upload.esm.min.js"
         },
         "./dist/*": "./dist/*",
-        "./rs-upload.css": "./dist/rs-upload.css"
+        "./rs-upload.css": "./dist/rs-upload.css",
+        "./vue": {
+            "types": "./dist/types/vue.d.ts",
+            "import": "./dist/rs-upload.vue.esm.min.js"
+        },
+        "./react": {
+            "types": "./dist/types/react.d.ts",
+            "import": "./dist/rs-upload.react.esm.min.js"
+        }
     },
     "files": [
         "dist"
@@ -30,6 +38,31 @@
     ],
     "author": "ryusuke.sano <ryusuke.sano@parelabo.com>",
     "license": "SEE LICENSE IN LICENSE.txt",
+    "homepage": "https://github.com/sano1023/rs-package/tree/main/rs-upload#readme",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/sano1023/rs-package.git",
+        "directory": "rs-upload"
+    },
+    "bugs": {
+        "url": "https://parelabo.com",
+        "email": "contact@parelabo.com"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
     "types": "./dist/types/index.d.ts",
-    "style": "./dist/rs-upload.css"
+    "style": "./dist/rs-upload.css",
+    "peerDependencies": {
+        "vue": "^3.0.0",
+        "react": ">=18"
+    },
+    "peerDependenciesMeta": {
+        "vue": {
+            "optional": true
+        },
+        "react": {
+            "optional": true
+        }
+    }
 }

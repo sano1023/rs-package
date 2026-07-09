@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>rs-editor デモ</title>
+<link rel="stylesheet" href="../dist/rs-editor.css">
+<style>
+    body {
+        font-family: system-ui, -apple-system, "Segoe UI", "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+        margin: 0;
+        background: #f1f5f9;
+        color: #1e293b;
+    }
+    .page {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 32px 20px 80px;
+    }
+    h1 { font-size: 24px; }
+    h1 small { font-size: 13px; color: #64748b; font-weight: 400; margin-left: 10px; }
+    .lead { color: #475569; font-size: 14px; margin-bottom: 24px; }
+    .panel {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 16px 18px;
+        margin-top: 20px;
+    }
+    .panel h2 { font-size: 15px; margin: 0 0 10px; }
+    .controls { display: flex; flex-wrap: wrap; gap: 8px; }
+    .controls button {
+        appearance: none;
+        border: 1px solid #cbd5e1;
+        background: #fff;
+        border-radius: 6px;
+        padding: 7px 14px;
+        font-size: 13px;
+        cursor: pointer;
+    }
+    .controls button:hover { background: #f1f5f9; }
+    pre.out {
+        background: #0f172a;
+        color: #e2e8f0;
+        border-radius: 8px;
+        padding: 12px 14px;
+        font-size: 12px;
+        line-height: 1.6;
+        overflow-x: auto;
+        white-space: pre-wrap;
+        word-break: break-all;
+        max-height: 260px;
+        overflow-y: auto;
+    }
+    .status { font-size: 12px; color: #64748b; margin-top: 8px; }
+    .status b.ok { color: #16a34a; }
+    .status b.ng { color: #dc2626; }
+</style>
+</head>
+<body>
+<div class="page">
+    <h1>rs-editor <small>v0.5 デモ — 依存ゼロ・プラグイン式WYSIWYGエディタ</small></h1>
+    <p class="lead">
+        標準機能（〜v0.2）: undo / redo・書式・文字色 / 背景色・見出し・配置・引用・コードブロック・リスト・インデント・リンク・画像（アップロード / リサイズ）・表・HTMLソース表示・フローティングツールバー・Markdownショートカット。
+        <br>v0.3 の opt-in プラグイン: 特殊文字・絵文字・日付挿入・NBSP・検索置換（Ctrl+F）・プレビュー・ブロック可視化・全画面・アンカー・動画埋め込み・目次（見出しから自動生成）・文字数カウント・自動リンク・下書き自動保存。最後の「⭐」はカスタムプラグインの例です。
+        <br><strong>v0.5 の新機能</strong>: 空の段落で「/」を押すと<strong>スラッシュコマンド</strong>、段落ホバーで<strong>⠿ドラッグ並べ替え</strong>。ツールバーに<strong>チェックリスト・コールアウト・書式ペインター・脚注・コメント・リビジョン履歴（差分付き）・ルビ・文字種変換・日本語校正・縦書きプレビュー</strong>を追加。
+    </p>
+
+    <textarea id="content">
+&lt;h1&gt;rs-editor へようこそ&lt;/h1&gt;
+&lt;p&gt;これは &lt;strong&gt;依存ゼロ&lt;/strong&gt; の &lt;em&gt;WYSIWYGエディタ&lt;/em&gt; です。&lt;u&gt;下線&lt;/u&gt;や&lt;s&gt;取り消し線&lt;/s&gt;、&lt;a href="https://example.com"&gt;リンク&lt;/a&gt;も使えます。&lt;/p&gt;
+&lt;ul&gt;&lt;li&gt;箇条書き 1&lt;/li&gt;&lt;li&gt;箇条書き 2&lt;/li&gt;&lt;/ul&gt;
+&lt;blockquote&gt;&lt;p&gt;引用ブロックの例。&lt;/p&gt;&lt;/blockquote&gt;
+</textarea>
+
+    <div class="panel">
+        <h2>操作</h2>
+        <div class="controls">
+            <button id="btn-set-html">setHTML(サンプル)</button>
+            <button id="btn-set-json">setJSON(サンプル)</button>
+            <button id="btn-roundtrip">ラウンドトリップ検査</button>
+            <button id="btn-readonly">readonly 切替</button>
+            <button id="btn-destroy">destroy / 再生成</button>
+        </div>
+        <div class="status" id="status">changeイベント: <span id="change-count">0</span> 回</div>
+    </div>
+
+    <div class="panel">
+        <h2>getHTML() の出力（リアルタイム）</h2>
+        <pre class="out" id="out-html"></pre>
+    </div>
+
+    <div class="panel">
+        <h2>getJSON() の出力（リアルタイム）</h2>
+        <pre class="out" id="out-json"></pre>
+    </div>
+</div>
+
+<script type="module">
+    import { createRSEditor, definePlugin } from '../dist/esm/index.js';
+    // v0.3: 拡張プラグイン（opt-in で読み込む）
+    import { charmap } from '../dist/esm/plugins/charmap.js';
+    import { emoticons } from '../dist/esm/plugins/emoticons.js';
+    import { insertdatetime } from '../dist/esm/plugins/insertdatetime.js';
+    import { nonbreaking } from '../dist/esm/plugins/nonbreaking.js';
+    import { searchreplace } from '../dist/esm/plugins/searchreplace.js';
+    import { preview } from '../dist/esm/plugins/preview.js';
+    import { visualblocks } from '../dist/esm/plugins/visualblocks.js';
+    import { fullscreen } from '../dist/esm/plugins/fullscreen.js';
+    import { anchor } from '../dist/esm/plugins/anchor.js';
+    import { media } from '../dist/esm/plugins/media.js';
+    import { wordcount } from '../dist/esm/plugins/wordcount.js';
+    import { autolink } from '../dist/esm/plugins/autolink.js';
+    import { autosave } from '../dist/esm/plugins/autosave.js';
+    import { toc } from '../dist/esm/plugins/toc.js';
+    // v0.5: ブロック体験（Notion風）
+    import { checklist } from '../dist/esm/plugins/checklist.js';
+    import { callout } from '../dist/esm/plugins/callout.js';
+    import { slashmenu } from '../dist/esm/plugins/slashmenu.js';
+    import { dragblock } from '../dist/esm/plugins/dragblock.js';
+    // v0.5: 上位プラグイン（opt-in）
+    import { formatpainter } from '../dist/esm/plugins/formatpainter.js';
+    import { footnote } from '../dist/esm/plugins/footnote.js';
+    import { comments } from '../dist/esm/plugins/comments.js';
+    import { revisions } from '../dist/esm/plugins/revisions.js';
+    // v0.5: 日本語特化
+    import { ruby } from '../dist/esm/plugins/ruby.js';
+    import { jpconvert } from '../dist/esm/plugins/jpconvert.js';
+    import { proofread } from '../dist/esm/plugins/proofread.js';
+    import { tategaki } from '../dist/esm/plugins/tategaki.js';
+
+    // ---- プラグインAPIの実演: カスタムボタンを数行で追加（REQUIREMENTS の例そのまま）
+    const stamp = definePlugin({
+        name: 'stamp',
+        buttons: {
+            stamp: {
+                icon: '⭐',
+                tooltip: 'スタンプを挿入',
+                onAction: (editor) => editor.insertContent('⭐'),
+            },
+        },
+        keymaps: { 'Mod-Shift-s': 'stamp' },
+    });
+
+    const outHtml = document.getElementById('out-html');
+    const outJson = document.getElementById('out-json');
+    const changeCountEl = document.getElementById('change-count');
+    window.__changes = 0;
+
+    function refresh(html) {
+        outHtml.textContent = html ?? window.editor.getHTML();
+        outJson.textContent = JSON.stringify(window.editor.getJSON(), null, 2);
+    }
+
+    function create() {
+        window.__changes = 0;
+        changeCountEl.textContent = '0';
+        window.editor = createRSEditor('#content', {
+            toolbar: 'undo redo | bold italic underline strikethrough | forecolor backcolor formatpainter | h1 h2 h3 | alignleft aligncenter alignright | blockquote codeblock callout | bullist numlist checklist | outdent indent | link image table media anchor toc footnote | comment revisions | ruby jpconvert proofread tategaki | charmap emoticons insertdatetime nonbreaking | searchreplace preview visualblocks fullscreen | code | stamp',
+            plugins: [charmap, emoticons, insertdatetime, nonbreaking, searchreplace, preview, visualblocks, fullscreen, anchor, media, toc, wordcount, autolink, autosave, stamp,
+                checklist, callout, slashmenu, dragblock, formatpainter, footnote, comments, revisions, ruby, jpconvert, proofread, tategaki],
+            autosaveKey: 'rs-editor-demo-draft',
+            placeholder: '本文を入力…',
+            // デモ用アップロード: サーバーへ送らず DataURL に変換して埋め込む
+            imageUploadHandler: (file) => new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            }),
+            onChange: (html) => {
+                window.__changes++;
+                changeCountEl.textContent = String(window.__changes);
+                refresh(html);
+            },
+        });
+        refresh();
+    }
+    create();
+
+    // ---- 操作ボタン
+    document.getElementById('btn-set-html').addEventListener('click', () => {
+        window.editor.setHTML('<h2>setHTML で入れ替え</h2>\n<p>この内容は <strong>setHTML()</strong> で流し込みました。<br>改行も使えます。</p>\n<ol>\n<li>番号付き 1</li>\n<li>番号付き 2</li>\n</ol>');
+        refresh();
+    });
+
+    document.getElementById('btn-set-json').addEventListener('click', () => {
+        window.editor.setJSON({
+            type: 'doc',
+            children: [
+                { type: 'heading', level: 2, children: [{ type: 'text', text: 'setJSON で入れ替え' }] },
+                { type: 'paragraph', children: [
+                    { type: 'text', text: 'こんにちは、' },
+                    { type: 'text', text: '太字', marks: ['bold'] },
+                    { type: 'text', text: 'の世界。' },
+                ] },
+                { type: 'unknown_widget', children: [{ type: 'text', text: '未知ノードはテキスト化されます' }] },
+            ],
+        });
+        refresh();
+    });
+
+    document.getElementById('btn-roundtrip').addEventListener('click', () => {
+        const result = window.runRoundtrip();
+        const el = document.getElementById('status');
+        el.innerHTML = `ラウンドトリップ: HTML <b class="${result.html ? 'ok' : 'ng'}">${result.html ? 'PASS' : 'FAIL'}</b> / JSON <b class="${result.json ? 'ok' : 'ng'}">${result.json ? 'PASS' : 'FAIL'}</b>`;
+    });
+
+    document.getElementById('btn-readonly').addEventListener('click', () => {
+        window.editor.setReadonly(!window.editor.readonly);
+    });
+
+    document.getElementById('btn-destroy').addEventListener('click', () => {
+        if (window.editor.destroyed) {
+            create();
+        } else {
+            window.editor.destroy();
+        }
+    });
+
+    // ---- 検証用ヘルパー（Playwright からも呼ぶ）
+    window.runRoundtrip = () => {
+        const ed = window.editor;
+        const html1 = ed.getHTML();
+        const json1 = JSON.stringify(ed.getJSON());
+        ed.setHTML(html1);
+        const html2 = ed.getHTML();
+        ed.setJSON(JSON.parse(json1));
+        const json2 = JSON.stringify(ed.getJSON());
+        refresh();
+        return { html: html1 === html2, json: json1 === json2, html1, html2, json1, json2 };
+    };
+</script>
+</body>
+</html>

@@ -1,0 +1,65 @@
+{
+    "name": "@parelabo/rs-tour",
+    "version": "0.1.0",
+    "description": "依存ゼロ・フレームワーク非依存のスポットライト型ガイドツアーライブラリ",
+    "type": "module",
+    "main": "./dist/rs-tour.esm.min.js",
+    "module": "./dist/rs-tour.esm.min.js",
+    "unpkg": "./dist/rs-tour.min.js",
+    "jsdelivr": "./dist/rs-tour.min.js",
+    "exports": {
+        ".": {
+            "types": "./dist/types/index.d.ts",
+            "import": "./dist/rs-tour.esm.min.js",
+            "default": "./dist/rs-tour.esm.min.js"
+        },
+        "./dist/*": "./dist/*",
+        "./vue": {
+            "types": "./dist/types/vue.d.ts",
+            "import": "./dist/rs-tour.vue.esm.min.js"
+        },
+        "./react": {
+            "types": "./dist/types/react.d.ts",
+            "import": "./dist/rs-tour.react.esm.min.js"
+        }
+    },
+    "files": [
+        "dist"
+    ],
+    "keywords": [
+        "tour",
+        "onboarding",
+        "spotlight",
+        "walkthrough",
+        "guide",
+        "tutorial"
+    ],
+    "author": "ryusuke.sano <ryusuke.sano@parelabo.com>",
+    "license": "SEE LICENSE IN LICENSE.txt",
+    "homepage": "https://github.com/sano1023/rs-package/tree/main/rs-tour#readme",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/sano1023/rs-package.git",
+        "directory": "rs-tour"
+    },
+    "bugs": {
+        "url": "https://parelabo.com",
+        "email": "contact@parelabo.com"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
+    "types": "./dist/types/index.d.ts",
+    "peerDependencies": {
+        "vue": "^3.0.0",
+        "react": ">=18"
+    },
+    "peerDependenciesMeta": {
+        "vue": {
+            "optional": true
+        },
+        "react": {
+            "optional": true
+        }
+    }
+}

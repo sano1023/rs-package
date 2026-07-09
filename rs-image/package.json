@@ -1,5 +1,5 @@
 {
-    "name": "rs-image",
+    "name": "@parelabo/rs-image",
     "version": "0.6.0",
     "description": "依存ゼロの画像処理＆合成エディタ（リサイズ・圧縮・トリミング・円形切り抜き・WebP変換・レイヤー合成）",
     "type": "module",
@@ -38,6 +38,19 @@
     ],
     "author": "ryusuke.sano <ryusuke.sano@parelabo.com>",
     "license": "SEE LICENSE IN LICENSE.txt",
+    "homepage": "https://github.com/sano1023/rs-package/tree/main/rs-image#readme",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/sano1023/rs-package.git",
+        "directory": "rs-image"
+    },
+    "bugs": {
+        "url": "https://parelabo.com",
+        "email": "contact@parelabo.com"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
     "types": "./dist/types/index.d.ts",
     "style": "./dist/rs-image.css",
     "peerDependencies": {

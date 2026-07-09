@@ -2,30 +2,73 @@
 > 利用は無償（商用可）ですが、**改変・再配布はできません**（LICENSE.txt 参照）。
 > 機能追加・改修のご依頼は有償で承ります → https://parelabo.com （contact@parelabo.com）
 
-## インストール / 読み込み
+## インストール
 
 ```bash
-# npm（GitHubのtarball指定）
-npm install https://github.com/sano1023/ryusuke-packages-dist/raw/main/tarballs/rs-slider-0.1.0.tgz
+npm install @parelabo/rs-slider
 ```
 
-```html
-<!-- CDN（jsDelivr・scriptタグ直読み） -->
-<script src="https://cdn.jsdelivr.net/gh/sano1023/ryusuke-packages-dist@main/rs-slider/dist/rs-slider.min.js"></script>
+<details>
+<summary>npm レジストリを使わない場合（GitHub tarball 直指定）</summary>
+
+```bash
+npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-slider-0.1.0.tgz
 ```
+</details>
+
+## 使い方
+
+### バニラ JS（ESM・バンドラあり）
 
 ```js
-// ESM import（npmインストール後）
-import { /* 公開API */ } from 'rs-slider';
+import { createRSSlider } from '@parelabo/rs-slider';
+import '@parelabo/rs-slider/rs-slider.css';   // スタイル（バンドラ経由）
+
+createRSSlider(document.querySelector('#app'), { /* オプション */ });
 ```
 
-CSSが必要なパッケージは `dist/rs-slider.css` を link してください。
+### `<script>` タグ（CDN・ビルド環境不要）
+
+```html
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@parelabo/rs-slider@0.1.0/dist/rs-slider.css">
+<script src="https://cdn.jsdelivr.net/npm/@parelabo/rs-slider@0.1.0/dist/rs-slider.min.js"></script>
+<script>
+  // 公開APIはグローバル RSSlider に載る
+  RSSlider.createRSSlider(document.querySelector('#app'), { /* オプション */ });
+</script>
+```
+
+### Vue 3
+
+```js
+import { RsSlider, RsGallery, RsMarquee, RsMasonry, RsCoverflow, RsStories } from '@parelabo/rs-slider/vue';
+import '@parelabo/rs-slider/rs-slider.css';   // スタイル（バンドラ経由）
+```
+
+```vue
+<template>
+  <RsSlider />
+</template>
+```
+
+### React 18 / 19
+
+```jsx
+import { RsSlider, RsGallery, RsMarquee, RsMasonry, RsCoverflow, RsStories } from '@parelabo/rs-slider/react';
+import '@parelabo/rs-slider/rs-slider.css';   // スタイル（バンドラ経由）
+
+export default function App() {
+  return <RsSlider />;
+}
+```
+
+> `vue` / `react` は peerDependency です（バンドルには含みません）。アプリ側のものが使われます。
 
 ---
 
 # rs-slider
 
-依存ゼロの**画像スライダーコレクション**（Swiper / Slick / Splide 等の代替）。よく使う13種類のスライダーUIを、7つのファクトリ関数で提供します。ビルド不要・ESモジュール + CSSファイル1枚。
+依存ゼロの**画像スライダーコレクション**。よく使う13種類のスライダーUIを、7つのファクトリ関数で提供します。ビルド不要・ESモジュール + CSSファイル1枚。
 
 | # | タイプ | ファクトリ |
 | --- | --- | --- |

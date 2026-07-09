@@ -1,6 +1,23 @@
 /** mm → px 変換。px = mm / 25.4 * dpi */
 export function mmToPx(mm: any, dpi?: number): number;
 /**
+ * シード付き擬似乱数（mulberry32）。かすれ/にじみ(v0.3)の再現性のための契約。
+ * ここ（DOM非依存の純粋層）を単一の定義元とし、stamps.js が再輸出する。
+ */
+export function mulberry32(seed: any): () => number;
+/**
+ * かすれ/にじみ用の決定的ノイズ格子（gw×gh の 0..1 値配列）。
+ * 同じ seed なら完全に同一・別 seed なら変化する（node 単体テストで決定性を検証）。
+ * canvas 側（hanko.js）がこの格子をスケールして destination-out（かすれ）や
+ * 輪郭膨張（にじみ）の強度に用いる。DOM に依存しない純粋関数。
+ * @returns {{gw, gh, grid: number[]}}
+ */
+export function fadeNoise(seed?: number, gw?: number, gh?: number): {
+    gw: any;
+    gh: any;
+    grid: number[];
+};
+/**
  * 日付印用の日付書式。
  * - 'wareki'（既定）: 元号イニシャル＋年 → 'R8.7.7'
  * - 'seireki': 西暦下2桁 → '26.7.7'
@@ -80,6 +97,72 @@ export function dataLayout(fields?: {
     bands: [{
         role: any;
         text: any;
+        y: any;
+        fontMm: any;
+        scaleX: any;
+        scaleY: any;
+    }];
+};
+/**
+ * 銀行印風（ginko・v0.3）: 丸枠・太枠・姓を横彫り（横一列・右→左）。
+ * - 直径 12mm 既定（9〜16mm にクランプ）・太枠 0.6mm
+ * - 文字は水平一列（y=0）に中央揃え、伝統に倣い先頭字を最も右（x 正側）に置く
+ * @param {string} name 姓（1〜3字を想定）
+ * @returns {{shape, sizeMm, frameMm, innerMm, chars: [{ch, x, y, fontMm, scaleX, scaleY}]}}
+ */
+export function ginkoLayout(name: string, opts?: {}): {
+    shape: any;
+    sizeMm: any;
+    frameMm: any;
+    innerMm: any;
+    chars: [{
+        ch: any;
+        x: any;
+        y: any;
+        fontMm: any;
+        scaleX: any;
+        scaleY: any;
+    }];
+};
+/**
+ * 職印（shoku・v0.3）: 二重円。外周リングに役職名を円弧配置、中央に「之印」を含む縦組み。
+ * - 直径 18mm 既定（15〜30mm にクランプ）・外枠 0.7mm・内円 0.4mm
+ * - 外周（リング帯）: 役職名を上弧に左→右（時計回り）で配置。各字は接線方向に回転
+ * - 中央（内円内）: 氏名＋「之印」を縦組み（氏名省略時は「之印」）
+ * @param {{title?, name?}} fields title=役職名 / name=氏名
+ * @returns {{shape:'circle-double', sizeMm, outerR, innerR,
+ *            rings: [{r, frameMm}], title, centerText,
+ *            arc: [{ch, x, y, fontMm, scaleX, scaleY, rotationRad, radiusMm, angleRad}],
+ *            center: [{ch, x, y, fontMm, scaleX, scaleY}]}}
+ */
+export function shokuLayout(fields?: {
+    title?: any;
+    name?: any;
+}, opts?: {}): {
+    shape: "circle-double";
+    sizeMm: any;
+    outerR: any;
+    innerR: any;
+    rings: [{
+        r: any;
+        frameMm: any;
+    }];
+    title: any;
+    centerText: any;
+    arc: [{
+        ch: any;
+        x: any;
+        y: any;
+        fontMm: any;
+        scaleX: any;
+        scaleY: any;
+        rotationRad: any;
+        radiusMm: any;
+        angleRad: any;
+    }];
+    center: [{
+        ch: any;
+        x: any;
         y: any;
         fontMm: any;
         scaleX: any;

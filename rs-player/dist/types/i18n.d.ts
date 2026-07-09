@@ -11,6 +11,7 @@ export namespace I18N_JA {
     let speed: string;
     let normal: string;
     let quality: string;
+    let chapters: string;
     let captions: string;
     let captionsOff: string;
     let captionSize: string;
@@ -27,4 +28,20 @@ export namespace I18N_JA {
     let back: string;
     let error: string;
     let timeSeparator: string;
+    let forward10: string;
+    let back10: string;
+    let speed2x: string;
+    let next: string;
+    let miniClose: string;
+    let miniExpand: string;
+    let close: string;
+    let playlist: string;
+    let playlistPrev: string;
+    let playlistNext: string;
+    let watermark: string;
+    let loopAB: string;
+    let auto: string;
+    let pitch: string;
+    let live: string;
+    let goLive: string;
 }

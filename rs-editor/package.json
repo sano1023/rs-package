@@ -1,17 +1,17 @@
 {
-    "name": "rs-editor",
+    "name": "@parelabo/rs-editor",
     "version": "0.5.0",
-    "description": "プラグインアーキテクチャを持つ、依存ゼロのWYSIWYGエディタライブラリ（TinyMCE代替を目指す）",
+    "description": "プラグインアーキテクチャを持つ、依存ゼロのWYSIWYGエディタライブラリ",
     "type": "module",
-    "main": "./dist/rs-editor.esm.min.js",
-    "module": "./dist/rs-editor.esm.min.js",
+    "main": "./dist/esm/index.js",
+    "module": "./dist/esm/index.js",
     "unpkg": "./dist/rs-editor.min.js",
     "jsdelivr": "./dist/rs-editor.min.js",
     "exports": {
         ".": {
             "types": "./dist/types/index.d.ts",
-            "import": "./dist/rs-editor.esm.min.js",
-            "default": "./dist/rs-editor.esm.min.js"
+            "import": "./dist/esm/index.js",
+            "default": "./dist/esm/index.js"
         },
         "./dist/*": "./dist/*",
         "./rs-editor.css": "./dist/rs-editor.css",
@@ -40,11 +40,23 @@
         "editor",
         "rich-text",
         "contenteditable",
-        "tinymce-alternative",
         "plugin"
     ],
     "author": "ryusuke.sano <ryusuke.sano@parelabo.com>",
     "license": "SEE LICENSE IN LICENSE.txt",
+    "homepage": "https://github.com/sano1023/rs-package/tree/main/rs-editor#readme",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/sano1023/rs-package.git",
+        "directory": "rs-editor"
+    },
+    "bugs": {
+        "url": "https://parelabo.com",
+        "email": "contact@parelabo.com"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
     "types": "./dist/types/index.d.ts",
     "style": "./dist/rs-editor.css",
     "peerDependencies": {

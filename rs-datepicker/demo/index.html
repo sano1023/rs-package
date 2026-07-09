@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>rs-datepicker デモ</title>
+<link rel="stylesheet" href="../dist/rs-datepicker.css">
+<style>
+    body {
+        font-family: system-ui, -apple-system, "Segoe UI", "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+        margin: 0;
+        background: #f1f5f9;
+        color: #1e293b;
+    }
+    .page { max-width: 1000px; margin: 0 auto; padding: 32px 20px 400px; }
+    h1 { font-size: 24px; }
+    h1 small { font-size: 13px; color: #64748b; font-weight: 400; margin-left: 10px; }
+    .lead { color: #475569; font-size: 14px; margin-bottom: 20px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .card {
+        background: #fff; border: 1px solid #e2e8f0; border-radius: 10px;
+        padding: 16px 18px;
+    }
+    .card h2 { font-size: 14px; margin: 0 0 10px; }
+    .card input {
+        width: 100%; box-sizing: border-box; padding: 9px 12px;
+        border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px;
+        font-family: inherit; outline: none;
+    }
+    .card input:focus { border-color: #4e79a7; }
+    .value { font-size: 12px; color: #64748b; margin-top: 8px; min-height: 16px; word-break: break-all; }
+    @media (max-width: 760px) { .grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="page">
+    <h1>rs-datepicker <small>v0.1 デモ — 日本語ファースト・依存ゼロの日付ピッカー</small></h1>
+    <p class="lead">
+        タイトル（「2026年7月」）をクリックすると年スクロール→月→日の3タップで移動できます。
+        期間選択はホバーで帯がプレビューされ、端点だけマーカーになります（色は設定可能）。
+    </p>
+
+    <div class="grid">
+        <div class="card">
+            <h2>基本（single）— input に直接タイプもOK（例: 2026/7/5）</h2>
+            <input id="dp-single" placeholder="日付を選択">
+            <div class="value" id="v-single"></div>
+        </div>
+
+        <div class="card">
+            <h2>期間（range・2ヶ月表示・帯/マーカー色カスタム）</h2>
+            <input id="dp-range" placeholder="期間を選択">
+            <div class="value" id="v-range"></div>
+        </div>
+
+        <div class="card">
+            <h2>複数選択（multiple）</h2>
+            <input id="dp-multiple" placeholder="複数の日付を選択">
+            <div class="value" id="v-multiple"></div>
+        </div>
+
+        <div class="card">
+            <h2>日時（showTime・5分刻み）</h2>
+            <input id="dp-datetime" placeholder="日時を選択">
+            <div class="value" id="v-datetime"></div>
+        </div>
+
+        <div class="card">
+            <h2>制約（過去とmin/max外・週末が選択不可）</h2>
+            <input id="dp-limited" placeholder="平日のみ選択可">
+            <div class="value" id="v-limited"></div>
+        </div>
+
+        <div class="card">
+            <h2>分割フィールド（年select → 月モーダル → 日モーダル連鎖）</h2>
+            <form id="ds-form">
+                <div id="ds-birthday"></div>
+            </form>
+            <div class="value" id="v-dateselect"></div>
+        </div>
+
+        <div class="card" style="grid-column: 1 / -1;">
+            <h2>フォーム送信（name 指定で hidden 出力 — single / range / multiple）</h2>
+            <form id="hidden-form" style="display:flex; flex-wrap:wrap; gap:14px;">
+                <div style="flex:1; min-width:200px;">
+                    <input id="dp-form-date" placeholder="予約日（name=booking_date）">
+                </div>
+                <div style="flex:1; min-width:200px;">
+                    <input id="dp-form-period" placeholder="期間（name=period → period_from/_to）">
+                </div>
+                <div style="flex:1; min-width:200px;">
+                    <input id="dp-form-days" placeholder="候補日（name=holidays → holidays[]）">
+                </div>
+            </form>
+            <div class="value" id="v-form"></div>
+        </div>
+
+        <div class="card">
+            <h2>インライン + マーカー（祝日・予定の表現）</h2>
+            <div id="dp-inline"></div>
+            <div class="value" id="v-inline"></div>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { createRSDatePicker, createRSDateSelect } from '../dist/rs-datepicker.esm.min.js';
+    window.__mod = { createRSDatePicker, createRSDateSelect }; // 検証用
+    window.pickers = {};
+
+    const show = (id) => (v) => {
+        document.getElementById(id).textContent = 'getValue(): ' + JSON.stringify(v, (k, val) => val, 0);
+    };
+
+    window.pickers.single = createRSDatePicker('#dp-single', {
+        onChange: show('v-single'),
+    });
+
+    window.pickers.range = createRSDatePicker('#dp-range', {
+        mode: 'range',
+        months: 2,
+        rangeColors: { band: '#fde9d9', endpoint: '#f28e2b' },
+        onChange: show('v-range'),
+    });
+
+    window.pickers.multiple = createRSDatePicker('#dp-multiple', {
+        mode: 'multiple',
+        format: 'M/D',
+        onChange: show('v-multiple'),
+    });
+
+    window.pickers.datetime = createRSDatePicker('#dp-datetime', {
+        showTime: true,
+        timeStep: 5,
+        onChange: show('v-datetime'),
+    });
+
+    const today = new Date();
+    window.pickers.limited = createRSDatePicker('#dp-limited', {
+        minDate: today,
+        maxDate: new Date(today.getFullYear(), today.getMonth() + 2, 0),
+        disabledDates: (d) => d.getDay() === 0 || d.getDay() === 6,
+        onChange: show('v-limited'),
+    });
+
+    window.pickers.dateselect = createRSDateSelect('#ds-birthday', {
+        name: 'birthday',
+        value: '1993-05-12',
+        format: 'YYYY-MM-DD',
+        labels: { year: '年', month: '月', day: '日' },
+        yearRange: { from: 1940, to: new Date().getFullYear() },
+        onChange: (v) => {
+            document.getElementById('v-dateselect').textContent =
+                'hidden[name=birthday] = ' + document.querySelector('#ds-birthday input[type=hidden]').value + ' / onChange: ' + v;
+        },
+    });
+    document.getElementById('v-dateselect').textContent =
+        'hidden[name=birthday] = ' + document.querySelector('#ds-birthday input[type=hidden]').value;
+
+    // ---- フォーム送信（hidden出力）
+    const dumpForm = () => {
+        const fd = new FormData(document.getElementById('hidden-form'));
+        const parts = [];
+        for (const [k, v] of fd.entries()) parts.push(`${k}=${v}`);
+        document.getElementById('v-form').textContent = '送信内容: ' + (parts.join(' & ') || '(なし)');
+    };
+    window.pickers.formDate = createRSDatePicker('#dp-form-date', {
+        name: 'booking_date',
+        onChange: dumpForm,
+    });
+    window.pickers.formPeriod = createRSDatePicker('#dp-form-period', {
+        mode: 'range',
+        name: 'period',
+        onChange: dumpForm,
+    });
+    window.pickers.formDays = createRSDatePicker('#dp-form-days', {
+        mode: 'multiple',
+        name: 'holidays',
+        format: 'M/D',
+        onChange: dumpForm,
+    });
+    dumpForm();
+
+    window.pickers.inline = createRSDatePicker('#dp-inline', {
+        inline: true,
+        markers: [
+            { date: new Date(2026, 6, 20), color: '#e15759', label: '海の日（祝）' },
+            { date: new Date(2026, 6, 10), color: '#59a14f', label: '給料日' },
+            { date: new Date(2026, 6, 15), color: '#f28e2b', label: '定例MTG' },
+        ],
+        defaultValue: new Date(2026, 6, 5),
+        onChange: show('v-inline'),
+    });
+</script>
+</body>
+</html>

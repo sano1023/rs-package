@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>rs-player デモ</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="../dist/rs-player.css">
+<style>
+    body {
+        font-family: system-ui, -apple-system, "Segoe UI", "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+        margin: 0;
+        background: #f1f5f9;
+        color: #1e293b;
+    }
+    .page { max-width: 900px; margin: 0 auto; padding: 32px 20px 80px; }
+    h1 { font-size: 24px; }
+    h1 small { font-size: 13px; color: #64748b; font-weight: 400; margin-left: 10px; }
+    h2 { font-size: 16px; margin: 26px 0 8px; }
+    .lead { color: #475569; font-size: 14px; margin-bottom: 20px; }
+    .player-wrap { max-width: 720px; }
+    .controls { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0; }
+    .controls button {
+        appearance: none; border: 1px solid #cbd5e1; background: #fff;
+        border-radius: 6px; padding: 7px 14px; font-size: 13px; cursor: pointer;
+    }
+    .controls button:hover { background: #e2e8f0; }
+    .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 760px) { .cols { grid-template-columns: 1fr; } }
+    pre {
+        background: #0f172a; color: #bae6fd; font-size: 12px; line-height: 1.5;
+        border-radius: 8px; padding: 12px; overflow: auto; height: 220px; margin: 0;
+    }
+    kbd {
+        background: #e2e8f0; border-radius: 4px; border: 1px solid #cbd5e1;
+        padding: 1px 6px; font-size: 12px; font-family: inherit;
+    }
+    .keys { font-size: 13px; color: #475569; line-height: 2; }
+    .scroll-hint {
+        margin-top: 40px; padding: 40px 20px; border: 2px dashed #cbd5e1; border-radius: 12px;
+        text-align: center; color: #64748b; font-size: 14px; min-height: 130vh; box-sizing: border-box;
+    }
+    .scroll-hint strong { color: #1e293b; }
+</style>
+</head>
+<body>
+<div class="page">
+    <h1>rs-player <small>v0.4 デモ — HLSアダプタ（画質レベル/AUTO）・ライブ配信UI・倍速ピッチ保持</small></h1>
+    <p class="lead">
+        v0.1（標準コントロール・字幕・画質切替・進捗イベント）・v0.2（チャプター・サムネイルプレビュー・
+        ダブルタップ・長押し2倍速・ミニプレイヤー・エンドスクリーン）に加え、v0.3 では
+        <strong>プレイリスト</strong>（連続再生・前へ/次へ・サイドリスト・現在位置ハイライト）・
+        <strong>自動サムネイル</strong>（<code>thumbnails: 'auto'</code>。裏の &lt;video&gt; をシークして生成）・
+        <strong>A-Bループ</strong>・<strong>コマ送り</strong>（<kbd>,</kbd>/<kbd>.</kbd> で1/30秒）・
+        <strong>ロゴウォーターマーク</strong>（位置・リンク）を試せます。
+    </p>
+    <p class="lead">下段の「プレイリストプレイヤー（v0.3）」で新機能を体験できます。上段は v0.1/v0.2 の従来機能です。</p>
+
+    <div class="player-wrap"><div id="player"></div></div>
+
+    <div class="controls">
+        <button id="btn-play">再生 / 一時停止</button>
+        <button id="btn-seek50">50%へジャンプ</button>
+        <button id="btn-chapter">次のチャプターへ</button>
+        <button id="btn-quality">画質を交互に切替</button>
+        <button id="btn-speed">速度 1.5x / 1x</button>
+        <button id="btn-caption">字幕 日本語 / オフ</button>
+        <button id="btn-end">終端へ（エンドスクリーン）</button>
+        <button id="btn-json">toJSON()</button>
+        <button id="btn-destroy">destroy() → 再生成</button>
+    </div>
+
+    <div class="cols">
+        <div>
+            <h2>イベントログ</h2>
+            <pre id="log"></pre>
+        </div>
+        <div>
+            <h2>操作（v0.2 の新機能）</h2>
+            <div class="keys">
+                シークバーに<strong>ホバー</strong> → サムネイル＋章名＋時刻<br>
+                動画の<strong>左右をダブルタップ</strong> → ±10秒（リップル）<br>
+                動画を<strong>長押し</strong> → 2倍速（離すと復帰）<br>
+                <strong>下へスクロール</strong> → 右下にミニプレイヤー
+            </div>
+            <h2>キーボード</h2>
+            <div class="keys">
+                <kbd>Space</kbd>/<kbd>K</kbd> 再生 <kbd>J</kbd>/<kbd>L</kbd> ±10秒 <kbd>←</kbd>/<kbd>→</kbd> ±5秒
+                <kbd>↑</kbd>/<kbd>↓</kbd> 音量 <kbd>M</kbd> ミュート <kbd>F</kbd> 全画面 <kbd>C</kbd> 字幕
+                <kbd>0</kbd>〜<kbd>9</kbd> ジャンプ <kbd>&lt;</kbd>/<kbd>&gt;</kbd> 速度
+            </div>
+        </div>
+    </div>
+
+    <hr style="margin:40px 0;border:0;border-top:1px solid #cbd5e1;">
+
+    <h1 style="font-size:20px;">プレイリストプレイヤー <small>v0.3 の新機能</small></h1>
+    <p class="lead">
+        2本の動画を<strong>プレイリスト</strong>で連続再生します。<kbd>前へ</kbd>/<kbd>次へ</kbd>ボタン・
+        右上の<strong>プレイリスト</strong>ボタンでサイドリスト（現在位置ハイライト）を開けます。
+        シークバーに<strong>ホバー</strong>すると<strong>自動生成サムネイル</strong>が出ます。
+        右上には<strong>ロゴウォーターマーク</strong>（リンク付き）。
+    </p>
+
+    <div class="player-wrap"><div id="player2"></div></div>
+
+    <div class="controls">
+        <button id="p2-prev">前の動画</button>
+        <button id="p2-next">次の動画</button>
+        <button id="p2-list">サイドリスト開閉</button>
+        <button id="p2-a">A点をセット</button>
+        <button id="p2-b">B点をセット</button>
+        <button id="p2-abclear">A-B解除</button>
+        <button id="p2-frame-back">◀ 1コマ</button>
+        <button id="p2-frame-fwd">1コマ ▶</button>
+        <button id="p2-json">toJSON()</button>
+    </div>
+    <div class="keys">
+        <strong>コマ送り</strong>: プレイヤーをクリックしてフォーカス → <kbd>,</kbd> 1コマ戻る / <kbd>.</kbd> 1コマ進む（各 1/30秒）<br>
+        <strong>A-Bループ</strong>: 再生位置で「A点」「B点」をセットすると、その区間を自動で繰り返します
+    </div>
+
+    <hr style="margin:40px 0;border:0;border-top:1px solid #cbd5e1;">
+
+    <h1 style="font-size:20px;">ストリーミングプレイヤー <small>v0.4 の新機能</small></h1>
+    <p class="lead">
+        <strong>HLSアダプタ</strong>（<code>hlsAdapter(Hls)</code>）に hls.js を渡すと、<strong>設定→画質</strong>に
+        レベル（1080p/720p/…）と <strong>AUTO</strong>（自動ビットレート）が並びます。hls.js 本体は<strong>同梱しません</strong>（依存ゼロ・利用側が注入）。
+        このデモは hls.js の代わりに<strong>フェイクHLS</strong>を注入し、裏で同梱の progressive 動画を再生してUIを体験できるようにしています。
+        <strong>ライブ配信UI</strong>（<code>live: true</code>）で <strong>LIVE バッジ</strong>・<strong>ライブエッジへジャンプ</strong>・シーク可能な <strong>DVR 窓</strong>を表示。
+        <strong>倍速ピッチ保持</strong>（<code>preservesPitch</code>）のトグルも試せます。
+    </p>
+
+    <div class="player-wrap"><div id="player3"></div></div>
+
+    <div class="controls">
+        <button id="p3-menu">設定メニュー（画質を開く）</button>
+        <button id="p3-720">画質を720pに固定</button>
+        <button id="p3-auto">画質をAUTOに</button>
+        <button id="p3-live">ライブエッジへジャンプ</button>
+        <button id="p3-mid">DVRを遡る（中央へ）</button>
+        <button id="p3-speed2">速度2x</button>
+        <button id="p3-pitch">ピッチ保持 ON/OFF</button>
+        <button id="p3-json">toJSON()</button>
+    </div>
+    <div class="keys">
+        <strong>画質レベル</strong>: 右下の<kbd>設定</kbd>→<kbd>画質</kbd>で AUTO/1080p/720p/480p/240p を選択（HLSのレベル）<br>
+        <strong>ライブ</strong>: 左下の<kbd>● LIVE</kbd>バッジ。遡ると点灯が消え、クリックで最新（ライブエッジ）へ戻ります<br>
+        <strong>ピッチ保持</strong>: <kbd>設定</kbd>→<kbd>ピッチ保持</kbd>、または上のトグルで <code>video.preservesPitch</code> を切替
+    </div>
+
+    <hr style="margin:40px 0;border:0;border-top:1px solid #cbd5e1;">
+
+    <h1 style="font-size:20px;">MediaStream プレイヤー <small>v0.5 の新機能 — 連携と計測</small></h1>
+    <p class="lead">
+        <strong>MediaStream 再生モード</strong>（<code>srcObject</code>）: rs-livecam 等が生成した <code>MediaStream</code> を注入すると、
+        尺・シークの概念が無いため<strong>シークバーと総時間表示が自動で隠れます</strong>。rs-livecam は <strong>import せず</strong>、
+        <code>srcObject</code> / <code>player.setStream(stream)</code> の口で連携します（ここではデモとして
+        <code>canvas.captureStream()</code> で MediaStream を<strong>フェイク生成</strong>しています）。<br>
+        <strong>アナリティクスアダプタ</strong>（<code>analytics</code>）: <code>play/pause/progress/ended/leave</code> などの視聴イベントの
+        <strong>送信先を利用側が注入</strong>します。<strong>本体は送信しません</strong>（fetch/ビーコンを持たない）。下の
+        「アナリティクスログ」は注入したハンドラが受け取ったイベントを表示しているだけです。
+    </p>
+
+    <div class="player-wrap"><div id="player4"></div></div>
+
+    <div class="controls">
+        <button id="p4-play">再生 / 一時停止</button>
+        <button id="p4-restream">MediaStream を再開</button>
+        <button id="p4-clear">通常再生へ切替（シーク復活）</button>
+        <button id="p4-fast">通常再生を8倍速で最後まで（進捗/終了ログ）</button>
+        <button id="p4-json">toJSON()</button>
+    </div>
+    <div class="cols">
+        <div>
+            <h2>アナリティクスログ（注入ハンドラが受信）</h2>
+            <pre id="analytics-log"></pre>
+        </div>
+        <div>
+            <h2>操作（v0.5 の新機能）</h2>
+            <div class="keys">
+                初期は <strong>MediaStream 再生モード</strong> → <strong>シークバー・総時間が非表示</strong><br>
+                <strong>通常再生へ切替</strong> → シークバー・総時間が復活（同一プレイヤー）<br>
+                視聴イベントは<strong>注入ハンドラ</strong>にのみ渡る（<code>play/pause/progress/ended/leave</code>）<br>
+                <strong>本体はネットワーク送信しない</strong>（送信先の実装は利用側の責務）
+            </div>
+        </div>
+    </div>
+
+    <div class="scroll-hint">
+        <strong>▼ ここまでスクロールするとミニプレイヤーになります ▼</strong><br>
+        （上段プレイヤーで再生を始めてから下へスクロールしてください。右下のフローティングの「元のサイズに戻す／閉じる」も試せます）
+    </div>
+</div>
+
+<script type="module">
+import * as RSPlayer from '../dist/rs-player.esm.min.js';
+const { createRSPlayer, definePlayerButton } = RSPlayer;
+
+const logEl = document.getElementById('log');
+const eventLog = [];
+const logEvent = (e) => {
+    eventLog.push(e.type);
+    const detail = { ...e };
+    delete detail.type;
+    logEl.textContent += `${e.type} ${JSON.stringify(detail)}\n`;
+    logEl.scrollTop = logEl.scrollHeight;
+};
+
+// カスタムボタン: 組み込みと同じ definePlayerButton() で「10秒送り」を追加
+const skipButton = definePlayerButton({
+    name: 'skip10',
+    position: 'left',
+    label: '10秒送り',
+    icon: '<path d="M12 5V1l5 5-5 5V7c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6h2c0 4.42-3.58 8-8 8s-8-3.58-8-8 3.58-8 8-8z"/><text x="9" y="16" font-size="7" fill="currentColor" stroke="none">10</text>',
+    onClick: (p) => p.core.seekBy(10),
+});
+
+// PHP ビルトインサーバは Range 非対応 → <video> の seekable が [0,0] になりシークできない。
+// 動画本体だけ Blob URL 化する（サムネイルのスプライト画像は Range 不要なので実URLのまま）。
+async function resolveMediaURLs() {
+    const files = { '360p': './media/video-360p.webm', '180p': './media/video-180p.webm' };
+    let ranged = false;
+    try {
+        const res = await fetch(files['360p'], { headers: { Range: 'bytes=0-1' } });
+        ranged = res.status === 206;
+    } catch (e) { /* オフライン等はそのまま */ }
+    if (ranged) return files;
+    const out = {};
+    for (const [label, url] of Object.entries(files)) {
+        out[label] = URL.createObjectURL(await (await fetch(url)).blob());
+    }
+    return out;
+}
+
+// チャプター（15秒尺・ja.vtt の cue 境界に合わせている）
+const CHAPTERS = [
+    { start: 0, title: 'オープニング' },
+    { start: 4, title: '字幕デモ' },
+    { start: 8, title: '設定メニュー' },
+    { start: 12, title: 'エンディング' },
+];
+
+function create(urls) {
+    return createRSPlayer('#player', {
+        sources: [
+            { src: urls['360p'], label: '360p', default: true },
+            { src: urls['180p'], label: '180p' },
+        ],
+        poster: './media/poster.jpg',
+        preload: 'auto',
+        tracks: [
+            { src: './media/ja.vtt', label: '日本語', srclang: 'ja' },
+            { src: './media/en.vtt', label: 'English', srclang: 'en' },
+        ],
+        chapters: CHAPTERS,
+        thumbnails: './media/sprite.vtt',   // VTTスプライト（#xywh）
+        next: [                              // エンドスクリーンの「次の動画」カード
+            { title: '（デモ）180p をもう一度', poster: './media/poster.jpg', sources: [{ src: urls['180p'], label: '180p' }] },
+            { title: '（デモ）360p を先頭から', poster: './media/poster.jpg', sources: [{ src: urls['360p'], label: '360p' }] },
+        ],
+        theme: { accent: '#e11d48' },
+        customButtons: [skipButton],
+    });
+}
+
+let player;
+const mediaURLs = await resolveMediaURLs();
+player = create(mediaURLs);
+window.RSPlayer = RSPlayer;
+window.player = player;
+window.eventLog = eventLog;
+
+const EVENTS = [
+    'statechange', 'play', 'pause', 'seeked', 'ratechange', 'qualitychange',
+    'ended', 'captionchange', 'volumechange', 'playblocked', 'error',
+    'progress25', 'progress50', 'progress75', 'progress100',
+    'chapterchange', 'chapterschange', 'thumbnailschange',
+    'gesture', 'minichange', 'next', 'replay',
+];
+function wire(p) {
+    for (const t of EVENTS) p.on(t, logEvent);
+}
+wire(player);
+
+document.getElementById('btn-play').onclick = () => player.togglePlay();
+document.getElementById('btn-seek50').onclick = () => player.core.seekPercent(50);
+document.getElementById('btn-chapter').onclick = () => {
+    const ch = player.core.getChapters();
+    const cur = player.core._activeChapter;
+    player.core.seekToChapter(Math.min(cur + 1, ch.length - 1));
+};
+document.getElementById('btn-quality').onclick = () => {
+    player.setQuality(player.core.quality === '360p' ? '180p' : '360p');
+};
+document.getElementById('btn-speed').onclick = () => {
+    player.setRate(player.video.playbackRate === 1.5 ? 1 : 1.5);
+};
+document.getElementById('btn-caption').onclick = () => {
+    player.setCaption(player.core.captionIndex === 0 ? -1 : 0);
+};
+document.getElementById('btn-end').onclick = () => {
+    const d = player.video.duration;
+    if (isFinite(d) && d > 0) player.seek(Math.max(0, d - 0.4));
+    player.play();
+};
+document.getElementById('btn-json').onclick = () => {
+    logEl.textContent += `toJSON ${JSON.stringify(player.toJSON())}\n`;
+    logEl.scrollTop = logEl.scrollHeight;
+};
+document.getElementById('btn-destroy').onclick = () => {
+    player.destroy();
+    logEl.textContent += '--- destroy() → 再生成 ---\n';
+    player = create(mediaURLs);
+    wire(player);
+    window.player = player;
+};
+
+// ============================================================
+// v0.3: プレイリストプレイヤー（連続再生・自動サムネイル・A-Bループ・コマ送り・ウォーターマーク）
+// ============================================================
+const player2 = createRSPlayer('#player2', {
+    playlist: [
+        { title: 'サンプル動画1（カラー・360p）', poster: './media/poster.jpg',
+            sources: [{ src: mediaURLs['360p'], label: '360p', default: true }], thumbnails: 'auto' },
+        { title: 'サンプル動画2（セピア・180p）', poster: './media/poster.jpg',
+            sources: [{ src: mediaURLs['180p'], label: '180p', default: true }], thumbnails: 'auto' },
+    ],
+    playlistLoop: false,
+    preload: 'auto',
+    persist: false,       // 上段プレイヤーの localStorage 復元と干渉しないよう保存しない
+    miniPlayer: false,    // 下段はミニ化しない
+    theme: { accent: '#0ea5e9' },
+    watermark: { text: 'rs-player', href: 'https://github.com/', position: 'top-right' },
+});
+window.player2 = player2;
+
+const p2log = (e) => {
+    const detail = { ...e };
+    delete detail.type;
+    logEl.textContent += `[P2] ${e.type} ${JSON.stringify(detail)}\n`;
+    logEl.scrollTop = logEl.scrollHeight;
+};
+for (const t of ['playlistchange', 'abloopchange', 'framestep', 'thumbnailschange', 'ended', 'playlistpanel']) {
+    player2.on(t, p2log);
+}
+
+document.getElementById('p2-prev').onclick = () => player2.playlistPrev();
+document.getElementById('p2-next').onclick = () => player2.playlistNext();
+document.getElementById('p2-list').onclick = () => player2.togglePlaylistPanel();
+document.getElementById('p2-a').onclick = () => player2.setLoopA();
+document.getElementById('p2-b').onclick = () => player2.setLoopB();
+document.getElementById('p2-abclear').onclick = () => player2.clearABLoop();
+document.getElementById('p2-frame-back').onclick = () => player2.frameStep(-1);
+document.getElementById('p2-frame-fwd').onclick = () => player2.frameStep(1);
+document.getElementById('p2-json').onclick = () => {
+    logEl.textContent += `[P2] toJSON ${JSON.stringify(player2.toJSON())}\n`;
+    logEl.scrollTop = logEl.scrollHeight;
+};
+
+// ============================================================
+// v0.4: ストリーミングプレイヤー（HLSアダプタ〈フェイク〉・ライブUI・ピッチ保持）
+// ============================================================
+const { hlsAdapter } = RSPlayer;
+
+// hls.js のフェイク実装。契約（isSupported / Events / on / loadSource / attachMedia /
+// levels / currentLevel / LEVEL_SWITCHED）を満たす。デモでは attachMedia で同梱の
+// progressive 動画を実際に再生し、レベルとライブをマニフェスト風に供給する。
+// ※ 本番は import Hls from 'hls.js'（CDNの <script src=".../hls.min.js">）を hlsAdapter に渡す。
+class DemoHls {
+    static isSupported() { return true; }
+    static get Events() {
+        return { MANIFEST_PARSED: 'hlsManifestParsed', LEVEL_SWITCHED: 'hlsLevelSwitched', LEVEL_LOADED: 'hlsLevelLoaded' };
+    }
+    constructor(config) {
+        this.config = config || {};
+        this._cb = {};
+        this.levels = [];
+        this._currentLevel = -1;
+        this.autoLevelEnabled = true;
+    }
+    get currentLevel() { return this._currentLevel; }
+    set currentLevel(i) {
+        this._currentLevel = i;
+        this.autoLevelEnabled = i < 0;
+        this._emit(DemoHls.Events.LEVEL_SWITCHED, { level: i < 0 ? 0 : i });
+    }
+    set nextLevel(i) { /* noop */ }
+    on(ev, cb) { (this._cb[ev] || (this._cb[ev] = [])).push(cb); }
+    _emit(ev, data) { for (const cb of (this._cb[ev] || [])) cb(ev, data); }
+    loadSource(src) { this._src = src; }
+    attachMedia(video) {
+        this.media = video;
+        video.src = this.config.demoSrc;                     // デモ: 実体は progressive を再生
+        setTimeout(() => {
+            this.levels = [
+                { height: 1080, bitrate: 5000000 }, { height: 720, bitrate: 2800000 },
+                { height: 480, bitrate: 1400000 }, { height: 240, bitrate: 600000 },
+            ];
+            this._emit(DemoHls.Events.MANIFEST_PARSED, { levels: this.levels });
+            this._emit(DemoHls.Events.LEVEL_LOADED, { details: { live: true } });
+        }, 0);
+    }
+    destroy() { /* デモでは video.src は保持 */ }
+}
+
+const player3 = createRSPlayer('#player3', {
+    sources: [{ src: 'demo.m3u8', type: 'application/x-mpegURL', label: 'HLS' }],
+    adapters: [hlsAdapter(DemoHls, { config: { demoSrc: mediaURLs['360p'] } })],
+    live: true,                     // ライブ配信UI（LIVEバッジ・ライブエッジ・DVR窓）
+    preservesPitch: true,           // 倍速ピッチ保持（既定 true）
+    poster: './media/poster.jpg',
+    preload: 'auto',
+    persist: false,
+    miniPlayer: false,
+    theme: { accent: '#7c3aed' },
+});
+window.player3 = player3;
+
+const p3log = (e) => {
+    const detail = { ...e };
+    delete detail.type;
+    logEl.textContent += `[P3] ${e.type} ${JSON.stringify(detail)}\n`;
+    logEl.scrollTop = logEl.scrollHeight;
+};
+for (const t of ['levelschange', 'qualitychange', 'livechange', 'pitchchange', 'seektolive', 'ratechange']) {
+    player3.on(t, p3log);
+}
+
+document.getElementById('p3-menu').onclick = () => {
+    player3.toggleMenu(true);
+    // 画質サブメニューを直接開く（デモ用フック）
+    const q = document.querySelector('#player3 .rsp-menu [data-rsp-menu="quality"]');
+    if (q) q.click();
+};
+document.getElementById('p3-720').onclick = () => {
+    const lv = player3.core.levels.find((l) => l.label === '720p');
+    if (lv) player3.setLevel(lv.index);
+};
+document.getElementById('p3-auto').onclick = () => player3.setLevel('auto');
+document.getElementById('p3-live').onclick = () => player3.seekToLiveEdge();
+document.getElementById('p3-mid').onclick = () => {
+    const w = player3.core.liveWindow();
+    player3.seek(w.start + w.duration * 0.5);
+};
+document.getElementById('p3-speed2').onclick = () => player3.setRate(player3.video.playbackRate === 2 ? 1 : 2);
+document.getElementById('p3-pitch').onclick = () => player3.setPreservesPitch(!player3.core.preservesPitch);
+document.getElementById('p3-json').onclick = () => {
+    logEl.textContent += `[P3] toJSON ${JSON.stringify(player3.toJSON())}\n`;
+    logEl.scrollTop = logEl.scrollHeight;
+};
+
+// ============================================================
+// v0.5: MediaStream プレイヤー（rs-livecam 連携・アナリティクスアダプタ）
+// ============================================================
+// rs-livecam は import しない。ここでは canvas.captureStream() で MediaStream を「フェイク生成」し、
+// srcObject / setStream の口へ流し込む（実運用では rs-livecam 等の getUserMedia ストリームを注入）。
+function makeFakeStream() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 480; canvas.height = 270;
+    const ctx = canvas.getContext('2d');
+    let f = 0;
+    const draw = () => {
+        f++;
+        ctx.fillStyle = `hsl(${(f * 3) % 360}, 55%, 42%)`;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 26px system-ui';
+        ctx.fillText('LIVE CAM (fake)', 24, 130);
+        ctx.font = '18px system-ui';
+        ctx.fillText('frame ' + f, 24, 165);
+    };
+    draw();
+    const timer = setInterval(draw, 100);
+    const stream = canvas.captureStream(10);
+    stream.__timer = timer; // デモ掃除用（本体は関知しない）
+    return stream;
+}
+
+// アナリティクスアダプタ（利用側が注入する送信先）。ここでは画面ログに出すだけ。本体は送信しない。
+const analyticsLogEl = document.getElementById('analytics-log');
+const analyticsEvents = [];
+window.__analyticsEvents = analyticsEvents;
+const analyticsAdapter = (event) => {
+    analyticsEvents.push(event);
+    analyticsLogEl.textContent += `${event.type} ${JSON.stringify(event)}\n`;
+    analyticsLogEl.scrollTop = analyticsLogEl.scrollHeight;
+};
+
+const player4 = createRSPlayer('#player4', {
+    srcObject: makeFakeStream(),                     // MediaStream 再生モード（シーク/時刻を自動で隠す）
+    sources: [{ src: mediaURLs['180p'], label: '180p', default: true }], // clearStream() で戻る先の通常ソース
+    analytics: analyticsAdapter,                     // アナリティクスアダプタ（注入）
+    autoplay: true,
+    muted: true,
+    preload: 'auto',
+    persist: false,
+    miniPlayer: false,
+    theme: { accent: '#059669' },
+});
+window.player4 = player4;
+
+document.getElementById('p4-play').onclick = () => player4.togglePlay();
+document.getElementById('p4-restream').onclick = () => player4.setStream(makeFakeStream());
+document.getElementById('p4-clear').onclick = () => player4.clearStream();
+document.getElementById('p4-fast').onclick = () => {
+    player4.clearStream();
+    player4.video.muted = true;
+    player4.seek(0);
+    player4.setRate(8);
+    player4.play();
+};
+document.getElementById('p4-json').onclick = () => {
+    analyticsLogEl.textContent += `toJSON ${JSON.stringify(player4.toJSON())}\n`;
+    analyticsLogEl.scrollTop = analyticsLogEl.scrollHeight;
+};
+</script>
+</body>
+</html>

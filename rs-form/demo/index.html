@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>rs-form デモ — 問い合わせ / アンケート / 対話 / ビルダー / 採点・計算 / 集計 / テーマ / 配布・多言語</title>
+<link rel="stylesheet" href="../dist/rs-form.css">
+<!-- 集計サマリで使う rs-chart は「読み取り連携」。相対パスは lib / features 配下どちらでも解決できる -->
+<link rel="stylesheet" href="../../rs-chart/dist/rs-chart.css">
+<style>
+    body {
+        font-family: system-ui, -apple-system, "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+        margin: 0;
+        background: #f3f4f6;
+        color: #1f2937;
+    }
+    header {
+        background: #1e293b;
+        color: #fff;
+        padding: 14px 24px;
+    }
+    header h1 { margin: 0; font-size: 1.25rem; }
+    header p { margin: 4px 0 0; font-size: 0.85rem; color: #cbd5e1; }
+    .tabs {
+        display: flex;
+        gap: 8px;
+        padding: 12px 24px 0;
+    }
+    .tabs button {
+        font: inherit;
+        font-weight: 700;
+        padding: 10px 20px;
+        border: 1px solid #d1d5db;
+        border-bottom: none;
+        border-radius: 8px 8px 0 0;
+        background: #e5e7eb;
+        cursor: pointer;
+    }
+    .tabs button.active {
+        background: #fff;
+        color: #2563eb;
+    }
+    main {
+        display: flex;
+        gap: 24px;
+        padding: 0 24px 40px;
+        align-items: flex-start;
+        flex-wrap: wrap;
+    }
+    .form-panel {
+        flex: 1 1 480px;
+        max-width: 760px;
+        background: #fff;
+        border: 1px solid #d1d5db;
+        border-radius: 0 8px 8px 8px;
+        padding: 24px;
+    }
+    .side-panel {
+        flex: 1 1 320px;
+        max-width: 480px;
+        position: sticky;
+        top: 12px;
+    }
+    .side-panel h2 { font-size: 0.95rem; margin: 12px 0 6px; }
+    .side-panel pre {
+        background: #0f172a;
+        color: #a5f3fc;
+        border-radius: 8px;
+        padding: 12px;
+        font-size: 0.78rem;
+        overflow: auto;
+        max-height: 320px;
+        margin: 0;
+    }
+    .side-panel .log {
+        background: #fff;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        padding: 8px 12px;
+        font-size: 0.78rem;
+        max-height: 160px;
+        overflow: auto;
+    }
+    .side-panel .buttons { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+    .side-panel .buttons button {
+        font: inherit; font-size: 0.8rem; padding: 6px 12px;
+        border: 1px solid #d1d5db; border-radius: 6px; background: #fff; cursor: pointer;
+    }
+    .demo[hidden] { display: none; }
+    #builder-wrap { padding: 12px 24px 40px; }
+    #builder-wrap[hidden] { display: none; }
+    #builder-wrap .builder-intro { font-size: 0.85rem; color: #475569; margin: 0 0 12px; max-width: 900px; }
+    .v04-wrap { padding: 12px 24px 40px; }
+    .v04-wrap[hidden] { display: none; }
+    .v04-wrap .intro { font-size: 0.85rem; color: #475569; margin: 0 0 12px; max-width: 900px; }
+    .v04-wrap .toolbar { margin: 0 0 14px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    .v04-wrap .toolbar button {
+        font: inherit; font-size: 0.82rem; font-weight: 700; padding: 6px 14px;
+        border: 1px solid #d1d5db; border-radius: 6px; background: #fff; cursor: pointer;
+    }
+    .v04-wrap .toolbar button.on { background: #2563eb; color: #fff; border-color: #2563eb; }
+    #demo-summary { max-width: 760px; }
+    .theme-cols { display: flex; gap: 24px; align-items: flex-start; flex-wrap: wrap; }
+    .theme-cols .theme-left { flex: 0 0 320px; max-width: 340px; }
+    .theme-cols .theme-right {
+        flex: 1 1 420px; max-width: 620px; background: #fff;
+        border: 1px solid #d1d5db; border-radius: 8px; padding: 20px;
+    }
+</style>
+</head>
+<body>
+<header>
+    <h1>rs-form v0.5 デモ</h1>
+    <p>スキーマ駆動・依存ゼロのフォームライブラリ — 質問16種 / 日本語バリデーション / 複数ページ / visibleIf / 自動保存 / 対話モード・matrix・file・signature / GUIフォームビルダー / 採点クイズ＋結果画面・計算フィールド・回答集計サマリ（rs-chart連携）・テーマエディタ / <strong>多言語スキーマ・A/Bバリアント・埋め込みスニペット（v0.5）</strong></p>
+</header>
+
+<div class="tabs">
+    <button id="tab-contact" class="active">問い合わせフォーム</button>
+    <button id="tab-survey">アンケート</button>
+    <button id="tab-convo">対話モード（1問1画面）</button>
+    <button id="tab-builder">フォームビルダー（v0.3）</button>
+    <button id="tab-score">採点・計算（v0.4）</button>
+    <button id="tab-summary">回答集計（v0.4）</button>
+    <button id="tab-theme">テーマ（v0.4）</button>
+    <button id="tab-i18n">配布・多言語（v0.5）</button>
+</div>
+
+<main>
+    <div class="form-panel">
+        <div id="demo-contact" class="demo"></div>
+        <div id="demo-survey" class="demo" hidden></div>
+        <div id="demo-convo" class="demo" hidden></div>
+        <div id="demo-score" class="demo" hidden></div>
+    </div>
+    <div class="side-panel">
+        <h2>回答JSON（リアルタイム）</h2>
+        <pre id="answers-json">{}</pre>
+        <div class="buttons">
+            <button id="btn-fill">サンプル回答を流し込む</button>
+            <button id="btn-validate">validate()</button>
+            <button id="btn-clear">下書きを消してリロード</button>
+        </div>
+        <h2>イベントログ</h2>
+        <div id="event-log" class="log"></div>
+    </div>
+</main>
+
+<section id="builder-wrap" hidden>
+    <p class="builder-intro">
+        左のパレットから質問をキャンバスへ<strong>ドラッグ＆ドロップ</strong>（クリックでも追加）。カードは<strong>並べ替え・削除</strong>でき、選択すると右のパネルで<strong>ラベル・選択肢・必須・バリデーション・表示条件（visibleIf）</strong>を編集できます。下部で<strong>ライブプレビュー（標準／対話の切替）</strong>と<strong>スキーマJSONの入出力</strong>を確認でき、上部の<strong>元に戻す／やり直す</strong>で undo/redo できます。作ったスキーマは <code>createRSForm()</code> にそのまま渡せる素のJSONです。
+    </p>
+    <div id="demo-builder"></div>
+</section>
+
+<section id="summary-wrap" class="v04-wrap" hidden>
+    <p class="intro">
+        複数の回答（回答JSONの配列）を質問ごとに集計し、<strong>rs-chart</strong> で可視化します（選択肢の円グラフ・NPS分布・星評価の分布・数値の要約統計）。rs-chart は<strong>読み取り連携（import して使うだけ）</strong>で、未ロード時は自動で<strong>表フォールバック</strong>に切り替わります。下のボタンで切り替えて確認できます。
+    </p>
+    <div class="toolbar">
+        <button id="sum-chart" class="on">チャート表示（rs-chart）</button>
+        <button id="sum-table">表フォールバック（rs-chart なし相当）</button>
+    </div>
+    <div id="demo-summary"></div>
+</section>
+
+<section id="theme-wrap" class="v04-wrap" hidden>
+    <p class="intro">
+        CSSカスタムプロパティ（<code>--rsf-*</code>）を GUI で編集し、右のプレビューに<strong>即時反映</strong>します。色や角丸を変えると <code>--rsf-primary</code> などがプレビュー要素に適用されます。<code>exportCSS()</code> で <code>:root</code> に貼れるCSSも書き出せます。
+    </p>
+    <div class="theme-cols">
+        <div class="theme-left">
+            <div id="theme-editor"></div>
+        </div>
+        <div class="theme-right">
+            <div id="theme-preview"></div>
+        </div>
+    </div>
+</section>
+
+<section id="i18n-wrap" class="v04-wrap" hidden>
+    <p class="intro">
+        <strong>多言語スキーマ</strong>: ラベル等を <code>{ ja, en }</code> 形式で持てます（単一文字列は完全後方互換）。言語ボタンで <code>form.setLocale()</code> を呼ぶと<strong>回答を保ったまま</strong>表示言語が切り替わります。<strong>A/Bバリアント</strong>: <code>variantSeed</code>（利用者ID等）から<strong>決定的に</strong>バリアントを割り当て、<code>variant</code> タグの質問を振り分け・<code>variants</code> 上書きで文言を差し替えます。<strong>埋め込みスニペット</strong>: 現在の言語／バリアントで、任意サイトに貼れる HTML/JS を書き出します。
+    </p>
+    <div class="theme-cols">
+        <div class="theme-left" style="flex:1 1 420px;max-width:520px;">
+            <div class="toolbar">
+                <span style="font-size:.82rem;font-weight:700;">言語:</span>
+                <button id="lang-ja" class="on">日本語</button>
+                <button id="lang-en">English</button>
+                <span style="font-size:.82rem;font-weight:700;margin-left:12px;">割当バリアント:</span>
+                <strong id="i18n-variant" style="color:#2563eb;">-</strong>
+                <button id="i18n-reseed">別の利用者を引く（シード変更）</button>
+            </div>
+            <div class="theme-right" style="max-width:none;">
+                <div id="demo-i18n"></div>
+            </div>
+        </div>
+        <div class="side-panel" style="flex:1 1 360px;">
+            <h2>埋め込みスニペット（generateEmbedSnippet）</h2>
+            <pre id="embed-out" style="max-height:520px;">…</pre>
+        </div>
+    </div>
+</section>
+
+<script type="module">
+// conversational エントリを import すると対話モードのレンダラが登録される（standard 利用者は index.js だけでよい）
+import * as RSForm from '../dist/esm/conversational.js';
+// ビルダーは別エントリ。レンダラだけの利用者には読み込まれない
+import { createRSFormBuilder } from '../dist/esm/builder.js';
+// rs-chart は「読み取り連携」— import して使うだけ（相対パスは lib / features 配下どちらでも解決できる）
+import { createRSChart } from '../../rs-chart/dist/rs-chart.esm.min.js';
+const { createRSForm, defineQuestionType, createRSFormSummary, createRSFormThemeEditor } = RSForm;
+window.RSForm = RSForm; // 検証スクリプト用
+window.RSFormBuilder = { createRSFormBuilder }; // 検証スクリプト用
+window.createRSChart = createRSChart; // 検証スクリプト用（rs-chart 連携の有無を切り替える）
+
+// ---------------------------------------------------------------- ① 問い合わせフォーム
+
+const contactSchema = {
+    title: 'お問い合わせフォーム',
+    description: '2ページ構成・自動保存つき。途中でリロードしても入力が復元されます。',
+    completedText: 'お問い合わせを受け付けました。担当者よりご連絡いたします。',
+    pages: [
+        {
+            title: 'お客様情報',
+            questions: [
+                { type: 'text', name: 'name', label: 'お名前', required: true, placeholder: '佐野 竜介', kanaTo: 'nameKana',
+                  description: '漢字を変換確定すると、下の「ふりがな」に読みが自動で転記されます（kanaSource）' },
+                { type: 'text', name: 'nameKana', label: 'ふりがな', charset: 'hiragana', placeholder: 'さの りゅうすけ',
+                  description: 'カタカナで入力しても自動でひらがなに変換されます' },
+                { type: 'postal', name: 'zip', label: '郵便番号', addressTo: 'address',
+                  description: '「１２３−４５６７」のような全角もOK。7桁入力で住所を自動補完します' },
+                { type: 'text', name: 'address', label: '住所', placeholder: '東京都千代田区…' },
+                { type: 'email', name: 'email', label: 'メールアドレス', required: true, placeholder: 'you@example.com' },
+                { type: 'tel', name: 'tel', label: '電話番号', description: '「03（1234）5678」のような揺れも自動整形します' },
+                { type: 'date', name: 'birth', label: '生年月日', wareki: true },
+            ],
+        },
+        {
+            title: 'お問い合わせ内容',
+            questions: [
+                { type: 'radio', name: 'kind', label: 'お問い合わせ種別', required: true,
+                  choices: ['製品について', 'お見積り', 'その他'] },
+                { type: 'text', name: 'kindOther', label: '種別（その他の内容）',
+                  visibleIf: "kind == 'その他'", required: true },
+                { type: 'select', name: 'product', label: '対象製品', visibleIf: "kind == '製品について' || kind == 'お見積り'",
+                  choices: ['rs-chart', 'rs-editor', 'rs-form', 'その他の製品'] },
+                { type: 'textarea', name: 'body', label: 'お問い合わせ内容', required: true, rows: 5,
+                  validators: [{ type: 'length', max: 2000 }] },
+                { type: 'checkbox', name: 'contactBy', label: 'ご希望の連絡方法', choices: ['メール', '電話'],
+                  minSelect: 1, required: true },
+                { type: 'rating', name: 'satisfaction', label: 'サイトの分かりやすさ', max: 5 },
+            ],
+        },
+    ],
+};
+
+// 住所自動補完アダプタ（デモ用の辞書。実運用では zipcloud 等を利用側で注入する）
+const ZIP_DICT = {
+    '100-0001': { pref: '東京都', city: '千代田区', town: '千代田' },
+    '150-0041': { pref: '東京都', city: '渋谷区', town: '神南' },
+    '530-0001': { pref: '大阪府', city: '大阪市北区', town: '梅田' },
+};
+
+const contactForm = createRSForm('#demo-contact', contactSchema, {
+    autosave: true,
+    storageKey: 'demo-contact',
+    addressLookup: async (postal) => ZIP_DICT[postal] || null,
+});
+window.contactForm = contactForm;
+
+// ---------------------------------------------------------------- ② アンケート
+
+// カスタム質問タイプ（スライダー）— 組み込みタイプと同じAPIで数行
+const slider = defineQuestionType({
+    name: 'slider',
+    defaults: { min: 0, max: 100, step: 1 },
+    render(ctx) {
+        const wrap = document.createElement('div');
+        wrap.style.cssText = 'display:flex;align-items:center;gap:12px;';
+        const input = document.createElement('input');
+        input.type = 'range';
+        input.min = ctx.q.min; input.max = ctx.q.max; input.step = ctx.q.step;
+        input.value = ctx.value ?? Math.round((ctx.q.min + ctx.q.max) / 2);
+        input.style.flex = '1';
+        const out = document.createElement('span');
+        out.textContent = input.value;
+        input.addEventListener('input', () => { ctx.setValue(Number(input.value)); out.textContent = input.value; });
+        input.addEventListener('blur', () => ctx.commit());
+        wrap.appendChild(input);
+        wrap.appendChild(out);
+        return wrap;
+    },
+});
+
+const surveySchema = {
+    title: '製品満足度アンケート',
+    description: '所要時間は約2分です。',
+    completedText: 'アンケートへのご協力ありがとうございました！',
+    pages: [
+        {
+            title: 'ご利用状況',
+            questions: [
+                { type: 'select', name: 'usage', label: 'ご利用頻度', required: true,
+                  choices: ['ほぼ毎日', '週に数回', '月に数回', 'ほとんど使わない'] },
+                { type: 'number', name: 'years', label: 'ご利用年数', min: 0, max: 50, unit: '年',
+                  description: '全角の「３」なども自動で半角になります' },
+                { type: 'checkbox', name: 'goodPoints', label: '良いと思う点（2つまで）',
+                  choices: ['使いやすさ', '機能の豊富さ', '動作の軽さ', 'ドキュメント'], other: true, maxSelect: 2 },
+                { type: 'rating', name: 'overall', label: '総合満足度', required: true, max: 5 },
+            ],
+        },
+        {
+            title: '今後について',
+            questions: [
+                { type: 'nps', name: 'recommend', label: '友人や同僚にすすめる可能性はどのくらいありますか？', required: true },
+                { type: 'radio', name: 'renew', label: '継続してご利用いただけますか？', required: true,
+                  choices: ['はい', 'いいえ', '未定'] },
+                { type: 'textarea', name: 'renewReason', label: '差し支えなければ理由をお聞かせください',
+                  visibleIf: "renew == 'いいえ'", required: true, maxLength: 500 },
+                { type: 'slider', name: 'budget', label: '月額いくらまでなら支払えますか？（カスタム質問タイプ）',
+                  min: 0, max: 5000, step: 100 },
+                { type: 'text', name: 'company', label: '会社名（任意）', charset: 'zenkaku',
+                  description: '半角カナ・半角英数は全角に自動変換されます' },
+            ],
+        },
+    ],
+};
+
+const surveyForm = createRSForm('#demo-survey', surveySchema, {
+    autosave: true,
+    storageKey: 'demo-survey',
+    questionTypes: [slider],
+});
+window.surveyForm = surveyForm;
+
+// ---------------------------------------------------------------- ③ 対話モード（1問1画面・v0.2）
+
+const convoSchema = {
+    title: 'お申し込み（対話モード）',
+    description: '1問ずつ表示。Enter で次へ・選択肢は上下キー / 数字キーで選べます。',
+    completedText: 'お申し込みありがとうございました！内容を受け付けました。',
+    pages: [
+        {
+            title: 'ご本人さま',
+            questions: [
+                { type: 'text', name: 'name', label: 'お名前を教えてください', required: true, kanaTo: 'kana',
+                  placeholder: '佐野 竜介' },
+                { type: 'text', name: 'kana', label: 'ふりがな（自動収集されます）', charset: 'hiragana',
+                  description: '上のお名前を漢字変換すると読みが自動で入ります' },
+                { type: 'postal', name: 'zip', label: '郵便番号は？', addressTo: 'address',
+                  description: '7桁入力で住所を自動補完します（100-0001 / 150-0041 / 530-0001）' },
+                { type: 'text', name: 'address', label: 'ご住所' },
+            ],
+        },
+        {
+            title: 'アンケート',
+            questions: [
+                { type: 'radio', name: 'plan', label: 'ご希望のプランは？', required: true,
+                  choices: ['ライト', 'スタンダード', 'プレミアム'] },
+                { type: 'matrix', name: 'rating', label: '各項目の満足度を教えてください', required: true,
+                  description: '行＝評価項目 / 列＝5段階。上下キーでも選べます',
+                  rows: [
+                      { value: 'price', text: '価格' },
+                      { value: 'support', text: 'サポート' },
+                      { value: 'ux', text: '使いやすさ' },
+                  ],
+                  columns: [
+                      { value: 1, text: '不満' }, { value: 2, text: 'やや不満' },
+                      { value: 3, text: '普通' }, { value: 4, text: 'やや満足' }, { value: 5, text: '満足' },
+                  ] },
+                { type: 'file', name: 'attachment', label: '参考資料があれば添付してください（任意）',
+                  accept: 'image/*,.pdf' },
+                { type: 'signature', name: 'sign', label: '最後に、ご署名をお願いします', required: true,
+                  description: 'マウス / 指でサインしてください' },
+            ],
+        },
+    ],
+};
+
+const convoForm = createRSForm('#demo-convo', convoSchema, {
+    mode: 'conversational',
+    addressLookup: async (postal) => ZIP_DICT[postal] || null,
+    // rs-upload 連携アダプタの契約デモ（実際はサーバへPUTする想定。ここではフェイクURLを返す）
+    uploadFile: async (f) => ({ url: `https://uploads.example/${encodeURIComponent(f.name)}`, id: 'fake-' + Date.now() }),
+});
+window.convoForm = convoForm;
+
+// ---------------------------------------------------------------- ④ フォームビルダー（v0.3）
+
+const builderSchema = {
+    title: 'お申し込みフォーム（サンプル）',
+    description: 'このスキーマをビルダーで編集してみてください。',
+    pages: [{
+        title: 'ご入力',
+        questions: [
+            { type: 'text', name: 'name', label: 'お名前', required: true },
+            { type: 'radio', name: 'plan', label: 'ご希望プラン', required: true, choices: ['ライト', 'スタンダード', 'プレミアム'] },
+            { type: 'text', name: 'planNote', label: 'プレミアムを選んだ理由', visibleIf: "plan == 'プレミアム'" },
+            { type: 'textarea', name: 'message', label: 'ご要望（任意）' },
+        ],
+    }],
+};
+
+const builder = createRSFormBuilder('#demo-builder', { schema: builderSchema });
+window.builder = builder; // 検証スクリプト用
+
+// ---------------------------------------------------------------- ⑤ 採点クイズ ＋ 計算フィールド（v0.4）
+
+const scoreSchema = {
+    title: '受講お申し込み ＋ 理解度チェック（採点・計算 / v0.4）',
+    description: '参加人数を入れると受講料が自動計算されます（計算フィールド）。最後の3問は理解度チェックで、送信すると採点結果が表示されます。',
+    // scoring があると送信時に採点結果画面を表示する（quiz:true でも可・合否なしになる）
+    scoring: { passingPercent: 70, showCorrectness: true },
+    completedText: 'お申し込みを受け付けました。理解度チェックの採点結果は下に表示されます。',
+    pages: [{
+        title: 'お申し込み内容',
+        questions: [
+            { type: 'number', name: 'qty', label: '参加人数', required: true, min: 1, max: 20, unit: '名',
+              description: '半角に自動変換されます' },
+            { type: 'calc', name: 'total', label: '受講料（自動計算）', expression: 'qty * 5000', unit: '円',
+              description: '「参加人数 × 5,000円」を他の回答から自動算出します（計算フィールド）' },
+            { type: 'radio', name: 'q1', label: 'HTTPS の既定ポート番号は？', required: true,
+              choices: ['80', '443', '8080'], correctAnswer: '443', points: 1 },
+            { type: 'checkbox', name: 'q2', label: 'プログラミング言語をすべて選んでください（部分点あり）', required: true,
+              choices: ['Python', 'HTML', 'JavaScript', 'CSS'], correctAnswer: ['Python', 'JavaScript'], points: 2, partial: true },
+            { type: 'number', name: 'q3', label: '2 の 10 乗は？', required: true, correctAnswer: 1024, points: 1 },
+        ],
+    }],
+};
+const scoreForm = createRSForm('#demo-score', scoreSchema, { storageKey: 'demo-score' });
+window.scoreForm = scoreForm; // 検証スクリプト用
+
+// ---------------------------------------------------------------- ⑥ 回答集計サマリ（rs-chart 連携 / v0.4）
+
+// アンケート（surveySchema）への複数回答のサンプル。実運用ではサーバから取得した回答JSONの配列を渡す
+const SAMPLE_RESPONSES = [
+    { usage: 'ほぼ毎日', years: 3, goodPoints: ['使いやすさ', '機能の豊富さ'], overall: 5, recommend: 10, renew: 'はい', budget: 2000, company: 'A社' },
+    { usage: '週に数回', years: 1, goodPoints: ['使いやすさ'], overall: 4, recommend: 9, renew: 'はい', budget: 1500, company: 'B社' },
+    { usage: 'ほぼ毎日', years: 5, goodPoints: ['動作の軽さ', 'ドキュメント'], overall: 5, recommend: 8, renew: 'はい', budget: 3000 },
+    { usage: '月に数回', years: 2, goodPoints: ['機能の豊富さ'], overall: 3, recommend: 6, renew: '未定', budget: 1000 },
+    { usage: '週に数回', years: 4, goodPoints: ['使いやすさ', '動作の軽さ'], overall: 4, recommend: 7, renew: 'はい', budget: 2500 },
+    { usage: 'ほとんど使わない', years: 1, goodPoints: [], overall: 2, recommend: 3, renew: 'いいえ', budget: 500 },
+    { usage: 'ほぼ毎日', years: 6, goodPoints: ['使いやすさ', 'ドキュメント'], overall: 5, recommend: 10, renew: 'はい', budget: 4000 },
+    { usage: '月に数回', years: 2, goodPoints: ['機能の豊富さ', '使いやすさ'], overall: 4, recommend: 5, renew: '未定', budget: 1200 },
+    { usage: '週に数回', years: 3, goodPoints: ['動作の軽さ'], overall: 3, recommend: 8, renew: 'はい', budget: 1800 },
+    { usage: 'ほぼ毎日', years: 4, goodPoints: ['使いやすさ', '機能の豊富さ', '動作の軽さ'], overall: 5, recommend: 9, renew: 'はい', budget: 3500 },
+];
+let demoSummary = null;
+function buildSummary(useChart) {
+    if (demoSummary) demoSummary.destroy();
+    demoSummary = createRSFormSummary('#demo-summary', {
+        schema: surveySchema,
+        responses: SAMPLE_RESPONSES,
+        // createChart に rs-chart を渡すとチャート描画。false なら表フォールバック
+        createChart: useChart ? createRSChart : false,
+    });
+    window.demoSummary = demoSummary; // 検証スクリプト用
+    document.getElementById('sum-chart').classList.toggle('on', useChart);
+    document.getElementById('sum-table').classList.toggle('on', !useChart);
+}
+document.getElementById('sum-chart').addEventListener('click', () => buildSummary(true));
+document.getElementById('sum-table').addEventListener('click', () => buildSummary(false));
+window.buildSummary = buildSummary; // 検証スクリプト用
+
+// ---------------------------------------------------------------- ⑦ テーマエディタ（v0.4）
+
+const themePreviewSchema = {
+    title: 'テーマ プレビュー',
+    description: '左のエディタで色や角丸を変えると、このフォームに即時反映されます。',
+    pages: [{
+        questions: [
+            { type: 'text', name: 'tname', label: 'お名前', required: true, placeholder: '佐野 竜介' },
+            { type: 'radio', name: 'tplan', label: 'プラン', required: true, choices: ['ライト', 'スタンダード', 'プレミアム'] },
+            { type: 'rating', name: 'tstar', label: '満足度', max: 5 },
+            { type: 'textarea', name: 'tmemo', label: 'ひとこと', rows: 2 },
+        ],
+    }],
+};
+const themePreviewForm = createRSForm('#theme-preview', themePreviewSchema, { showCompleted: false });
+window.themePreviewForm = themePreviewForm;
+// エディタは #theme-preview 要素へ --rsf-* を適用する（子の .rsf に継承される）
+const themeEditor = createRSFormThemeEditor('#theme-editor', { apply: '#theme-preview' });
+window.themeEditor = themeEditor; // 検証スクリプト用
+
+// ---------------------------------------------------------------- ⑧ 配布・多言語（v0.5）
+
+const { generateEmbedSnippet } = RSForm;
+
+// ラベル等を { ja, en } 形式で持つ多言語スキーマ。A/Bバリアントも併用（variant タグ / variants 上書き）
+const i18nSchema = {
+    title: { ja: 'イベント参加登録', en: 'Event Registration' },
+    description: { ja: '言語切替・A/Bバリアント・埋め込みのデモです。', en: 'Demo of locale switch, A/B variants and embedding.' },
+    completedText: { ja: 'ご登録ありがとうございました！', en: 'Thanks for registering!' },
+    submitText: { ja: '登録する', en: 'Register' },
+    pages: [{
+        title: { ja: 'ご参加者さま', en: 'Attendee' },
+        questions: [
+            { type: 'text', name: 'name', label: { ja: 'お名前', en: 'Name' }, required: true,
+              placeholder: { ja: '佐野 竜介', en: 'Ryusuke Sano' } },
+            { type: 'email', name: 'email', label: { ja: 'メールアドレス', en: 'Email' }, required: true,
+              placeholder: 'you@example.com' /* 単一文字列 = 後方互換（両言語で共通） */ },
+            { type: 'radio', name: 'plan', label: { ja: 'チケット種別', en: 'Ticket type' }, required: true,
+              choices: [
+                  { value: 'general', text: { ja: '一般', en: 'General' } },
+                  { value: 'student', text: { ja: '学生', en: 'Student' } },
+              ] },
+            { type: 'nps', name: 'rec', label: { ja: 'このイベントを人にすすめる可能性は？', en: 'How likely are you to recommend this event?' },
+              minLabel: { ja: '低い', en: 'Low' }, maxLabel: { ja: '高い', en: 'High' } },
+            // A/B: 同意チェックの文言をバリアントで差し替え
+            { type: 'checkbox', name: 'news', label: { ja: 'お知らせ', en: 'Updates' },
+              choices: [{ value: 'yes', text: { ja: '最新情報を受け取る', en: 'Send me updates' } }],
+              variants: {
+                  A: { label: { ja: 'お知らせ（A案）', en: 'Updates (A)' } },
+                  B: { label: { ja: 'お知らせ（B案）', en: 'Updates (B)' } },
+              } },
+            // A/B: バリアント限定の質問（片方だけ表示される）
+            { type: 'textarea', name: 'q_a', label: { ja: '登壇者への質問（A限定）', en: 'Question for speakers (A only)' }, variant: 'A' },
+            { type: 'text', name: 'referral', label: { ja: '紹介コード（B限定）', en: 'Referral code (B only)' }, variant: 'B' },
+        ],
+    }],
+};
+
+let i18nLocale = 'ja';
+let i18nSeed = 'visitor-1';
+let i18nForm = null;
+
+function refreshEmbed() {
+    const html = generateEmbedSnippet(i18nSchema, {
+        baseUrl: 'https://cdn.example.com/rs-form/src',
+        mountId: 'my-form',
+        locale: i18nLocale,
+        variant: i18nForm ? i18nForm.getVariant() : undefined,
+    });
+    document.getElementById('embed-out').textContent = html;
+}
+
+function buildI18n() {
+    if (i18nForm) i18nForm.destroy();
+    i18nForm = createRSForm('#demo-i18n', i18nSchema, {
+        locale: i18nLocale, fallbackLocale: 'ja', variantSeed: i18nSeed, showCompleted: true,
+    });
+    window.i18nForm = i18nForm; // 検証スクリプト用
+    document.getElementById('i18n-variant').textContent = i18nForm.getVariant();
+    document.getElementById('lang-ja').classList.toggle('on', i18nLocale === 'ja');
+    document.getElementById('lang-en').classList.toggle('on', i18nLocale === 'en');
+    refreshEmbed();
+}
+
+function setI18nLocale(loc) {
+    if (loc === i18nLocale) return;
+    i18nLocale = loc;
+    i18nForm.setLocale(loc, { fallbackLocale: 'ja' }); // 回答を保ったまま表示言語を切替
+    document.getElementById('lang-ja').classList.toggle('on', loc === 'ja');
+    document.getElementById('lang-en').classList.toggle('on', loc === 'en');
+    refreshEmbed();
+}
+
+document.getElementById('lang-ja').addEventListener('click', () => setI18nLocale('ja'));
+document.getElementById('lang-en').addEventListener('click', () => setI18nLocale('en'));
+document.getElementById('i18n-reseed').addEventListener('click', () => {
+    i18nSeed = 'visitor-' + Math.floor(Math.random() * 100000);
+    buildI18n();
+});
+window.buildI18n = buildI18n; // 検証スクリプト用
+
+// ---------------------------------------------------------------- デモUI（タブ・JSON表示・ログ）
+
+const jsonEl = document.getElementById('answers-json');
+const logEl = document.getElementById('event-log');
+let active = contactForm;
+
+function refreshJson() {
+    jsonEl.textContent = JSON.stringify(active.getAnswers(), null, 2);
+}
+function log(msg) {
+    const line = document.createElement('div');
+    line.textContent = `${new Date().toLocaleTimeString()} ${msg}`;
+    logEl.prepend(line);
+    while (logEl.childNodes.length > 30) logEl.removeChild(logEl.lastChild);
+}
+
+for (const [form, label] of [[contactForm, '問い合わせ'], [surveyForm, 'アンケート'], [convoForm, '対話'], [scoreForm, '採点']]) {
+    form.on('change', () => refreshJson());
+    form.on('answersChange', () => refreshJson());
+    form.on('pageChange', (e) => { log(`[${label}] pageChange → ${e.pageIndex + 1}/${e.pageCount}ページ`); refreshJson(); });
+    form.on('submit', ({ answers }) => {
+        const g = form.getGrade && form.getGrade();
+        const tail = g ? `（採点 ${g.score}/${g.maxScore}・${g.passed === null ? '' : (g.passed ? '合格' : '不合格')}）` : '';
+        log(`[${label}] submit! ${Object.keys(answers).length}項目 ${tail}`);
+        refreshJson();
+    });
+}
+if (contactForm.restored) log('[問い合わせ] localStorage の下書きを復元しました');
+if (surveyForm.restored) log('[アンケート] localStorage の下書きを復元しました');
+
+const tabs = {
+    contact: [document.getElementById('tab-contact'), document.getElementById('demo-contact'), contactForm],
+    survey: [document.getElementById('tab-survey'), document.getElementById('demo-survey'), surveyForm],
+    convo: [document.getElementById('tab-convo'), document.getElementById('demo-convo'), convoForm],
+    score: [document.getElementById('tab-score'), document.getElementById('demo-score'), scoreForm],
+};
+const mainEl = document.querySelector('main');
+// 全画面を占める特別セクション（ビルダー / 集計 / テーマ）
+const specials = [
+    { btn: document.getElementById('tab-builder'), wrap: document.getElementById('builder-wrap') },
+    { btn: document.getElementById('tab-summary'), wrap: document.getElementById('summary-wrap'), onShow: () => buildSummary(true) },
+    { btn: document.getElementById('tab-theme'), wrap: document.getElementById('theme-wrap') },
+    { btn: document.getElementById('tab-i18n'), wrap: document.getElementById('i18n-wrap'), onShow: () => { if (!i18nForm) buildI18n(); } },
+];
+function hideSpecials() { for (const s of specials) { s.wrap.hidden = true; s.btn.classList.remove('active'); } }
+
+for (const key of Object.keys(tabs)) {
+    tabs[key][0].addEventListener('click', () => {
+        hideSpecials();
+        mainEl.hidden = false;
+        for (const [btn, panel, form] of Object.values(tabs)) {
+            const on = btn === tabs[key][0];
+            btn.classList.toggle('active', on);
+            panel.hidden = !on;
+            if (on) active = form;
+        }
+        refreshJson();
+    });
+}
+for (const sp of specials) {
+    sp.btn.addEventListener('click', () => {
+        for (const [btn, panel] of Object.values(tabs)) { btn.classList.remove('active'); panel.hidden = true; }
+        hideSpecials();
+        mainEl.hidden = true;
+        sp.btn.classList.add('active');
+        sp.wrap.hidden = false;
+        if (sp.onShow) sp.onShow();
+    });
+}
+
+document.getElementById('btn-fill').addEventListener('click', () => {
+    if (active === contactForm) {
+        active.setAnswers({
+            name: '佐野 竜介', nameKana: 'さの りゅうすけ', zip: '100-0001',
+            address: '東京都千代田区千代田1-1', email: 'ryusuke.sano@example.com',
+            tel: '03-1234-5678', kind: 'その他', kindOther: '協業のご相談', body: 'デモの流し込みです。',
+            contactBy: ['メール'], satisfaction: 4,
+        });
+    } else if (active === convoForm) {
+        active.setAnswers({
+            name: '佐野 竜介', kana: 'さのりゅうすけ', zip: '100-0001', address: '東京都千代田区千代田',
+            plan: 'スタンダード', rating: { price: 4, support: 5, ux: 3 },
+            sign: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+M8AAAMBAQDJ/pLvAAAAAElFTkSuQmCC',
+        });
+    } else if (active === scoreForm) {
+        // 参加人数を入れると total が自動計算される。クイズは全問正解を流し込む
+        active.setAnswers({ qty: 3, q1: '443', q2: ['Python', 'JavaScript'], q3: 1024 });
+    } else {
+        active.setAnswers({
+            usage: 'ほぼ毎日', years: 3, goodPoints: ['使いやすさ', 'その他'], goodPoints_other: '導入が簡単',
+            overall: 5, recommend: 9, renew: 'はい', budget: 1500, company: 'パレラボ',
+        });
+    }
+    refreshJson();
+    log('setAnswers() でサンプル回答を流し込みました');
+});
+document.getElementById('btn-validate').addEventListener('click', () => {
+    const r = active.validate();
+    log(`validate() → ${r.ok ? 'OK' : `${r.errors.length}件のエラー`}`);
+});
+document.getElementById('btn-clear').addEventListener('click', () => {
+    contactForm.clearDraft();
+    surveyForm.clearDraft();
+    location.reload();
+});
+
+refreshJson();
+</script>
+</body>
+</html>

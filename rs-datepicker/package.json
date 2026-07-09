@@ -1,5 +1,5 @@
 {
-    "name": "rs-datepicker",
+    "name": "@parelabo/rs-datepicker",
     "version": "0.3.0",
     "description": "日本語ファースト・依存ゼロの日付ピッカー（単一/複数/期間・時刻・年スクロールナビ・マーカー）",
     "type": "module",
@@ -14,7 +14,15 @@
             "default": "./dist/rs-datepicker.esm.min.js"
         },
         "./dist/*": "./dist/*",
-        "./rs-datepicker.css": "./dist/rs-datepicker.css"
+        "./rs-datepicker.css": "./dist/rs-datepicker.css",
+        "./vue": {
+            "types": "./dist/types/vue.d.ts",
+            "import": "./dist/rs-datepicker.vue.esm.min.js"
+        },
+        "./react": {
+            "types": "./dist/types/react.d.ts",
+            "import": "./dist/rs-datepicker.react.esm.min.js"
+        }
     },
     "files": [
         "dist"
@@ -28,6 +36,31 @@
     ],
     "author": "ryusuke.sano <ryusuke.sano@parelabo.com>",
     "license": "SEE LICENSE IN LICENSE.txt",
+    "homepage": "https://github.com/sano1023/rs-package/tree/main/rs-datepicker#readme",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/sano1023/rs-package.git",
+        "directory": "rs-datepicker"
+    },
+    "bugs": {
+        "url": "https://parelabo.com",
+        "email": "contact@parelabo.com"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
     "types": "./dist/types/index.d.ts",
-    "style": "./dist/rs-datepicker.css"
+    "style": "./dist/rs-datepicker.css",
+    "peerDependencies": {
+        "vue": "^3.0.0",
+        "react": ">=18"
+    },
+    "peerDependenciesMeta": {
+        "vue": {
+            "optional": true
+        },
+        "react": {
+            "optional": true
+        }
+    }
 }

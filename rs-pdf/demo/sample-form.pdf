@@ -1,0 +1,76 @@
+%PDF-1.4
+%‚„œ”
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R /AcroForm << /Fields [6 0 R 7 0 R 10 0 R 11 0 R] /NeedAppearances true /DA (/Helv 0 Tf 0 g) /DR << /Font << /Helv 5 0 R >> >> >> >>
+endobj
+2 0 obj
+<< /Type /Pages /Count 1 /Kids [3 0 R] >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /Helv 5 0 R >> >> /Contents 4 0 R /Annots [6 0 R 7 0 R 8 0 R 9 0 R 11 0 R] >>
+endobj
+4 0 obj
+<< /Length 233 >>
+stream
+BT /Helv 14 Tf 60 770 Td (rs-pdf AcroForm sample) Tj ET
+BT /Helv 12 Tf 60 748 Td (Name:) Tj ET
+BT /Helv 12 Tf 60 706 Td (Agree terms) Tj ET
+BT /Helv 12 Tf 60 666 Td (Color:  red      blue) Tj ET
+BT /Helv 12 Tf 60 618 Td (Pref:) Tj ET
+endstream
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>
+endobj
+6 0 obj
+<< /Type /Annot /Subtype /Widget /FT /Tx /T (name) /Rect [110 738 340 762] /V (Taro Yamada) /DA (/Helv 12 Tf 0 g) /F 4 >>
+endobj
+7 0 obj
+<< /Type /Annot /Subtype /Widget /FT /Btn /T (agree) /V /Yes /AS /Yes /Rect [150 696 168 714] /AP << /N << /Yes 12 0 R /Off 13 0 R >> >> /MK << /CA (4) >> /F 4 >>
+endobj
+8 0 obj
+<< /Type /Annot /Subtype /Widget /Parent 10 0 R /Rect [100 656 118 674] /AS /red /AP << /N << /red 12 0 R /Off 13 0 R >> >> /F 4 >>
+endobj
+9 0 obj
+<< /Type /Annot /Subtype /Widget /Parent 10 0 R /Rect [150 656 168 674] /AS /Off /AP << /N << /blue 12 0 R /Off 13 0 R >> >> /F 4 >>
+endobj
+10 0 obj
+<< /FT /Btn /T (color) /Ff 32768 /V /red /Kids [8 0 R 9 0 R] >>
+endobj
+11 0 obj
+<< /Type /Annot /Subtype /Widget /FT /Ch /Ff 131072 /T (pref) /Opt [(Tokyo) (Osaka) (Nagoya)] /V (Tokyo) /Rect [110 608 260 632] /DA (/Helv 12 Tf 0 g) /F 4 >>
+endobj
+12 0 obj
+<< /Type /XObject /Subtype /Form /BBox [0 0 18 18] /Length 30 >>
+stream
+0 g 2 2 Td
+0.5 w 1 1 16 16 re S
+endstream
+endobj
+13 0 obj
+<< /Type /XObject /Subtype /Form /BBox [0 0 18 18] /Length 22 >>
+stream
+0.5 w 1 1 16 16 re S 
+endstream
+endobj
+xref
+0 14
+0000000000 65535 f 
+0000000015 00000 n 
+0000000193 00000 n 
+0000000250 00000 n 
+0000000419 00000 n 
+0000000703 00000 n 
+0000000800 00000 n 
+0000000937 00000 n 
+0000001115 00000 n 
+0000001262 00000 n 
+0000001410 00000 n 
+0000001490 00000 n 
+0000001665 00000 n 
+0000001795 00000 n 
+trailer
+<< /Size 14 /Root 1 0 R >>
+startxref
+1915
+%%EOF

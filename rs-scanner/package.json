@@ -1,5 +1,5 @@
 {
-    "name": "rs-scanner",
+    "name": "@parelabo/rs-scanner",
     "version": "0.1.0",
     "description": "QR/バーコード読み取り（依存ゼロコア・内蔵1Dデコーダ・BarcodeDetector・アダプタ注入）",
     "type": "module",
@@ -14,7 +14,15 @@
             "default": "./dist/rs-scanner.esm.min.js"
         },
         "./dist/*": "./dist/*",
-        "./rs-scanner.css": "./dist/rs-scanner.css"
+        "./rs-scanner.css": "./dist/rs-scanner.css",
+        "./vue": {
+            "types": "./dist/types/vue.d.ts",
+            "import": "./dist/rs-scanner.vue.esm.min.js"
+        },
+        "./react": {
+            "types": "./dist/types/react.d.ts",
+            "import": "./dist/rs-scanner.react.esm.min.js"
+        }
     },
     "files": [
         "dist"
@@ -29,6 +37,31 @@
     ],
     "author": "ryusuke.sano <ryusuke.sano@parelabo.com>",
     "license": "SEE LICENSE IN LICENSE.txt",
+    "homepage": "https://github.com/sano1023/rs-package/tree/main/rs-scanner#readme",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/sano1023/rs-package.git",
+        "directory": "rs-scanner"
+    },
+    "bugs": {
+        "url": "https://parelabo.com",
+        "email": "contact@parelabo.com"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
     "types": "./dist/types/index.d.ts",
-    "style": "./dist/rs-scanner.css"
+    "style": "./dist/rs-scanner.css",
+    "peerDependencies": {
+        "vue": "^3.0.0",
+        "react": ">=18"
+    },
+    "peerDependenciesMeta": {
+        "vue": {
+            "optional": true
+        },
+        "react": {
+            "optional": true
+        }
+    }
 }

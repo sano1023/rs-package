@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>rs-slider デモ — 10. マルチ行画像スライダー</title>
+<link rel="stylesheet" href="../dist/rs-slider.css">
+<link rel="stylesheet" href="demo.css">
+<style>
+    #m-two { --rss-marquee-h: 130px; }
+    #m-three { --rss-marquee-h: 96px; }
+    @media (max-width: 640px) {
+        #m-two { --rss-marquee-h: 92px; }
+        #m-three { --rss-marquee-h: 70px; }
+    }
+</style>
+</head>
+<body>
+<div class="page">
+    <p class="back"><a href="./">← デモ一覧へ</a></p>
+    <h1>10. マルチ行画像スライダー <small>createRSMarquee (rows)</small></h1>
+    <p class="lead">2行/3行表示・行ごとに方向と速度を指定・レスポンシブ（画像高さはメディアクエリで縮小）。</p>
+
+    <div class="card">
+        <h2>2行・互い違い方向</h2>
+        <p class="note"><code>rows: [{speed: 55}, {speed: 75, reverse: true}]</code></p>
+        <div id="m-two"></div>
+        <div class="controls">
+            <label>全体の速度倍率 <input type="range" id="r-scale" min="25" max="300" value="100"> <span id="v-scale">1.0</span>x</label>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>3行・行ごとに速度/方向を変更</h2>
+        <p class="note">中央の行だけ逆方向・低速にしています。</p>
+        <div id="m-three"></div>
+    </div>
+</div>
+
+<script type="module">
+    import { createRSMarquee } from '../dist/rs-slider.esm.min.js';
+    import { photo } from './assets.js';
+
+    const items = (base, n, w, h) => Array.from({ length: n }, (_, i) => ({
+        image: photo(base + i, { w, h, label: `#${i + 1}` }),
+        alt: `画像 ${i + 1}`,
+    }));
+
+    const BASE_SPEEDS = [55, 75];
+    const two = createRSMarquee('#m-two', {
+        rows: [
+            { items: items(700, 8, 420, 280), speed: BASE_SPEEDS[0] },
+            { items: items(720, 8, 420, 280), speed: BASE_SPEEDS[1], reverse: true },
+        ],
+    });
+
+    const rScale = document.getElementById('r-scale');
+    rScale.addEventListener('input', () => {
+        const scale = Number(rScale.value) / 100;
+        BASE_SPEEDS.forEach((s, i) => two.setSpeed(s * scale, i));
+        document.getElementById('v-scale').textContent = scale.toFixed(2);
+    });
+
+    createRSMarquee('#m-three', {
+        gap: 12,
+        rows: [
+            { items: items(740, 10, 320, 210), speed: 70 },
+            { items: items(760, 10, 320, 210), speed: 40, reverse: true },
+            { items: items(780, 10, 320, 210), speed: 95 },
+        ],
+    });
+</script>
+</body>
+</html>

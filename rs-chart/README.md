@@ -2,34 +2,77 @@
 > 利用は無償（商用可）ですが、**改変・再配布はできません**（LICENSE.txt 参照）。
 > 機能追加・改修のご依頼は有償で承ります → https://parelabo.com （contact@parelabo.com）
 
-## インストール / 読み込み
+## インストール
 
 ```bash
-# npm（GitHubのtarball指定）
-npm install https://github.com/sano1023/ryusuke-packages-dist/raw/main/tarballs/rs-chart-0.5.0.tgz
+npm install @parelabo/rs-chart
 ```
 
-```html
-<!-- CDN（jsDelivr・scriptタグ直読み） -->
-<script src="https://cdn.jsdelivr.net/gh/sano1023/ryusuke-packages-dist@main/rs-chart/dist/rs-chart.min.js"></script>
+<details>
+<summary>npm レジストリを使わない場合（GitHub tarball 直指定）</summary>
+
+```bash
+npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-chart-0.5.0.tgz
 ```
+</details>
+
+## 使い方
+
+### バニラ JS（ESM・バンドラあり）
 
 ```js
-// ESM import（npmインストール後）
-import { /* 公開API */ } from 'rs-chart';
+import { createRSChart } from '@parelabo/rs-chart';
+import '@parelabo/rs-chart/rs-chart.css';   // スタイル（バンドラ経由）
+
+createRSChart(document.querySelector('#app'), { /* オプション */ });
 ```
 
-CSSが必要なパッケージは `dist/rs-chart.css` を link してください。
+### `<script>` タグ（CDN・ビルド環境不要）
+
+```html
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@parelabo/rs-chart@0.5.0/dist/rs-chart.css">
+<script src="https://cdn.jsdelivr.net/npm/@parelabo/rs-chart@0.5.0/dist/rs-chart.min.js"></script>
+<script>
+  // 公開APIはグローバル RSChart に載る
+  RSChart.createRSChart(document.querySelector('#app'), { /* オプション */ });
+</script>
+```
+
+### Vue 3
+
+```js
+import { RsChart, RsDashboard } from '@parelabo/rs-chart/vue';
+import '@parelabo/rs-chart/rs-chart.css';   // スタイル（バンドラ経由）
+```
+
+```vue
+<template>
+  <RsChart />
+</template>
+```
+
+### React 18 / 19
+
+```jsx
+import { RsChart, RsDashboard } from '@parelabo/rs-chart/react';
+import '@parelabo/rs-chart/rs-chart.css';   // スタイル（バンドラ経由）
+
+export default function App() {
+  return <RsChart />;
+}
+```
+
+> `vue` / `react` は peerDependency です（バンドルには含みません）。アプリ側のものが使われます。
 
 ---
 
 # rs-chart
 
-有料JSチャートライブラリ（Highcharts / amCharts / FusionCharts 等）の機能網羅を目指す、依存ゼロのSVGチャートライブラリ。業務システム・SaaS・ダッシュボード・金融（Stock）・リアルタイム監視向けです（現在 v0.5・ロードマップ完走）。
+依存ゼロのSVGチャートライブラリ。業務システム・SaaS・ダッシュボード・金融（Stock）・リアルタイム監視向けです（現在 v0.5・ロードマップ完走）。
 
 - **依存ゼロ**: ランタイム依存なし。ビルド不要で `src/` から直接 import できる ESモジュール（JS合計 約55KB）
 - **チャートタイプ＝プラグイン**: line / column などの組み込みタイプもすべて `defineChartType()` で実装（利用者が独自チャートを数行で追加できる）
-- **宣言的オプションAPI**: Highcharts 利用者が移行しやすい形（`series` / `xAxis` / `legend` / `tooltip` …）
+- **宣言的オプションAPI**: `series` / `xAxis` / `legend` / `tooltip` などの素直な構造
 - **Renderer 抽象**: SVG（既定・エクスポート/アクセシビリティ向き）と Canvas（Turbo mode・大量データ向き）を `renderer` オプションで切替。上位層は同一コード
 - **スマートな初期設定**: きりのいい目盛り・日本語の日時ラベル・桁区切り・自動レスポンシブ・初期アニメーション
 - **ライセンス**: MIT

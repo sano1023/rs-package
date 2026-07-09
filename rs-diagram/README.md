@@ -2,30 +2,73 @@
 > 利用は無償（商用可）ですが、**改変・再配布はできません**（LICENSE.txt 参照）。
 > 機能追加・改修のご依頼は有償で承ります → https://parelabo.com （contact@parelabo.com）
 
-## インストール / 読み込み
+## インストール
 
 ```bash
-# npm（GitHubのtarball指定）
-npm install https://github.com/sano1023/ryusuke-packages-dist/raw/main/tarballs/rs-diagram-0.2.0.tgz
+npm install @parelabo/rs-diagram
 ```
 
-```html
-<!-- CDN（jsDelivr・scriptタグ直読み） -->
-<script src="https://cdn.jsdelivr.net/gh/sano1023/ryusuke-packages-dist@main/rs-diagram/dist/rs-diagram.min.js"></script>
+<details>
+<summary>npm レジストリを使わない場合（GitHub tarball 直指定）</summary>
+
+```bash
+npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-diagram-0.5.0.tgz
 ```
+</details>
+
+## 使い方
+
+### バニラ JS（ESM・バンドラあり）
 
 ```js
-// ESM import（npmインストール後）
-import { /* 公開API */ } from 'rs-diagram';
+import { createRSDiagram } from '@parelabo/rs-diagram';
+import '@parelabo/rs-diagram/rs-diagram.css';   // スタイル（バンドラ経由）
+
+createRSDiagram(document.querySelector('#app'), { /* オプション */ });
 ```
 
-CSSが必要なパッケージは `dist/rs-diagram.css` を link してください。
+### `<script>` タグ（CDN・ビルド環境不要）
+
+```html
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@parelabo/rs-diagram@0.5.0/dist/rs-diagram.css">
+<script src="https://cdn.jsdelivr.net/npm/@parelabo/rs-diagram@0.5.0/dist/rs-diagram.min.js"></script>
+<script>
+  // 公開APIはグローバル RSDiagram に載る
+  RSDiagram.createRSDiagram(document.querySelector('#app'), { /* オプション */ });
+</script>
+```
+
+### Vue 3
+
+```js
+import { RsDiagram } from '@parelabo/rs-diagram/vue';
+import '@parelabo/rs-diagram/rs-diagram.css';   // スタイル（バンドラ経由）
+```
+
+```vue
+<template>
+  <RsDiagram />
+</template>
+```
+
+### React 18 / 19
+
+```jsx
+import { RsDiagram } from '@parelabo/rs-diagram/react';
+import '@parelabo/rs-diagram/rs-diagram.css';   // スタイル（バンドラ経由）
+
+export default function App() {
+  return <RsDiagram />;
+}
+```
+
+> `vue` / `react` は peerDependency です（バンドルには含みません）。アプリ側のものが使われます。
 
 ---
 
 # rs-diagram
 
-有料JSダイアグラムライブラリ（GoJS / JointJS+ 等）の機能網羅を目指す、依存ゼロのSVG作図ライブラリです（現在 v0.2）。
+依存ゼロのSVG作図・ダイアグラムライブラリです（現在 v0.5）。
 
 - **宣言的**: `nodes` / `links` の配列を渡すだけで3行で図が出る。独自DSLもクラス継承も不要
 - **依存ゼロ**: ランタイム依存なし。ビルド不要で `src/` から直接 import できる ESモジュール
@@ -41,6 +84,23 @@ CSSが必要なパッケージは `dist/rs-diagram.css` を link してくださ
   - **入出力**: `exportJSON({download})` / `importJSONFile(file)` / `loadFrom(url)` / `saveTo(url)`（fetchでAPI送受信）
   - **スタンプ**: 絵文字スタンプノード（`type: 'stamp', emoji: '⭐'`）。パレットに⭐✅⚠️👍を同梱
   - **ラベル編集**: ノードをダブルクリックでその場編集（Enter確定・Shift+Enter改行・Esc取消）
+- **v0.3 の機能**:
+  - **自動レイアウト**: `diagram.layout('tree' | 'layered' | 'grid' | 'radial')`。DOM非依存の純粋関数（`layout.js`）。undo可能で、重なりが解消される
+  - **日本語業務テンプレ**: `createRSDiagram(el, { template: 'orgchart', data })` で定番図が一発生成。**組織図 / 稟議・承認フロー / ER図 / ネットワーク構成図 / 座席表**（専用ノードタイプ＋サンプルデータ＋レイアウトのプリセット）
+  - **bezier リンク・障害物回避ルーティング**: `router: 'bezier'`（滑らかな曲線）/ `router: 'avoid'`（間のノードを避けて迂回する直交配線）
+  - **ポート**: ノード上の明示的な接続点 `ports: [{ id, position }]`（position は `'left'` 等の辺名か `{ x, y }` 割合）。ポートの●からドラッグで `from: { node, port }` 接続
+  - **リンクラベル**: `label` を経路上に表示（`labelT` で位置比率指定）。選択してハンドルをドラッグで自由移動（undo可）
+  - **リンク再接続**: 選択したリンクの端点◯をドラッグでノード/ポートへ付け替え
+  - **グループ化**: `diagram.group(ids)` で子を囲むコンテナを作成。グループ移動で子が追従、見出しの▶で折りたたみ（子を隠し、子へのリンクはグループへ再ルート）
+  - **スイムレーン**: `lanes: [{ id, label, x, y, width, height }]`。レーン帯の移動で内部ノードが追従、ハンドルでリサイズ。`laneOf(nodeId)` で所属判定
+  - **キーボード操作一式**: Tab/Shift+Tab（ノード巡回）・矢印キー（移動・Shiftで大きく）・Enter（ラベル編集）・Esc（解除）・Ctrl+G / Ctrl+Shift+G（グループ化/解除）
+- **v0.4 の機能**:
+  - **仮想化描画**: ビューポート外ノード/リンクの `<g>` を DOM から除去し、再入場で復元する（**model は不変・view だけを間引く**）。既定でON（`virtualize: false` で無効化、`virtualizeMargin` で先読み余白）。パン/ズームに追従し、**1,000ノードの図でパン/ズーム60fps**（実測: 可視域のみ約100ノードを描画、1フレーム1ms未満）
+  - **差分描画（dirty節点のみ再描画）**: 各ノード/リンクを署名（signature）でキャッシュし、変化した要素の `<g>` だけを作り直す。移動は `transform` だけ更新して中身を再生成しないので、ドラッグ/選択の応答が軽い
+  - **変更イベントストリーム（コラボ向け）**: すべてのコマンド実行を op 粒度の `{ type, payload }` 列へ細分化。`diagram.on('op', op => …)` で1 opずつ、`diagram.on('modelChange', e => e.ops)` で1コマンド分の op 列を受け取れる。**undo/redo も逆操作の op 列として流れる**ので、そのままサーバ同期の差分に使える（同期そのものはアプリ側の責務）。`diagram.getLastOps()` / `getRenderStats()` / `setVirtualize(on)` を追加
+- **v0.5 の機能（エコシステム連携・opt-in）**: 同リポジトリの他パッケージと相互運用する。**連携先は import しない**（生成関数を「注入」で受け取るので rs-diagram 自体は依存ゼロのまま）。**連携先が未ロードでも図は壊れない**（自動フォールバック）。
+  - **rs-chart 内包ノード**: `defineChartNode({ createRSChart })` が返すノードタイプを登録すると、`{ type: 'chart', chart: {...rs-chartのオプション} }` で**図の中に小型チャート（rs-chart 実体）**を持てる。チャートは SVG の `foreignObject` に埋め込まれ、ノードのドラッグ/選択/ズームにそのまま追従する。`updateNode(id, { chart })` で**図中のチャートがデータ追従**（ノード再構築時・削除時・破棄時にチャートは確実に destroy される）。`createRSChart` を渡さなければ純SVGの簡易バー（サムネイル）へフォールバック。「`defineNodeType` の draw 内で `createRSChart` を呼ぶだけで実現できる」ことの実証
+  - **画像ノードの rs-image 編集**: `makeRSImagePicker({ createRSImageEditor })` を `options.imagePicker` に渡すと、**画像ノードのダブルクリックで rs-image のエディタがモーダル起動**し、トリミング/回転/文字入れ等の編集結果を dataURL でノードへ書き戻す。`createRSImageEditor` が無ければ既定のファイル選択へフォールバック
 - **ライセンス**: MIT
 
 対応ブラウザ: 最新の Chrome / Edge / Safari / Firefox（IE・旧ブラウザは非対応）
@@ -125,6 +185,8 @@ diagram.destroy();
 | `contextMenu` | `true` | 右クリックメニュー。`false` で無効、配列で項目差し替え |
 | `readOnly` | `false` | 読み取り専用ビューア（`nodeClick` 等の閲覧イベントは生きる） |
 | `nodeTypes` / `linkTypes` | `[]` | カスタム形状プラグインの登録 |
+| `virtualize` | `true` | 仮想化描画（ビューポート外ノード/リンクの `<g>` を DOM から除去）。大規模図で有効 |
+| `virtualizeMargin` | `160` | 仮想化の先読み余白（model座標）。画面外に少し広げてパン時の欠けを防ぐ |
 | `ariaLabel` | `'ダイアグラムエディタ'` | コンテナの aria-label |
 
 - `id` 省略時は自動採番。`width` / `height` 省略時はタイプの既定値
@@ -147,8 +209,24 @@ diagram.destroy();
 
 - `router: 'straight'`（既定）— 形状境界から境界への直線
 - `router: 'orthogonal'` — 水平垂直の折れ線。`fromAnchor` / `toAnchor`（top/right/bottom/left）で出入りの辺を指定可能
+- `router: 'bezier'` — 滑らかな三次ベジェ曲線
+- `router: 'avoid'` — 障害物回避の直交配線（間にある他ノードを避けて迂回。疎グリッド上の A*）
 - `arrow: 'triangle'（既定） | 'open' | 'none'`、`arrowStart`（始点側の矢印=両矢印）、`style: { stroke, strokeWidth, dash }`
 - **端点は座標も指定できる**: `from: { x, y }` / `to: { x, y }`（ノードに依存しない自由な線・矢印）
+- **端点はポートも指定できる**: `from: { node: 'id', port: 'out' }`
+- **ラベル**: `label` を経路上に表示。`labelT`（0..1 経路上の位置）・`labelDx` / `labelDy`（オフセット。ドラッグで自動設定）
+
+### 業務テンプレート
+
+`createRSDiagram(el, { template, data })` で定番図が完成します（`data` 省略時はサンプル）。
+
+| template | 内容 | 専用ノードタイプ | 既定レイアウト |
+|---|---|---|---|
+| `orgchart` | 組織図（氏名＋役職） | `org-person` | tree |
+| `approval` | 稟議/承認フロー | rounded/rect/diamond | layered |
+| `er` | ER図（テーブル＋カラム） | `er-table` | grid |
+| `network` | ネットワーク構成図 | `net-device`（cloud/router/switch/server/pc） | tree |
+| `seating` | 座席表 | `seat` | 明示配置 |
 
 ### Diagram メソッド
 
@@ -165,20 +243,30 @@ diagram.destroy();
 | `loadFrom(url, fetchOptions)` / `saveTo(url, {method, headers})` | fetchでAPIからの読み込み・APIへの送信 |
 | `selectLinks(ids)` / `getLinkSelection()` | リンクの選択 |
 | `setView({x, y, scale})` / `getView()` / `resetView()` / `zoomToFit()` | パン/ズーム |
-| `setDrawMode({arrow, arrowStart})` / `getDrawMode()` | 線描画モード（キャンバスドラッグで線を引く） |
+| `setDrawMode({arrow, arrowStart, router})` / `getDrawMode()` | 線描画モード（キャンバスドラッグで線を引く。router で bezier/avoid も可） |
+| `layout(name, opts)` | 自動レイアウト（`'tree'`/`'layered'`/`'grid'`/`'radial'`・undo可） |
+| `group(ids)` / `ungroup(id)` / `toggleCollapse(id)` | グループ化・解除・折りたたみ |
+| `addLane(lane)` / `updateLane(id, props)` / `removeLane(id)` / `selectLane(id)` | スイムレーン編集 |
+| `laneOf(nodeId)` / `nodesInLane(lane)` | レーン所属判定・レーン内ノード取得 |
 | `exportSVG()` | 単体表示可能なSVG文字列を返す |
 | `exportPNG({ scale, download, filename })` | PNG Blob を生成（既定でダウンロードも実行） |
 | `setReadOnly(v)` | 読み取り専用の切り替え |
+| `setVirtualize(on)` | 仮想化描画のON/OFF切り替え（大規模図の性能検証・比較用） |
+| `getRenderStats()` | 描画統計 `{ virtualize, renderedNodes, renderedLinks, totalNodes, totalLinks }`（DOMにある `<g>` 数＝可視域） |
+| `getLastOps()` | 直近コマンドが生成した op 列 `{ type, payload }[]`（コラボ同期の差分） |
 | `on(event, cb)` / `off(event, cb)` | イベント購読 |
 | `destroy()` | 破棄 |
 
 ### イベント
 
-`nodeClick` / `nodeAdd` / `nodeRemove` / `nodeMove` / `nodeResize` / `linkAdd` / `linkConnect` / `linkRemove` / `linkDraw` / `imageSet` / `selectionChange` / `modelChange` / `viewChange` / `drawModeChange`
+`nodeClick` / `nodeAdd` / `nodeRemove` / `nodeMove` / `nodeResize` / `linkAdd` / `linkConnect` / `linkRemove` / `linkDraw` / `imageSet` / `selectionChange` / `modelChange` / `viewChange` / `drawModeChange` / `layout` / `groupCollapse` / `laneAdd` / `laneMove` / `laneResize` / `laneRemove` / `op`
+
+- **`op`**（v0.4・コラボ向け変更イベントストリーム）: すべての編集を op 粒度 `{ type, payload }` で1つずつ発火する。`addNode` / `removeNode` / `addLink` / `removeLink` / `updateNode` / `updateLink` / `updateLane` / `reorder` / `addLane` / `removeLane` 等。**undo/redo では逆操作の op が流れる**ので、そのままサーバ同期の差分に使える（同期はアプリ側の責務）
+- **`modelChange`** は1コマンドにつき1回発火し、`{ type, direction, ops }` を渡す（`ops` がそのコマンドの op 列）。`diagram.on('modelChange', e => save(diagram.toJSON()))` の自動保存はこれまで通り動く
 
 ### キーボード操作
 
-Delete（削除・リンクにも効く）/ Ctrl+D（複製）/ Ctrl+Z（undo）/ Ctrl+Y・Ctrl+Shift+Z（redo）/ Escape（選択・描画モード解除）/ スペース+ドラッグ（パン）/ Ctrl+ホイール（ズーム）
+Tab / Shift+Tab（ノード巡回選択）/ 矢印キー（選択ノードを移動・Shiftで大きく）/ Enter（単一選択ノードのラベル編集）/ Delete（削除・リンク/レーンにも効く）/ Ctrl+D（複製）/ Ctrl+G・Ctrl+Shift+G（グループ化/解除）/ Ctrl+Z（undo）/ Ctrl+Y・Ctrl+Shift+Z（redo）/ Escape（選択・描画モード解除）/ スペース+ドラッグ（パン）/ Ctrl+ホイール（ズーム）
 
 ### カスタム形状 — `defineNodeType(def)` / `defineLinkType(def)`
 
@@ -207,6 +295,52 @@ const dashed = defineLinkType({
 createRSDiagram('#el', { nodeTypes: [server], linkTypes: [dashed], nodes: [{ type: 'server', x: 40, y: 40 }] });
 ```
 
+### エコシステム連携（v0.5・opt-in）
+
+同リポジトリの `rs-chart` / `rs-image` と相互運用できます。rs-diagram は連携先を **import しません**。生成関数を「注入」で受け取るので**依存ゼロのまま**で、**連携先が未ロードでも図は壊れません**（自動フォールバック）。
+
+**rs-chart 内包ノード** — `defineNodeType` の draw 内で `createRSChart` を呼ぶだけで「図の中の小型チャート」が実現できます。
+
+```js
+import { createRSDiagram, defineChartNode } from 'rs-diagram';
+import { createRSChart } from 'rs-chart';   // ← アプリ側で import して注入
+
+const chartNode = defineChartNode({ createRSChart, defaults: { width: 250, height: 170 } });
+
+const diagram = createRSDiagram('#el', {
+    nodeTypes: [chartNode],
+    nodes: [{
+        id: 'sales', type: 'chart', x: 40, y: 40, chartTitle: '月次売上',
+        chart: { type: 'column', series: [{ name: '売上', data: [120, 200, 150] }], xAxis: { categories: ['1月', '2月', '3月'] } },
+    }],
+});
+
+// データ更新で図中のチャートが追従（undo 可）
+diagram.updateNode('sales', { chart: { ...diagram.getNode('sales').chart, series: [{ data: [120, 200, 150, 210] }] } });
+```
+
+- チャートは SVG の `foreignObject` に埋め込まれ、ノードのドラッグ/選択/ズームに自動追従します
+- `createRSChart` を渡さない（未ロード）場合は純SVGの簡易バー（サムネイル）へフォールバックします
+- 内包チャートはノードの再構築時・削除時・`diagram.destroy()` 時に確実に `destroy()` されます
+
+**画像ノードの rs-image 編集** — `makeRSImagePicker` を `imagePicker` に渡すと、**画像ノードのダブルクリックで rs-image エディタがモーダル起動**し、編集結果を dataURL でノードへ書き戻します。
+
+```js
+import { createRSDiagram, makeRSImagePicker } from 'rs-diagram';
+import { createRSImageEditor } from 'rs-image';   // ← 注入
+
+createRSDiagram('#el', {
+    nodes: [{ id: 'pic', type: 'image', x: 40, y: 40, image: '...' }],
+    imagePicker: makeRSImagePicker({ createRSImageEditor }),   // 未指定 or 未ロード時は既定のファイル選択
+});
+```
+
+| ヘルパー | 説明 |
+|---|---|
+| `defineChartNode({ createRSChart, name?, defaults?, chartDefaults? })` | rs-chart 内包ノードのタイプ定義を返す。`name` 既定 `'chart'`。ノードは `{ type, chart, chartTitle? }` |
+| `makeRSImagePicker({ createRSImageEditor, editorOptions?, title? })` | `options.imagePicker` 用の関数を返す。未注入時はファイル選択にフォールバック |
+| `chartFallbackBars` / `firstSeriesValues` / `chartOptionsFor` / `resolveImageEditFlow` | 連携の純粋関数（node 単体テスト可能） |
+
 ### テーマ
 
 CSSカスタムプロパティ（`--rsd-*`）で差し替えられます。
@@ -231,15 +365,20 @@ CSSカスタムプロパティ（`--rsd-*`）で差し替えられます。
 
 ## ロードマップ（REQUIREMENTS.md 参照）
 
-- v0.2: bezier・障害物回避ルーティング / ポート / リンク再接続 / グループ化 / キーボード一式 / ミニマップ・ズーム/パン
-- v0.3: 自動レイアウト（tree/layered/grid/radial）/ 日本語業務テンプレ（組織図・稟議フロー・ER図・ネットワーク図・座席表）/ スイムレーン
-- v0.4: 仮想化描画（1,000ノードでパン/ズーム60fps）/ 変更イベントストリーム
-- v0.5: rs-chart・rs-image 連携
+- v0.2: ズーム/パン / 自由な線・矢印 / 画像 / スタイルバー / 入出力 / スタンプ / ラベル編集（実装済み）
+- v0.3: bezier・障害物回避ルーティング / ポート / リンクラベル・再接続 / グループ化・折りたたみ / キーボード一式 / 自動レイアウト（tree/layered/grid/radial）/ 日本語業務テンプレ（組織図・稟議フロー・ER図・ネットワーク図・座席表）/ スイムレーン（実装済み）
+- v0.4: 仮想化描画（1,000ノードでパン/ズーム60fps）/ 差分描画 / 変更イベントストリーム（実装済み）
+- v0.5: rs-chart 内包ノード / 画像ノードの rs-image 編集（エコシステム連携・実装済み）
 
 ## 検証
 
-- 幾何計算・ルーティングの node 単体テスト
-- ヘッドレスChromiumでの受け入れテスト13項目（初期描画のSVG構造 / D&D後の座標一致 / グリッドスナップ / リサイズとリンク追従 / パレットD&D / アンカー接続 / 直交経路の検証 / 矩形選択と一括削除 / undo・redo / JSONラウンドトリップ / 複製 / エクスポート / readOnly）
+- 幾何計算・ルーティング・自動レイアウト・グループ・ポート・**仮想化/差分描画・変更イベントストリーム・エコシステム連携の純粋関数**の node 単体テスト（`test/*.test.mjs`、45項目）
+- ヘッドレスChromiumでの受け入れテスト:
+  - v0.1（13項目）: 初期描画のSVG構造 / D&D後の座標一致 / グリッドスナップ / リサイズとリンク追従 / パレットD&D / アンカー接続 / 直交経路 / 矩形選択と一括削除 / undo・redo / JSONラウンドトリップ / 複製 / エクスポート / readOnly
+  - v0.2（15項目）: パン/ズーム / 自由な線・矢印 / リンク選択・再接続 / スタイルバー / 画像 / スタンプ / ラベル編集 / 入出力
+  - v0.3（11項目）: テンプレ生成 / 4種の自動レイアウト（重なり解消）/ bezier / 障害物回避 / ポート接続 / リンクラベルのドラッグ / 端点再接続 / グループ移動・折りたたみ / スイムレーン / キーボード操作
+  - v0.4（8項目）: 1,000ノードの仮想化（可視域のみ描画）/ 仮想化ON/OFFの可逆性 / パンでの入退場（model不変）/ 仮想化下の選択・ドラッグ・リンク追従 / リンク仮想化と選択復元 / パン中央値<16.7ms かつ 仮想化ON>OFF / op粒度の変更イベントと undo/redo 両立 / コンソールエラー0
+  - v0.5（7項目）: rs-chart 内包ノードの図中描画（foreignObject に rs-chart 実体）/ データ更新でチャート追従 / 画像ノードのダブルクリックで rs-image 編集起動 / 適用で dataURL 書き戻し / 連携先未ロード時フォールバック（chart=簡易バー・image=ファイル選択）/ チャートノードのドラッグ追従（相互運用維持）/ コンソールエラー0
 
 ## ライセンス
 

@@ -555,6 +555,629 @@
     text-shadow: 0 0 4px #000, 0 0 6px #000;
 }
 
+/* ============================================================
+ * rs-player v0.2 — チャプター / サムネイル / ジェスチャ / ミニ / エンドスクリーン
+ * ============================================================ */
+
+/* ------------------------------------------------------------ チャプター区切り（シークバー） */
+
+.rsp-seek-chapters {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.rsp-seek-chapter-mark {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    margin-left: -1px;
+    background: rgba(0, 0, 0, .55);
+}
+
+/* ------------------------------------------------------------ シークバー複合プレビュー（サムネ+章名+時刻） */
+
+/* v0.1 の単一ツールチップを、縦積みの複合プレビューに拡張 */
+.rsp-seek-tooltip {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
+}
+
+.rsp-seek-preview {
+    border-radius: 4px;
+    background-color: #000;
+    background-repeat: no-repeat;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, .5);
+    max-width: 180px;
+    outline: 2px solid rgba(255, 255, 255, .85);
+    outline-offset: -1px;
+}
+
+.rsp-seek-preview[hidden] {
+    display: none;
+}
+
+.rsp-seek-chapter-title {
+    max-width: 220px;
+    padding: 3px 8px;
+    background: var(--rsp-tooltip-bg);
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.rsp-seek-chapter-title[hidden] {
+    display: none;
+}
+
+.rsp-seek-time-label {
+    padding: 5px 7px;
+    background: var(--rsp-tooltip-bg);
+    border-radius: 4px;
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+/* ------------------------------------------------------------ ジェスチャ層（ダブルタップ / 長押し） */
+
+.rsp-gestures {
+    position: absolute;
+    inset: 0;
+    cursor: pointer;
+    touch-action: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.rsp-user-idle .rsp-gestures {
+    cursor: none;
+}
+
+.rsp-ripple {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 38%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, .13);
+    color: #fff;
+    pointer-events: none;
+    animation: rsp-ripple-fade .65s ease-out forwards;
+}
+
+.rsp-ripple-left {
+    left: 0;
+    border-radius: 0 50% 50% 0 / 0 50% 50% 0;
+}
+
+.rsp-ripple-right {
+    right: 0;
+    border-radius: 50% 0 0 50% / 50% 0 0 50%;
+}
+
+.rsp-ripple-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    text-shadow: 0 0 4px rgba(0, 0, 0, .6);
+}
+
+.rsp-ripple-arrows {
+    font-size: 20px;
+    letter-spacing: -3px;
+}
+
+.rsp-ripple-text {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+@keyframes rsp-ripple-fade {
+    0% { opacity: 0; }
+    15% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+.rsp-speed-indicator {
+    position: absolute;
+    top: 14px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: rgba(0, 0, 0, .6);
+    color: #fff;
+    border-radius: 16px;
+    font-size: 13px;
+    font-weight: 600;
+    pointer-events: none;
+    z-index: 8;
+}
+
+.rsp-speed-arrows {
+    letter-spacing: -2px;
+    animation: rsp-speed-blink .8s steps(1) infinite;
+}
+
+@keyframes rsp-speed-blink {
+    50% { opacity: .35; }
+}
+
+/* ------------------------------------------------------------ ミニプレイヤー */
+
+.rsp-mini-sentinel {
+    width: 100%;
+    height: 0;
+}
+
+.rsp.rsp-mini {
+    position: fixed;
+    right: 16px;
+    bottom: 16px;
+    left: auto;
+    top: auto;
+    width: min(360px, 42vw);
+    height: auto;
+    margin: 0;
+    aspect-ratio: 16 / 9;
+    z-index: 2147483000;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, .55);
+    border-radius: 8px;
+}
+
+.rsp-mini-bar {
+    position: absolute;
+    top: 0;
+    right: 0;
+    display: none;
+    gap: 3px;
+    padding: 5px;
+    z-index: 12;
+}
+
+.rsp.rsp-mini .rsp-mini-bar {
+    display: flex;
+}
+
+.rsp-mini-bar button {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 0;
+    border-radius: 6px;
+    background: rgba(0, 0, 0, .55);
+    color: #fff;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+}
+
+.rsp-mini-bar button:hover {
+    background: rgba(0, 0, 0, .82);
+}
+
+.rsp-mini-bar svg {
+    width: 18px;
+    height: 18px;
+    fill: currentColor;
+}
+
+/* ミニ時は中央ボタン・設定メニューを畳んで見やすくする */
+.rsp.rsp-mini .rsp-center {
+    transform: translate(-50%, -50%) scale(.8);
+}
+
+.rsp.rsp-mini .rsp-menu {
+    display: none;
+}
+
+/* ------------------------------------------------------------ エンドスクリーン */
+
+.rsp-endscreen {
+    position: absolute;
+    inset: 0;
+    z-index: 7;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    padding: 20px;
+    background: rgba(0, 0, 0, .72);
+    text-align: center;
+}
+
+.rsp-endscreen[hidden] {
+    display: none;
+}
+
+.rsp-end-replay {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    border: 0;
+    background: transparent;
+    color: #fff;
+    font: inherit;
+    cursor: pointer;
+}
+
+.rsp-end-replay svg {
+    width: 56px;
+    height: 56px;
+    padding: 12px;
+    fill: currentColor;
+    background: rgba(255, 255, 255, .14);
+    border-radius: 50%;
+    transition: background .15s;
+}
+
+.rsp-end-replay:hover svg,
+.rsp-end-replay:focus-visible svg {
+    background: var(--rsp-accent);
+    outline: none;
+}
+
+.rsp-end-replay-label {
+    font-size: 14px;
+}
+
+.rsp-end-next {
+    width: 100%;
+    max-width: 540px;
+}
+
+.rsp-end-next-title {
+    margin-bottom: 8px;
+    font-size: 13px;
+    color: rgba(255, 255, 255, .75);
+    text-align: left;
+}
+
+.rsp-end-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+}
+
+.rsp-end-card {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 150px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #fff;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.rsp-end-card-thumb {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border-radius: 6px;
+    background: #222 center / cover no-repeat;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+}
+
+.rsp-end-card-thumb svg {
+    width: 34px;
+    height: 34px;
+    fill: #fff;
+    opacity: .92;
+    filter: drop-shadow(0 1px 3px rgba(0, 0, 0, .6));
+}
+
+.rsp-end-card:hover .rsp-end-card-thumb,
+.rsp-end-card:focus-visible .rsp-end-card-thumb {
+    outline: 2px solid var(--rsp-accent);
+    outline-offset: 1px;
+}
+
+.rsp-end-card-title {
+    font-size: 13px;
+    line-height: 1.35;
+}
+
+/* エンドスクリーン表示中は中央のリプレイボタンと重複しないよう中央ボタンを隠す */
+.rsp-state-ended .rsp-center {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* ============================================================
+ * rs-player v0.3 — プレイリスト / 自動サムネイル / A-Bループ / ウォーターマーク
+ * ============================================================ */
+
+/* ------------------------------------------------------------ 無効ボタン（プレイリスト端など） */
+
+.rsp-btn:disabled {
+    opacity: .35;
+    cursor: default;
+    pointer-events: none;
+}
+
+/* ------------------------------------------------------------ A-Bループ（シークバー区間） */
+
+.rsp-seek-ab {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.rsp-seek-ab[hidden] {
+    display: none;
+}
+
+.rsp-seek-ab-region {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    background: rgba(250, 204, 21, .42);
+}
+
+.rsp-seek-ab-region[hidden] {
+    display: none;
+}
+
+.rsp-seek-ab-mark {
+    position: absolute;
+    top: -2px;
+    bottom: -2px;
+    width: 3px;
+    margin-left: -1.5px;
+    background: #facc15;
+    box-shadow: 0 0 3px rgba(0, 0, 0, .5);
+}
+
+.rsp-seek-ab-mark[hidden] {
+    display: none;
+}
+
+/* ------------------------------------------------------------ ロゴウォーターマーク */
+
+.rsp-watermark {
+    position: absolute;
+    z-index: 3;
+    pointer-events: none;
+    max-width: 34%;
+    max-height: 22%;
+    opacity: .82;
+    transition: opacity .2s;
+}
+
+.rsp-watermark-inner {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    pointer-events: auto;
+    color: #fff;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: .02em;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, .7);
+}
+
+a.rsp-watermark-inner:hover,
+a.rsp-watermark-inner:focus-visible {
+    opacity: 1;
+    text-decoration: underline;
+    outline: none;
+}
+
+.rsp-watermark-img {
+    display: block;
+    max-width: 100%;
+    max-height: 40px;
+    filter: drop-shadow(0 1px 4px rgba(0, 0, 0, .6));
+}
+
+.rsp-wm-top-left { top: 12px; left: 12px; }
+.rsp-wm-top-right { top: 12px; right: 12px; }
+.rsp-wm-bottom-left { bottom: 60px; left: 12px; }
+.rsp-wm-bottom-right { bottom: 60px; right: 12px; }
+.rsp-wm-center { top: 50%; left: 50%; transform: translate(-50%, -50%); }
+
+/* 操作中はコントロールに重ならないよう下寄せのロゴを少し持ち上げる */
+.rsp-user-idle .rsp-wm-bottom-left,
+.rsp-user-idle .rsp-wm-bottom-right { bottom: 24px; }
+
+/* ------------------------------------------------------------ プレイリスト サイドリスト */
+
+.rsp-playlist {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: min(320px, 78%);
+    z-index: 9;
+    display: flex;
+    flex-direction: column;
+    background: var(--rsp-menu-bg);
+    box-shadow: -4px 0 24px rgba(0, 0, 0, .45);
+    transform: translateX(100%);
+    transition: transform .22s ease;
+}
+
+.rsp-playlist[hidden] {
+    display: flex; /* スライドアニメーションのため hidden でもレイアウトは保つ */
+}
+
+.rsp-playlist-open .rsp-playlist {
+    transform: translateX(0);
+}
+
+.rsp-playlist-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 8px 12px 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, .14);
+    font-weight: 700;
+}
+
+.rsp-playlist-close {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--rsp-text);
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+}
+
+.rsp-playlist-close:hover { background: rgba(255, 255, 255, .14); }
+
+.rsp-playlist-close svg { width: 20px; height: 20px; fill: currentColor; }
+
+.rsp-playlist-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 6px;
+}
+
+.rsp-playlist-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 8px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--rsp-text);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.rsp-playlist-item:hover,
+.rsp-playlist-item:focus-visible {
+    background: rgba(255, 255, 255, .1);
+    outline: none;
+}
+
+.rsp-playlist-item-current {
+    background: rgba(255, 255, 255, .16);
+}
+
+.rsp-playlist-index {
+    flex: none;
+    width: 22px;
+    text-align: center;
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+    color: rgba(255, 255, 255, .7);
+    display: grid;
+    place-items: center;
+}
+
+.rsp-playlist-item-current .rsp-playlist-index { color: var(--rsp-accent); }
+
+.rsp-playlist-index svg { width: 14px; height: 14px; fill: var(--rsp-accent); }
+
+.rsp-playlist-thumb {
+    flex: none;
+    width: 68px;
+    aspect-ratio: 16 / 9;
+    border-radius: 5px;
+    background: #222 center / cover no-repeat;
+}
+
+.rsp-playlist-item-current .rsp-playlist-thumb {
+    outline: 2px solid var(--rsp-accent);
+    outline-offset: 1px;
+}
+
+.rsp-playlist-title {
+    flex: 1;
+    font-size: 13px;
+    line-height: 1.35;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.rsp-playlist-item-current .rsp-playlist-title { font-weight: 600; }
+
+/* ============================================================
+ * rs-player v0.4 — ストリーミング（LIVE バッジ / DVR / ピッチ保持）
+ * ============================================================ */
+
+/* ------------------------------------------------------------ LIVE バッジ */
+
+.rsp-live-badge {
+    width: auto;
+    min-width: 44px;
+    padding: 0 10px 0 8px;
+    gap: 5px;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: .04em;
+}
+
+.rsp-live-badge .rsp-live-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #888;
+    flex: none;
+    transition: background .2s;
+}
+
+.rsp-live-badge .rsp-live-text { line-height: 1; }
+
+/* ライブエッジ再生中 = 赤く点灯（クリックで最新へ、の誘導は greyed 側で） */
+.rsp-live-badge.rsp-live-edge .rsp-live-dot {
+    background: var(--rsp-accent, #f03);
+    box-shadow: 0 0 0 3px rgba(255, 0, 51, .22);
+}
+
+.rsp-live-badge.rsp-live-edge { cursor: default; }
+
+/* DVR を遡って視聴中 = 消灯・ホバーで「最新へ」を促す */
+.rsp-live-badge.rsp-live-behind { opacity: .78; }
+
+.rsp-live-badge.rsp-live-behind:hover { opacity: 1; }
+
+.rsp-live-badge.rsp-live-behind .rsp-live-text { text-decoration: underline dotted; text-underline-offset: 3px; }
+
+/* ライブ時の時刻表示（エッジからの遅れ -M:SS） */
+.rsp-time.rsp-time-live { font-variant-numeric: tabular-nums; opacity: .9; }
+
+/* ------------------------------------------------------------ v0.5 MediaStream 再生モード（rs-livecam 連携） */
+/* MediaStream（ライブカメラ等）には尺・シークの概念が無いため、シークバーと時刻表示を隠す */
+.rsp.rsp-stream .rsp-seek { display: none; }
+.rsp.rsp-stream .rsp-time { display: none; }
+
 /* ------------------------------------------------------------ アニメーション抑制 */
 
 @media (prefers-reduced-motion: reduce) {

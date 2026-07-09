@@ -21,8 +21,19 @@
     --rsgt-link: #94a3b8;
     --rsgt-link-selected: #2563eb;
     --rsgt-handle: #1d4ed8;
+    --rsgt-critical: #e15759;
+    --rsgt-critical-link: #d62728;
+    --rsgt-critical-row: #fff1f0;
+    --rsgt-footer-bg: #f1f5f9;
+    --rsgt-avatar-bg: #6366f1;
+    --rsgt-baseline: #94a3b8;
+    --rsgt-progressline: #7c3aed;
+    --rsgt-overload: #ef4444;
+    --rsgt-hist-bar: #60a5fa;
+    --rsgt-hist-bg: #f8fafc;
 
     display: flex;
+    flex-direction: column;
     position: relative;
     height: 100%;
     min-height: 200px;
@@ -37,6 +48,15 @@
 }
 
 .rsgt *, .rsgt *::before, .rsgt *::after { box-sizing: border-box; }
+
+/* 上段（グリッド + タイムライン）の横並び。下段にヒストグラムを積む */
+.rsgt-main {
+    display: flex;
+    flex: 1 1 auto;
+    min-height: 0;
+    position: relative;
+    overflow: hidden;
+}
 
 /* ---------------------------------------------------------------- 左: グリッド */
 
@@ -93,8 +113,42 @@
     cursor: pointer;
 }
 
-.rsgt-row:nth-child(even) { background: var(--rsgt-row-stripe); }
+/* 縞は絶対行インデックスの偶奇で付ける（仮想スクロールのスライスに依存しない） */
+.rsgt-row.rsgt-row-alt { background: var(--rsgt-row-stripe); }
+.rsgt-row.rsgt-critical { background: var(--rsgt-critical-row); }
 .rsgt-row.rsgt-selected { background: var(--rsgt-row-selected); }
+/* 仮想スクロールの上下スペーサ（描画しない行ぶんの高さ確保） */
+.rsgt-vspacer { flex: none; width: 100%; pointer-events: none; }
+
+/* 行の並べ替えドラッグ */
+.rsgt-row-dragging { opacity: 0.5; }
+.rsgt-row.rsgt-drop-into { box-shadow: inset 0 0 0 2px var(--rsgt-handle); }
+.rsgt-drop-line {
+    position: absolute; left: 0; right: 0; height: 2px;
+    background: var(--rsgt-handle); z-index: 6; pointer-events: none;
+}
+
+/* 集計フッター行 */
+.rsgt-grid-footer {
+    flex: none;
+    display: flex;
+    align-items: stretch;
+    height: 30px;
+    border-top: 2px solid var(--rsgt-border);
+    background: var(--rsgt-footer-bg);
+    color: var(--rsgt-header-text);
+    font-weight: 600;
+}
+.rsgt-gf-cell {
+    flex: none;
+    display: flex;
+    align-items: center;
+    padding: 0 8px;
+    border-right: 1px solid var(--rsgt-border);
+    overflow: hidden;
+    white-space: nowrap;
+}
+.rsgt-gf-cell[style*="text-align: right"] { justify-content: flex-end; }
 
 .rsgt-cell {
     flex: none;
@@ -213,6 +267,8 @@
 }
 .rsgt-bar:active { cursor: grabbing; }
 .rsgt-bar.rsgt-selected { box-shadow: 0 0 0 2px var(--rsgt-handle); }
+.rsgt-bar.rsgt-critical { background: var(--rsgt-critical); }
+.rsgt-bar.rsgt-critical.rsgt-selected { box-shadow: 0 0 0 2px var(--rsgt-handle); }
 
 .rsgt-bar-progress {
     position: absolute;
@@ -231,6 +287,15 @@
     text-overflow: ellipsis;
     font-size: 11px;
     line-height: 16px;
+    pointer-events: none;
+}
+
+/* サマリーバーの集計進捗（子から自動集計） */
+.rsgt-summary-progress {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    background: rgba(15, 30, 60, 0.35);
+    border-radius: 2px 0 0 2px;
     pointer-events: none;
 }
 
@@ -310,6 +375,7 @@
     user-select: none;
 }
 .rsgt-milestone.rsgt-selected { box-shadow: 0 0 0 2px var(--rsgt-handle); }
+.rsgt-milestone.rsgt-critical { background: var(--rsgt-critical); }
 .rsgt-milestone .rsgt-conn-l { left: -16px; transform: rotate(-45deg); }
 .rsgt-milestone .rsgt-conn-r { right: -16px; transform: rotate(-45deg); }
 
@@ -362,6 +428,288 @@ path.rsgt-link-hit {
     cursor: pointer;
 }
 path.rsgt-link-selected { stroke: var(--rsgt-link-selected); stroke-width: 2; }
+path.rsgt-link-critical { stroke: var(--rsgt-critical-link); stroke-width: 2.5; }
 path.rsgt-link-temp { stroke: var(--rsgt-link-selected); stroke-dasharray: 4 3; }
 .rsgt-arrowhead { fill: var(--rsgt-link); }
 path.rsgt-link-selected + .rsgt-arrowhead { fill: var(--rsgt-link-selected); }
+
+/* ---------------------------------------------------------------- v0.3 リソース（アバター） */
+
+.rsgt-avatar {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--rsgt-avatar-bg);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1;
+    box-shadow: 0 0 0 1px #fff;
+}
+.rsgt-avatar-more { background: #64748b; font-size: 9px; }
+
+/* グリッドの担当列 */
+.rsgt-assignees-cell { display: flex; align-items: center; gap: 3px; overflow: hidden; width: 100%; }
+.rsgt-assignees-names { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--rsgt-text); }
+
+/* バー右のリソース表示（非対話） */
+.rsgt-bar-assignees {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    pointer-events: none;
+    z-index: 2;
+    white-space: nowrap;
+}
+.rsgt-bar-assignees .rsgt-avatar { width: 16px; height: 16px; font-size: 9px; }
+.rsgt-bar-assignees-name { font-size: 10px; color: var(--rsgt-header-text); margin-left: 2px; }
+
+/* ---------------------------------------------------------------- v0.3 ベースライン */
+
+.rsgt-baseline {
+    position: absolute;
+    height: 5px;
+    border-radius: 2px;
+    background: var(--rsgt-baseline);
+    opacity: 0.65;
+    pointer-events: none;
+    z-index: 1;
+}
+.rsgt-baseline-ms {
+    position: absolute;
+    width: 16px; height: 16px;
+    transform: rotate(45deg);
+    border: 1.5px solid var(--rsgt-baseline);
+    background: transparent;
+    opacity: 0.7;
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* 遅延日数列 */
+.rsgt-delay-late { color: #dc2626; font-weight: 600; }
+.rsgt-delay-early { color: #16a34a; }
+.rsgt-delay-none { color: var(--rsgt-header-text); }
+
+/* ---------------------------------------------------------------- v0.3 進捗ライン（イナズマ線） */
+
+svg.rsgt-progressline { position: absolute; left: 0; top: 0; pointer-events: none; overflow: visible; }
+path.rsgt-progressline-path {
+    fill: none;
+    stroke: var(--rsgt-progressline);
+    stroke-width: 1.5;
+    stroke-linejoin: round;
+    opacity: 0.9;
+}
+
+/* ---------------------------------------------------------------- v0.3 リソースヒストグラム（下部パネル） */
+
+.rsgt-histogram {
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    border-top: 2px solid var(--rsgt-border);
+    background: var(--rsgt-hist-bg);
+}
+.rsgt-hist-title {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 24px;
+    padding: 0 10px;
+    background: var(--rsgt-header-bg);
+    border-bottom: 1px solid var(--rsgt-border);
+    color: var(--rsgt-header-text);
+    font-size: 11px;
+    font-weight: 600;
+}
+.rsgt-hist-over-summary { font-weight: 400; }
+.rsgt-hist-over-summary.rsgt-hist-has-over { color: #dc2626; font-weight: 600; }
+.rsgt-hist-mode {
+    margin-left: auto;
+    padding: 1px 8px;
+    border: 1px solid var(--rsgt-border);
+    border-radius: 5px;
+    background: #fff;
+    color: var(--rsgt-header-text);
+    font-size: 10.5px;
+    cursor: pointer;
+}
+.rsgt-hist-mode:hover { background: #eef4ff; }
+
+.rsgt-hist-body { display: flex; align-items: stretch; overflow: hidden; }
+.rsgt-hist-labels { flex: none; border-right: 1px solid var(--rsgt-border); background: #fff; }
+.rsgt-hist-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 8px;
+    border-bottom: 1px solid var(--rsgt-border);
+    overflow: hidden;
+}
+.rsgt-hist-label-over { background: #fff5f5; }
+.rsgt-hist-dot { flex: none; width: 10px; height: 10px; border-radius: 50%; background: var(--rsgt-avatar-bg); }
+.rsgt-hist-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--rsgt-text); }
+.rsgt-hist-meta { flex: none; font-size: 10.5px; color: var(--rsgt-header-text); }
+.rsgt-hist-label-over .rsgt-hist-meta { color: #dc2626; font-weight: 700; }
+
+.rsgt-hist-chart-wrap { flex: 1; overflow: hidden; position: relative; }
+.rsgt-hist-chart { position: relative; }
+.rsgt-hist-row { position: relative; border-bottom: 1px solid var(--rsgt-border); }
+.rsgt-hist-bar { position: absolute; background: var(--rsgt-hist-bar); border-radius: 1px 1px 0 0; }
+.rsgt-hist-bar-over { background: var(--rsgt-overload); }
+.rsgt-hist-cap { position: absolute; left: 0; right: 0; height: 0; border-top: 1px dashed #94a3b8; opacity: 0.8; }
+
+/* ---------------------------------------------------------------- v0.5 スケジューラビュー */
+
+.rsgt-sched {
+    --rsgt-sched-label-w: 160px;
+    --rsgt-sched-ev-bg: #4e79a7;
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+    background: #fff;
+}
+
+/* ヘッダー（コーナー + 時間ヘッダー） */
+.rsgt-sched-head {
+    flex: none;
+    display: flex;
+    height: 46px;
+    border-bottom: 1px solid var(--rsgt-border);
+    background: var(--rsgt-header-bg);
+    color: var(--rsgt-header-text);
+}
+.rsgt-sched-corner {
+    flex: none;
+    width: var(--rsgt-sched-label-w);
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    font-weight: 600;
+    border-right: 1px solid var(--rsgt-border);
+}
+.rsgt-sched-head-scroll { flex: 1; overflow: hidden; position: relative; }
+.rsgt-sched-timehead { position: relative; height: 100%; }
+.rsgt-sched-th-days { position: relative; height: 22px; border-bottom: 1px solid var(--rsgt-border); }
+.rsgt-sched-th-slots { position: relative; height: 24px; }
+.rsgt-sched-th-day, .rsgt-sched-th-slot {
+    position: absolute;
+    top: 0; height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-right: 1px solid var(--rsgt-border);
+    font-size: 11px;
+    overflow: hidden;
+    white-space: nowrap;
+}
+.rsgt-sched-th-day { font-weight: 600; }
+.rsgt-sched-th-slot { font-size: 10px; color: var(--rsgt-header-text); }
+.rsgt-sched-th-day.rsgt-sched-nonwork { background: var(--rsgt-nonwork-bg); color: #b91c1c; }
+.rsgt-sched-th-slot.rsgt-sched-nonwork { background: var(--rsgt-nonwork-bg); }
+
+/* 本体（左ラベル + スクロール領域） */
+.rsgt-sched-body { flex: 1; display: flex; min-height: 0; overflow: hidden; }
+.rsgt-sched-labels {
+    flex: none;
+    width: var(--rsgt-sched-label-w);
+    overflow: hidden;
+    border-right: 1px solid var(--rsgt-border);
+    background: #fff;
+}
+.rsgt-sched-labels-inner { position: relative; }
+.rsgt-sched-reslabel {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 0 10px;
+    border-bottom: 1px solid var(--rsgt-border);
+    box-sizing: border-box;
+}
+.rsgt-sched-res-dot { flex: none; width: 10px; height: 10px; border-radius: 3px; background: var(--rsgt-avatar-bg); }
+.rsgt-sched-res-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--rsgt-text); font-weight: 500; }
+.rsgt-sched-res-cap { flex: none; font-size: 10.5px; color: var(--rsgt-header-text); }
+
+.rsgt-sched-scroll { flex: 1; overflow: auto; position: relative; }
+.rsgt-sched-grid { position: relative; }
+.rsgt-sched-bg { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+.rsgt-sched-events { position: absolute; inset: 0; z-index: 1; }
+
+.rsgt-sched-daycol-nonwork { position: absolute; top: 0; background: var(--rsgt-nonwork-bg); }
+.rsgt-sched-dayline { position: absolute; top: 0; width: 1px; background: var(--rsgt-border); }
+.rsgt-sched-slotline { position: absolute; top: 0; width: 1px; background: var(--rsgt-border); opacity: 0.45; }
+.rsgt-sched-rowline { position: absolute; left: 0; height: 1px; background: var(--rsgt-border); }
+
+/* イベントブロック */
+.rsgt-sched-ev {
+    position: absolute;
+    box-sizing: border-box;
+    padding: 1px 6px;
+    border-radius: 4px;
+    background: var(--rsgt-sched-ev-bg);
+    color: #fff;
+    font-size: 11px;
+    line-height: 1.15;
+    overflow: hidden;
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.18);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+.rsgt-sched-ev:active { cursor: grabbing; }
+.rsgt-sched-ev.rsgt-selected { box-shadow: 0 0 0 2px var(--rsgt-handle); }
+.rsgt-sched-ev-time { font-size: 9.5px; opacity: 0.9; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rsgt-sched-ev-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600; }
+.rsgt-sched-ev-resize {
+    position: absolute;
+    top: 0; right: 0;
+    width: 8px; height: 100%;
+    cursor: ew-resize;
+    touch-action: none;
+}
+.rsgt-sched-ghost { opacity: 0.55; outline: 1px dashed #fff; pointer-events: none; z-index: 5; }
+.rsgt-sched-drag-src { opacity: 0.35; }
+
+/* ---------------------------------------------------------------- v0.4 印刷（A4横・ページ分割） */
+
+@media print {
+    @page { size: A4 landscape; margin: 8mm; }
+
+    /* コンテナのスクロール枠を外し、全内容を紙面に流す */
+    .rsgt {
+        height: auto !important;
+        min-height: 0 !important;
+        border: none;
+        border-radius: 0;
+        overflow: visible !important;
+    }
+    .rsgt-main { overflow: visible !important; height: auto !important; }
+    .rsgt-grid { overflow: visible !important; }
+    .rsgt-grid-scroll { overflow: visible !important; }
+    .rsgt-tl { overflow: visible !important; }
+
+    /* 見出しは各ページ先頭で繰り返す */
+    .rsgt-grid-header, .rsgt-tl-header { position: static !important; }
+    thead, .rsgt-tl-header { display: table-header-group; }
+
+    /* 行・バーはページ境界で分断しない */
+    .rsgt-row, .rsgt-bar, .rsgt-milestone, .rsgt-hist-row { break-inside: avoid; page-break-inside: avoid; }
+
+    /* 操作専用の装飾は印刷しない */
+    .rsgt-splitter, .rsgt-col-grip, .rsgt-handle, .rsgt-conn,
+    .rsgt-progress-handle, .rsgt-drop-line, .rsgt-hist-mode { display: none !important; }
+
+    /* 背景（縞・網掛け・進捗）を確実に出す */
+    .rsgt, .rsgt * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}

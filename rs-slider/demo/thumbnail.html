@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>rs-slider デモ — 4. サムネイル連動ギャラリー</title>
+<link rel="stylesheet" href="../dist/rs-slider.css">
+<link rel="stylesheet" href="demo.css">
+<style>
+    .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 26px; }
+    @media (max-width: 860px) { .cols { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="page">
+    <p class="back"><a href="./">← デモ一覧へ</a></p>
+    <h1>4. サムネイル連動ギャラリー <small>createRSGallery</small></h1>
+    <p class="lead">
+        サムネイルクリックで切替・現在画像のハイライト・左右/下部サムネイル・スマホスワイプ・キーボード操作。
+        ギャラリーをクリック（フォーカス）して <kbd>←</kbd><kbd>→</kbd><kbd>Home</kbd><kbd>End</kbd> で操作できます。
+    </p>
+
+    <div class="card">
+        <h2>下部サムネイル（thumbs: 'bottom'）</h2>
+        <p class="note">メイン画像はスワイプでも切替可能。アクティブなサムネイルがハイライトされ、自動でスクロール追従します。</p>
+        <div id="g-bottom"></div>
+        <div class="value" id="v-bottom"></div>
+    </div>
+
+    <div class="cols">
+        <div class="card">
+            <h2>左サムネイル（thumbs: 'left'）</h2>
+            <div id="g-left"></div>
+        </div>
+        <div class="card">
+            <h2>右サムネイル（thumbs: 'right'）</h2>
+            <div id="g-right"></div>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { createRSGallery } from '../dist/rs-slider.esm.min.js';
+    import { photo } from './assets.js';
+
+    const items = (base, n) => Array.from({ length: n }, (_, i) => ({
+        image: photo(base + i, { w: 1200, h: 900, label: `Gallery ${i + 1}` }),
+        thumb: photo(base + i, { w: 200, h: 200, label: '' }),
+        caption: `${i + 1}枚目のキャプション`,
+        alt: `ギャラリー画像 ${i + 1}`,
+    }));
+
+    const g = createRSGallery('#g-bottom', {
+        items: items(120, 8),
+        thumbs: 'bottom',
+        zoom: false,
+        onChange: (i) => {
+            document.getElementById('v-bottom').textContent = `change: ${i + 1} / ${g.getCount()}`;
+        },
+    });
+
+    createRSGallery('#g-left', { items: items(140, 6), thumbs: 'left', zoom: false, aspectRatio: '1 / 1' });
+    createRSGallery('#g-right', { items: items(160, 6), thumbs: 'right', zoom: false, aspectRatio: '1 / 1' });
+</script>
+</body>
+</html>

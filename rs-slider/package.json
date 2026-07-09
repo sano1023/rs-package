@@ -1,5 +1,5 @@
 {
-    "name": "rs-slider",
+    "name": "@parelabo/rs-slider",
     "version": "0.1.0",
     "description": "依存ゼロの画像スライダーコレクション（基本/フェード/ヒーロー/カード・サムネイル/商品ギャラリー・フルスクリーン・無限ループ/マルチ行・Masonry・3Dカバーフロー・ストーリーズ）",
     "type": "module",
@@ -14,7 +14,15 @@
             "default": "./dist/rs-slider.esm.min.js"
         },
         "./dist/*": "./dist/*",
-        "./rs-slider.css": "./dist/rs-slider.css"
+        "./rs-slider.css": "./dist/rs-slider.css",
+        "./vue": {
+            "types": "./dist/types/vue.d.ts",
+            "import": "./dist/rs-slider.vue.esm.min.js"
+        },
+        "./react": {
+            "types": "./dist/types/react.d.ts",
+            "import": "./dist/rs-slider.react.esm.min.js"
+        }
     },
     "files": [
         "dist"
@@ -32,6 +40,31 @@
     ],
     "author": "ryusuke.sano <ryusuke.sano@parelabo.com>",
     "license": "SEE LICENSE IN LICENSE.txt",
+    "homepage": "https://github.com/sano1023/rs-package/tree/main/rs-slider#readme",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/sano1023/rs-package.git",
+        "directory": "rs-slider"
+    },
+    "bugs": {
+        "url": "https://parelabo.com",
+        "email": "contact@parelabo.com"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
     "types": "./dist/types/index.d.ts",
-    "style": "./dist/rs-slider.css"
+    "style": "./dist/rs-slider.css",
+    "peerDependencies": {
+        "vue": "^3.0.0",
+        "react": ">=18"
+    },
+    "peerDependenciesMeta": {
+        "vue": {
+            "optional": true
+        },
+        "react": {
+            "optional": true
+        }
+    }
 }

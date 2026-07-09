@@ -171,6 +171,78 @@
     pointer-events: none;
 }
 
+/* ---- v0.2: 無操作スキップ区間・イベントマーカー ---- */
+:root {
+    --rsr-skip: rgba(148, 163, 184, 0.55);
+    --rsr-marker-route: #a78bfa;
+    --rsr-marker-error: #f87171;
+    --rsr-marker-custom: #34d399;
+    /* v0.4: 分析マーカー（レイジクリック / デッドクリック） */
+    --rsr-marker-rage: #fb923c;
+    --rsr-marker-dead: #94a3b8;
+}
+
+/* 無操作スキップ区間（ハッチング表示） */
+.rsr-skip {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    background: repeating-linear-gradient(
+        -45deg,
+        var(--rsr-skip),
+        var(--rsr-skip) 3px,
+        transparent 3px,
+        transparent 6px
+    );
+    border-radius: 2px;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* タイムライン上のイベントマーカー（点） */
+.rsr-marker {
+    position: absolute;
+    top: 50%;
+    width: 8px;
+    height: 8px;
+    margin-left: -4px;
+    border-radius: 50%;
+    transform: translateY(-50%);
+    border: 1.5px solid rgba(15, 23, 42, 0.7);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.5);
+    pointer-events: none;
+    z-index: 3;
+}
+
+.rsr-marker-route { background: var(--rsr-marker-route); }
+.rsr-marker-error { background: var(--rsr-marker-error); }
+.rsr-marker-custom { background: var(--rsr-marker-custom); }
+
+/* v0.4: レイジクリックは目立つ菱形、デッドクリックは中空の点で差別化する */
+.rsr-marker-rage {
+    background: var(--rsr-marker-rage);
+    width: 10px;
+    height: 10px;
+    margin-left: -5px;
+    border-radius: 2px;
+    transform: translateY(-50%) rotate(45deg);
+}
+.rsr-marker-dead {
+    background: transparent;
+    border-color: var(--rsr-marker-dead);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.5);
+}
+
+/* 無操作スキップのトグルボタン（オン時に強調） */
+.rsr-btn-active {
+    background: var(--rsr-accent);
+    color: #0b1220;
+}
+.rsr-btn-active:hover {
+    background: var(--rsr-accent);
+    filter: brightness(1.08);
+}
+
 .rsr-speed {
     flex: 0 0 auto;
     width: auto; /* ホストページの select { width:100% } 等に負けない */
@@ -193,4 +265,108 @@
 
 .rsr-speed option {
     color: #111;
+}
+
+/* ================================================================ v0.3: ヒートマップ */
+/* 対象要素に重ねるオーバーレイ。canvas は操作を透過し、コントロールだけ操作可能。 */
+.rsh-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    pointer-events: none;
+    font-family: system-ui, -apple-system, "Segoe UI", "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+}
+
+.rsh-canvas {
+    position: absolute;
+    left: 0;
+    top: 0;
+    pointer-events: none;
+    mix-blend-mode: multiply; /* 下地のUIを透かしつつ色を乗せる */
+}
+
+/* コントロールバー（右上に固定・ここだけクリック可能） */
+.rsh-controls {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    background: rgba(15, 23, 42, 0.92);
+    color: #e2e8f0;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+    pointer-events: auto;
+    font-size: 12px;
+    max-width: calc(100% - 16px);
+}
+
+.rsh-seg {
+    display: inline-flex;
+    border: 1px solid rgba(148, 163, 184, 0.4);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.rsh-btn {
+    padding: 4px 10px;
+    margin: 0;
+    border: 0;
+    border-right: 1px solid rgba(148, 163, 184, 0.4);
+    background: transparent;
+    color: #e2e8f0;
+    font-size: 12px;
+    line-height: 1.4;
+    cursor: pointer;
+}
+
+.rsh-seg .rsh-btn:last-child { border-right: 0; }
+.rsh-btn:hover { background: rgba(148, 163, 184, 0.2); }
+.rsh-btn:focus-visible { outline: 2px solid #38bdf8; outline-offset: -2px; }
+
+.rsh-btn-active {
+    background: #38bdf8;
+    color: #0b1220;
+    font-weight: 600;
+}
+.rsh-btn-active:hover { background: #38bdf8; filter: brightness(1.08); }
+
+.rsh-range-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+}
+
+.rsh-range {
+    width: 90px;
+    height: 4px;
+    accent-color: #38bdf8;
+    cursor: pointer;
+}
+
+/* 凡例（低→高のグラデーションバー＋件数キャプション） */
+.rsh-legend {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.rsh-legend-bar {
+    display: inline-block;
+    width: 84px;
+    height: 8px;
+    border-radius: 4px;
+    /* background は heatGradientCss() が JS で設定 */
+}
+
+.rsh-legend-lo, .rsh-legend-hi { opacity: 0.85; }
+
+.rsh-legend-cap {
+    opacity: 0.85;
+    font-variant-numeric: tabular-nums;
 }

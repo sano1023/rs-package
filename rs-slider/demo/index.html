@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>rs-slider デモ一覧</title>
+<link rel="stylesheet" href="demo.css">
+<style>
+    .menu { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
+    .menu a {
+        display: block; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px;
+        padding: 16px 18px; text-decoration: none; color: inherit; transition: all .15s;
+    }
+    .menu a:hover { border-color: #2563eb; box-shadow: 0 6px 16px -10px rgba(37,99,235,.5); transform: translateY(-1px); }
+    .menu .no { font-size: 11px; color: #94a3b8; letter-spacing: .06em; }
+    .menu h2 { font-size: 15px; margin: 2px 0 6px; color: #0f172a; }
+    .menu p { font-size: 12px; color: #64748b; margin: 0; }
+</style>
+</head>
+<body>
+<div class="page">
+    <h1>rs-slider <small>v0.1 デモ一覧 — 依存ゼロの画像スライダーコレクション</small></h1>
+    <p class="lead">
+        デモの画像・動画はすべてブラウザ内で生成したプレースホルダです（外部リソース・ネットワーク不要）。
+        各ページはスマホ幅でも動作します。
+    </p>
+    <div class="menu">
+        <a href="basic.html"><span class="no">No.1 — createRSSlider</span><h2>基本画像スライダー</h2><p>自動再生・矢印・ドット・ループ・スワイプ・レスポンシブ（複数枚表示）</p></a>
+        <a href="fade.html"><span class="no">No.2 — createRSSlider (mode: fade)</span><h2>フェード画像スライダー</h2><p>クロスフェード・表示時間設定・画像ごとのテキスト・背景オーバーレイ・スマホ画像切替</p></a>
+        <a href="hero.html"><span class="no">No.3 — createRSSlider (variant: hero)</span><h2>ヒーロー画像スライダー</h2><p>大型背景・キャッチコピー・CTAボタン・フェード/スライド切替・グラデーション・テキストアニメーション</p></a>
+        <a href="thumbnail.html"><span class="no">No.4 — createRSGallery</span><h2>サムネイル連動ギャラリー</h2><p>サムネイルクリック・ハイライト・左右/下部配置・スワイプ・キーボード操作</p></a>
+        <a href="product.html"><span class="no">No.5 — createRSGallery</span><h2>商品画像ギャラリー</h2><p>拡大ズーム・バリエーション連動・動画サムネイル・遅延読み込み・スワイプ</p></a>
+        <a href="fullscreen.html"><span class="no">No.8 — createRSFullscreen</span><h2>フルスクリーン画像スライダー</h2><p>全画面セクション・マウスホイール・キーボード・スワイプ・カウンター</p></a>
+        <a href="marquee.html"><span class="no">No.9 — createRSMarquee</span><h2>無限ループ画像スライダー</h2><p>途切れないループ・速度調整・逆方向・ホバー停止</p></a>
+        <a href="multirow.html"><span class="no">No.10 — createRSMarquee (rows)</span><h2>マルチ行画像スライダー</h2><p>2行/3行表示・行ごとに逆方向・速度調整・レスポンシブ</p></a>
+        <a href="masonry.html"><span class="no">No.11 — createRSMasonry</span><h2>Masonry風画像ギャラリー</h2><p>比率維持の不規則配置・カテゴリフィルター・クリック拡大・横スクロール</p></a>
+        <a href="coverflow.html"><span class="no">No.12 — createRSCoverflow</span><h2>3Dカバーフロー</h2><p>中央拡大・奥行き・影/反射・3D回転・スワイプ</p></a>
+        <a href="cards.html"><span class="no">No.13 — createRSSlider (variant: cards)</span><h2>画像カードスライダー</h2><p>画像+タイトル+説明+タグ+ボタン・複数枚表示・スマホ1枚表示</p></a>
+        <a href="stories.html"><span class="no">No.14 — createRSStories</span><h2>ストーリーズ風スライダー</h2><p>自動進行バー・タップ操作・長押し一時停止・縦長画像・画像/動画混在</p></a>
+    </div>
+</div>
+</body>
+</html>

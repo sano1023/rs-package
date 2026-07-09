@@ -2,24 +2,63 @@
 > 利用は無償（商用可）ですが、**改変・再配布はできません**（LICENSE.txt 参照）。
 > 機能追加・改修のご依頼は有償で承ります → https://parelabo.com （contact@parelabo.com）
 
-## インストール / 読み込み
+## インストール
 
 ```bash
-# npm（GitHubのtarball指定）
-npm install https://github.com/sano1023/ryusuke-packages-dist/raw/main/tarballs/rs-livecam-0.2.0.tgz
+npm install @parelabo/rs-livecam
 ```
 
-```html
-<!-- CDN（jsDelivr・scriptタグ直読み） -->
-<script src="https://cdn.jsdelivr.net/gh/sano1023/ryusuke-packages-dist@main/rs-livecam/dist/rs-livecam.min.js"></script>
+<details>
+<summary>npm レジストリを使わない場合（GitHub tarball 直指定）</summary>
+
+```bash
+npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-livecam-0.2.0.tgz
 ```
+</details>
+
+## 使い方
+
+### バニラ JS（ESM・バンドラあり）
 
 ```js
-// ESM import（npmインストール後）
-import { /* 公開API */ } from 'rs-livecam';
+import { createRSLiveCam } from '@parelabo/rs-livecam';
+
+createRSLiveCam({ /* オプション */ });
 ```
 
-CSSが必要なパッケージは `dist/rs-livecam.css` を link してください。
+### `<script>` タグ（CDN・ビルド環境不要）
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/@parelabo/rs-livecam@0.2.0/dist/rs-livecam.min.js"></script>
+<script>
+  // 公開APIはグローバル RSLivecam に載る
+  RSLivecam.createRSLiveCam({ /* オプション */ });
+</script>
+```
+
+### Vue 3
+
+```js
+import { RsLiveCam } from '@parelabo/rs-livecam/vue';
+```
+
+```vue
+<template>
+  <RsLiveCam />
+</template>
+```
+
+### React 18 / 19
+
+```jsx
+import { RsLiveCam } from '@parelabo/rs-livecam/react';
+
+export default function App() {
+  return <RsLiveCam />;
+}
+```
+
+> `vue` / `react` は peerDependency です（バンドルには含みません）。アプリ側のものが使われます。
 
 ---
 

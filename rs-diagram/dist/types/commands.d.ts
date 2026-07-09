@@ -59,6 +59,25 @@ export namespace commands {
     /** z順の並べ替え（最前面へ/最背面へ） */
     function reorder(list: any, beforeIds: any, afterIds: any): {
         type: string;
+        list: any;
+        beforeIds: any;
+        afterIds: any;
+        apply(m: any): void;
+        revert(m: any): void;
+    };
+    /** 任意リスト（lanes 等）への1件追加 */
+    function addItem(list: any, item: any, type?: string): {
+        type: string;
+        list: any;
+        item: any;
+        apply(m: any): void;
+        revert(m: any): void;
+    };
+    /** 任意リストからの1件削除（{item,index}） */
+    function removeItem(list: any, entry: any, type?: string): {
+        type: string;
+        list: any;
+        entry: any;
         apply(m: any): void;
         revert(m: any): void;
     };

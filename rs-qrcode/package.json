@@ -1,5 +1,5 @@
 {
-    "name": "rs-qrcode",
+    "name": "@parelabo/rs-qrcode",
     "version": "0.1.2",
     "description": "QRコード/バーコード生成（依存ゼロ・SVG/PNG・300dpi・ロゴ・ラベル・連番・CSV一括）",
     "type": "module",
@@ -13,7 +13,15 @@
             "import": "./dist/rs-qrcode.esm.min.js",
             "default": "./dist/rs-qrcode.esm.min.js"
         },
-        "./dist/*": "./dist/*"
+        "./dist/*": "./dist/*",
+        "./vue": {
+            "types": "./dist/types/vue.d.ts",
+            "import": "./dist/rs-qrcode.vue.esm.min.js"
+        },
+        "./react": {
+            "types": "./dist/types/react.d.ts",
+            "import": "./dist/rs-qrcode.react.esm.min.js"
+        }
     },
     "files": [
         "dist"
@@ -28,5 +36,30 @@
     ],
     "author": "ryusuke.sano <ryusuke.sano@parelabo.com>",
     "license": "SEE LICENSE IN LICENSE.txt",
-    "types": "./dist/types/index.d.ts"
+    "homepage": "https://github.com/sano1023/rs-package/tree/main/rs-qrcode#readme",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/sano1023/rs-package.git",
+        "directory": "rs-qrcode"
+    },
+    "bugs": {
+        "url": "https://parelabo.com",
+        "email": "contact@parelabo.com"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
+    "types": "./dist/types/index.d.ts",
+    "peerDependencies": {
+        "vue": "^3.0.0",
+        "react": ">=18"
+    },
+    "peerDependenciesMeta": {
+        "vue": {
+            "optional": true
+        },
+        "react": {
+            "optional": true
+        }
+    }
 }

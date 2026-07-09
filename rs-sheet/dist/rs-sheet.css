@@ -259,6 +259,39 @@
     background: var(--rss-cell-bg);
 }
 
+/* ------------------------------------------------------------ v0.5 数式監査（参照元/参照先トレース） */
+
+.rss-audit {
+    position: absolute;
+    left: 0;
+    top: 0;
+    pointer-events: none;
+    z-index: 7;
+    overflow: visible;
+}
+
+.rss-audit line {
+    stroke-width: 1.5;
+}
+
+.rss-audit .rss-audit-box {
+    fill: none;
+    stroke-width: 1.5;
+    stroke-dasharray: 3 2;
+}
+
+/* ------------------------------------------------------------ v0.5 読み取り専用ビュー */
+
+.rss--readonly .rss-cell {
+    cursor: default;
+}
+
+.rss--readonly .rss-editorwrap,
+.rss--readonly .rss-fill,
+.rss--readonly .rss-validation-btn {
+    display: none !important;
+}
+
 /* ------------------------------------------------------------ ステータスバー・メニュー */
 
 .rss-status {
@@ -273,6 +306,63 @@
     white-space: nowrap;
     overflow: hidden;
 }
+
+/* ------------------------------------------------------------ シートタブ（複数シート） */
+
+.rss-tabs {
+    display: flex;
+    align-items: stretch;
+    gap: 2px;
+    height: 30px;
+    padding: 3px 4px 0;
+    background: var(--rss-header-bg);
+    border: 1px solid var(--rss-border);
+    border-top: none;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+.rss-tab {
+    font: inherit;
+    font-size: 12px;
+    max-width: 160px;
+    padding: 0 12px;
+    border: 1px solid var(--rss-border);
+    border-bottom: none;
+    border-radius: 6px 6px 0 0;
+    background: #eef1f5;
+    color: var(--rss-header-text);
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 27px;
+}
+
+.rss-tab:hover { background: #e3e8ef; }
+
+.rss-tab.active {
+    background: var(--rss-cell-bg);
+    color: var(--rss-accent);
+    font-weight: 600;
+    border-bottom: 1px solid var(--rss-cell-bg);
+    margin-bottom: -1px;
+}
+
+.rss-tab-add {
+    font: inherit;
+    font-size: 15px;
+    width: 30px;
+    flex: 0 0 auto;
+    border: 1px solid var(--rss-border);
+    border-radius: 6px;
+    background: #eef1f5;
+    color: var(--rss-header-text);
+    cursor: pointer;
+    line-height: 24px;
+}
+
+.rss-tab-add:hover { background: #e3e8ef; color: var(--rss-accent); }
 
 .rss-menu {
     position: absolute;
@@ -307,4 +397,239 @@
     height: 1px;
     background: var(--rss-border);
     margin: 4px 6px;
+}
+
+/* ------------------------------------------------------------ v0.2: セル結合 */
+
+.rss-cell.rss-merged {
+    z-index: 2;
+    background: var(--rss-cell-bg);
+    border-right: 1px solid var(--rss-border);
+    border-bottom: 1px solid var(--rss-border);
+}
+
+/* ------------------------------------------------------------ v0.2: 条件付き書式（データバーは背景グラデーション） */
+
+.rss-cell.rss-hasbar {
+    background-clip: padding-box;
+}
+
+/* ------------------------------------------------------------ v0.2: データ検証 */
+
+.rss-cell.rss-invalid {
+    box-shadow: inset 0 0 0 2px var(--rss-error);
+}
+
+.rss-cell.rss-haslist {
+    cursor: pointer;
+}
+
+.rss-validation-btn {
+    position: absolute;
+    width: 16px;
+    padding: 0;
+    border: 1px solid var(--rss-border);
+    border-radius: 0 2px 2px 0;
+    background: var(--rss-header-bg);
+    color: var(--rss-header-text);
+    font-size: 10px;
+    line-height: 1;
+    cursor: pointer;
+    z-index: 7;
+}
+
+.rss-validation-btn:hover {
+    background: var(--rss-header-hl);
+    color: var(--rss-accent);
+}
+
+/* ------------------------------------------------------------ v0.4: カスタムセル型（checkbox / select） */
+
+/* チェックボックスセル: グリフを中央に・クリックでトグル */
+.rss-cell.rss-cb {
+    justify-content: center;
+    cursor: pointer;
+    font-size: 15px;
+    color: var(--rss-header-text);
+}
+
+.rss-cell.rss-cb.rss-cb-on {
+    color: var(--rss-accent);
+}
+
+/* 選択肢セル: 右端に ▾ を出し、クリックでドロップダウン */
+.rss-cell.rss-select {
+    cursor: pointer;
+    padding-right: 16px;
+}
+
+.rss-cell.rss-select::after {
+    content: "▾";
+    position: absolute;
+    right: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 10px;
+    color: var(--rss-header-text);
+    pointer-events: none;
+}
+
+.rss-cell.rss-select.rss-select-empty {
+    color: var(--rss-header-text);
+}
+
+/* ------------------------------------------------------------ v0.2: オートフィルタ */
+
+.rss-filter-btn {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    padding: 0;
+    border: 1px solid var(--rss-border);
+    border-radius: 2px;
+    background: #fff;
+    color: var(--rss-header-text);
+    font-size: 9px;
+    line-height: 1;
+    cursor: pointer;
+    z-index: 3;
+}
+
+.rss-filter-btn:hover {
+    background: var(--rss-header-hl);
+    color: var(--rss-accent);
+}
+
+.rss-filter-btn.rss-filter-active {
+    background: var(--rss-accent);
+    color: #fff;
+    border-color: var(--rss-accent);
+}
+
+.rss-filter-menu {
+    position: absolute;
+    z-index: 100;
+    width: 210px;
+    background: #fff;
+    border: 1px solid var(--rss-border);
+    border-radius: 6px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.14);
+    padding: 4px;
+}
+
+.rss-filter-list {
+    max-height: 180px;
+    overflow: auto;
+    margin: 4px 0;
+    border: 1px solid var(--rss-border);
+    border-radius: 4px;
+    padding: 4px;
+}
+
+.rss-filter-check {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 4px;
+    font-size: 12px;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.rss-filter-check:hover {
+    background: var(--rss-sel-bg);
+}
+
+.rss-filter-check span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.rss-filter-foot {
+    display: flex;
+    gap: 4px;
+    padding-top: 2px;
+}
+
+.rss-filter-foot .rss-menu-item {
+    text-align: center;
+    background: var(--rss-header-bg);
+    flex: 1;
+}
+
+/* ------------------------------------------------------------ v0.2: ウィンドウ枠固定（フリーズ） */
+
+.rss-frozen {
+    position: absolute;
+    overflow: hidden;
+    background: var(--rss-cell-bg);
+    z-index: 16;
+    box-sizing: border-box;
+}
+
+.rss-frozen-top {
+    border-bottom: 2px solid var(--rss-header-text);
+}
+
+.rss-frozen-left {
+    border-right: 2px solid var(--rss-header-text);
+}
+
+.rss-frozen-corner {
+    z-index: 18;
+    border-right: 2px solid var(--rss-header-text);
+    border-bottom: 2px solid var(--rss-header-text);
+}
+
+.rss-frozen-inner {
+    position: absolute;
+    left: 0;
+    top: 0;
+    will-change: transform;
+}
+
+/* ------------------------------------------------------------ 印刷 */
+
+.rss-print-table {
+    border-collapse: collapse;
+    font: var(--rss-font);
+}
+
+.rss-print-table td {
+    border: 1px solid var(--rss-border);
+    padding: 3px 8px;
+    min-width: 32px;
+}
+
+@media print {
+    /* 操作用 UI・スクロール枠を隠し、内容だけを印刷する */
+    .rss-proxy,
+    .rss-menu,
+    .rss-filter-menu,
+    .rss-tabs,
+    .rss-status,
+    .rss-fill,
+    .rss-fillpreview,
+    .rss-validation-btn,
+    .rss-colgrip,
+    .rss-rowgrip {
+        display: none !important;
+    }
+
+    .rss-scroller {
+        height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
+        border: none;
+    }
+
+    .rss {
+        --rss-cell-bg: #fff;
+    }
+
+    .rss-cell {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
 }

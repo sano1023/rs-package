@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>rs-qrcode デモ</title>
+<style>
+    body {
+        font-family: system-ui, -apple-system, "Segoe UI", "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+        margin: 0; background: #f1f5f9; color: #1e293b;
+    }
+    .page { max-width: 1100px; margin: 0 auto; padding: 32px 20px 120px; }
+    h1 { font-size: 24px; }
+    h1 small { font-size: 13px; color: #64748b; font-weight: 400; margin-left: 10px; }
+    .lead { color: #475569; font-size: 14px; margin-bottom: 20px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .card { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 18px; }
+    .card.wide { grid-column: 1 / -1; }
+    .card h2 { font-size: 14px; margin: 0 0 12px; }
+    .card input[type=text], .card textarea, .card select {
+        width: 100%; box-sizing: border-box; padding: 8px 10px; margin-bottom: 8px;
+        border: 1px solid #cbd5e1; border-radius: 7px; font-size: 13px; font-family: inherit;
+    }
+    .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 8px; }
+    .row label { font-size: 12px; color: #475569; display: inline-flex; align-items: center; gap: 4px; }
+    .out { text-align: center; padding: 8px; }
+    .out svg, .out canvas, .out img { max-width: 100%; }
+    button {
+        appearance: none; border: 1px solid #4e79a7; background: #4e79a7; color: #fff;
+        padding: 7px 14px; border-radius: 7px; font-size: 13px; cursor: pointer; font-family: inherit;
+    }
+    button.ghost { background: #fff; color: #334155; border-color: #cbd5e1; }
+    .sheet { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 12px; }
+    .sheet .cell { border: 1px dashed #cbd5e1; border-radius: 6px; padding: 8px; text-align: center; background: #fff; }
+    .sheet .cell svg { width: 100%; height: auto; }
+    @media print {
+        body * { visibility: hidden; }
+        #sheet, #sheet * { visibility: visible; }
+        #sheet { position: absolute; left: 0; top: 0; width: 100%; }
+        .sheet .cell { border: none; }
+    }
+    @media (max-width: 760px) { .grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="page">
+    <h1>rs-qrcode <small>v0.1 デモ — QR/バーコード生成（依存ゼロ・フルスクラッチエンコーダ）</small></h1>
+    <p class="lead">入力するとリアルタイムに再生成。SVG/PNG（300dpi）出力・ロゴ・ラベル・色・連番・CSV一括に対応。</p>
+
+    <div class="grid">
+        <div class="card">
+            <h2>QRコード（リアルタイム生成）</h2>
+            <input type="text" id="qr-data" value="https://example.com/products/12345">
+            <div class="row">
+                <label>誤り訂正
+                    <select id="qr-ec">
+                        <option>L</option><option selected>M</option><option>Q</option><option>H</option>
+                    </select>
+                </label>
+                <label>余白 <input type="range" id="qr-margin" min="0" max="8" value="4"></label>
+                <label>色 <input type="color" id="qr-dark" value="#000000"></label>
+                <label>背景 <input type="color" id="qr-light" value="#ffffff"></label>
+                <label><input type="checkbox" id="qr-logo"> ロゴ埋め込み（自動でEC=Hに昇格）</label>
+                <label>画像を変更 <input type="file" id="qr-logo-file" accept="image/*" style="width:180px"></label>
+            </div>
+            <input type="text" id="qr-label" placeholder="ラベル（コード下のテキスト・空で非表示）">
+            <div class="out" id="qr-out"></div>
+            <div class="row">
+                <button class="ghost" id="qr-svg-dl">SVGダウンロード</button>
+                <button class="ghost" id="qr-png-dl">PNG（300dpi）ダウンロード</button>
+                <span id="qr-info" style="font-size:12px;color:#64748b;"></span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>バーコード</h2>
+            <input type="text" id="bc-data" value="RS-2026-0001">
+            <div class="row">
+                <label>タイプ
+                    <select id="bc-type">
+                        <option value="code128" selected>CODE128</option>
+                        <option value="ean13">EAN-13（12桁数字）</option>
+                    </select>
+                </label>
+                <label>高さ <input type="range" id="bc-height" min="30" max="100" value="60"></label>
+                <label>色 <input type="color" id="bc-dark" value="#000000"></label>
+            </div>
+            <div class="out" id="bc-out"></div>
+            <div class="row">
+                <button class="ghost" id="bc-svg-dl">SVGダウンロード</button>
+                <button class="ghost" id="bc-png-dl">PNG（300dpi）ダウンロード</button>
+                <span id="bc-err" style="font-size:12px;color:#dc2626;"></span>
+            </div>
+        </div>
+
+        <div class="card wide">
+            <h2>連番生成 & CSV一括生成 → ラベルシート（印刷対応）</h2>
+            <div class="row">
+                <label>プレフィックス <input type="text" id="seq-prefix" value="RS-" style="width:90px"></label>
+                <label>開始 <input type="text" id="seq-start" value="1" style="width:60px"></label>
+                <label>桁数 <input type="text" id="seq-digits" value="4" style="width:50px"></label>
+                <label>件数 <input type="text" id="seq-count" value="8" style="width:60px"></label>
+                <button class="ghost" id="btn-seq">連番で生成</button>
+                <button id="btn-print">シートを印刷</button>
+            </div>
+            <textarea id="csv-input" rows="3" placeholder="CSV（1列目=データ, 2列目=ラベル）">A-1001,りんごジュース
+A-1002,みかんゼリー
+A-1003,ぶどうグミ
+A-1004,いちごチョコ</textarea>
+            <button class="ghost" id="btn-csv">CSVから一括生成</button>
+            <div class="sheet" id="sheet"></div>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import {
+        createRSQR, createRSBarcode, makeSequence, batchFromCSV,
+        encodeQR, encodeBarcode, code128Patterns, code128Values, eanCheckDigit,
+    } from '../dist/rs-qrcode.esm.min.js';
+    window.__mod = {
+        createRSQR, createRSBarcode, makeSequence, batchFromCSV,
+        encodeQR, encodeBarcode, code128Patterns, code128Values, eanCheckDigit,
+    };
+
+    const $ = (id) => document.getElementById(id);
+
+    // ロゴ用のサンプル画像（canvasで生成）
+    function makeLogo() {
+        const c = document.createElement('canvas');
+        c.width = 64; c.height = 64;
+        const x = c.getContext('2d');
+        x.fillStyle = '#4e79a7';
+        x.beginPath(); x.arc(32, 32, 30, 0, Math.PI * 2); x.fill();
+        x.fillStyle = '#fff'; x.font = '900 28px sans-serif';
+        x.textAlign = 'center'; x.textBaseline = 'middle';
+        x.fillText('RS', 32, 34);
+        return c;
+    }
+    let logo = makeLogo();
+    $('qr-logo-file').addEventListener('change', (e) => {
+        const f = e.target.files[0];
+        if (!f) return;
+        const img = new Image();
+        img.onload = () => {
+            logo = img;
+            $('qr-logo').checked = true;
+            renderQR();
+        };
+        img.src = URL.createObjectURL(f);
+    });
+
+    function qrOptions() {
+        return {
+            ecLevel: $('qr-ec').value,
+            margin: Number($('qr-margin').value),
+            dark: $('qr-dark').value,
+            light: $('qr-light').value,
+            logo: $('qr-logo').checked ? logo : null,
+            label: $('qr-label').value,
+            size: 240,
+        };
+    }
+
+    async function renderQR() {
+        try {
+            if ($('qr-logo').checked && $('qr-ec').value !== 'H') $('qr-ec').value = 'H';
+            const qr = createRSQR($('qr-data').value || ' ', qrOptions());
+            window.lastQR = qr;
+            const canvas = await qr.toCanvas();
+            $('qr-out').innerHTML = '';
+            $('qr-out').appendChild(canvas);
+            $('qr-info').textContent = `v${qr.version}（${qr.size}×${qr.size}）EC=${qr.ecLevel} マスク${qr.mask}`;
+        } catch (e) {
+            $('qr-info').textContent = e.message;
+        }
+    }
+
+    function renderBC() {
+        try {
+            $('bc-err').textContent = '';
+            const bc = createRSBarcode($('bc-data').value, {
+                type: $('bc-type').value,
+                barHeight: Number($('bc-height').value),
+                dark: $('bc-dark').value,
+            });
+            window.lastBC = bc;
+            $('bc-out').innerHTML = bc.toSVG();
+        } catch (e) {
+            $('bc-err').textContent = e.message;
+        }
+    }
+
+    for (const id of ['qr-data', 'qr-ec', 'qr-margin', 'qr-dark', 'qr-light', 'qr-logo', 'qr-label']) {
+        $(id).addEventListener('input', renderQR);
+    }
+    for (const id of ['bc-data', 'bc-type', 'bc-height', 'bc-dark']) {
+        $(id).addEventListener('input', renderBC);
+    }
+
+    const download = (blob, name) => {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = name;
+        a.click();
+        URL.revokeObjectURL(a.href);
+    };
+    $('qr-svg-dl').addEventListener('click', () => {
+        download(new Blob([window.lastQR.toSVG()], { type: 'image/svg+xml' }), 'qrcode.svg');
+    });
+    $('qr-png-dl').addEventListener('click', async () => {
+        download(await window.lastQR.toPNG({ dpi: 300, scale: 12 }), 'qrcode-300dpi.png');
+    });
+    $('bc-svg-dl').addEventListener('click', () => {
+        download(new Blob([window.lastBC.toSVG()], { type: 'image/svg+xml' }), 'barcode.svg');
+    });
+    $('bc-png-dl').addEventListener('click', async () => {
+        download(await window.lastBC.toPNG({ dpi: 300, scale: 6 }), 'barcode-300dpi.png');
+    });
+
+    // ---- ラベルシート
+    function renderSheet(items) {
+        const sheet = $('sheet');
+        sheet.innerHTML = '';
+        for (const { item, label } of items) {
+            const cell = document.createElement('div');
+            cell.className = 'cell';
+            cell.innerHTML = item.toSVG({ size: 120 });
+            sheet.appendChild(cell);
+        }
+        window.sheetCount = items.length;
+    }
+
+    $('btn-seq').addEventListener('click', () => {
+        const seq = makeSequence({
+            prefix: $('seq-prefix').value,
+            start: Number($('seq-start').value),
+            digits: Number($('seq-digits').value),
+            count: Number($('seq-count').value),
+        });
+        renderSheet(seq.map((data) => ({
+            data,
+            label: data,
+            item: createRSQR(data, { label: data, margin: 2 }),
+        })));
+    });
+
+    $('btn-csv').addEventListener('click', () => {
+        renderSheet(batchFromCSV($('csv-input').value, { margin: 2 }));
+    });
+
+    $('btn-print').addEventListener('click', () => window.print());
+
+    renderQR();
+    renderBC();
+</script>
+</body>
+</html>

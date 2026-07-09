@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>rs-tour デモ</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', 'Noto Sans JP', sans-serif;
+            background: #f5f5f4;
+            color: #1c1917;
+        }
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 24px;
+            background: #fff;
+            border-bottom: 1px solid #e7e5e4;
+        }
+        header h1 { margin: 0; font-size: 18px; }
+        #start-tour {
+            border: 1px solid #bae6fd;
+            background: #f0f9ff;
+            color: #0369a1;
+            border-radius: 999px;
+            padding: 8px 20px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        main {
+            display: grid;
+            grid-template-columns: 240px 1fr;
+            gap: 16px;
+            padding: 24px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .panel {
+            background: #fff;
+            border: 1px solid #e7e5e4;
+            border-radius: 16px;
+            padding: 16px;
+        }
+        .panel h2 { margin: 0 0 12px; font-size: 14px; color: #57534e; }
+        .file { padding: 6px 10px; border-radius: 8px; font-size: 13px; }
+        .file:hover { background: #f5f5f4; }
+        .toolbar { display: flex; gap: 8px; margin-bottom: 12px; }
+        .toolbar button {
+            border: 1px solid #d6d3d1;
+            background: #fff;
+            border-radius: 8px;
+            padding: 6px 14px;
+            font-size: 13px;
+            cursor: pointer;
+        }
+        #editor {
+            background: #1c1917;
+            color: #e7e5e4;
+            border-radius: 12px;
+            padding: 16px;
+            font-family: ui-monospace, monospace;
+            font-size: 13px;
+            min-height: 220px;
+            white-space: pre;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>rs-tour デモ</h1>
+        <button id="start-tour" type="button">🧭 ツアーを開始</button>
+    </header>
+
+    <main>
+        <div class="panel" id="tree">
+            <h2>ファイル一覧</h2>
+            <div class="file">index.html</div>
+            <div class="file">style.css</div>
+            <div class="file">script.js</div>
+        </div>
+
+        <div class="panel">
+            <div class="toolbar">
+                <button id="save" type="button">保存</button>
+                <button id="run" type="button">実行</button>
+            </div>
+            <div id="editor">&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+  &lt;body&gt;
+    &lt;h1&gt;Hello rs-tour!&lt;/h1&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { createRSTour } from '../dist/rs-tour.esm.min.js';
+
+        const tour = createRSTour({
+            steps: [
+                { target: null, title: 'rs-tour デモへようこそ！', body: '「次へ」を押すと、画面の各パーツをスポットライトで案内します。Escでいつでも終了できます。' },
+                { target: '#tree', title: 'ファイル一覧', body: 'プロジェクトのファイルがここに表示されます。' },
+                { target: '#save', title: '保存ボタン', body: '編集したら必ず保存しましょう。' },
+                { target: '#run', title: '実行ボタン', body: '保存した内容を実行して結果を確認します。' },
+                { target: '#editor', title: 'エディタ', body: 'コードを書く場所です。スポットライトは要素のサイズに合わせて伸縮します。' },
+                { target: null, title: '以上です！', body: 'createRSTour({ steps: [...] }) だけでこのツアーが作れます。' },
+            ],
+            labels: { next: '次へ', previous: '戻る', skip: 'スキップ', finish: '完了', progress: '{current} / {total}' },
+            onFinish: () => console.log('tour finished'),
+        });
+
+        document.querySelector('#start-tour').addEventListener('click', () => tour.start());
+    </script>
+</body>
+</html>

@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>rs-pdf デモ</title>
+<link rel="stylesheet" href="../dist/rs-pdf.css">
+<style>
+    body {
+        font-family: system-ui, -apple-system, "Segoe UI", "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+        margin: 0;
+        background: #f1f5f9;
+        color: #1e293b;
+    }
+    .page { max-width: 1100px; margin: 0 auto; padding: 24px 20px 60px; }
+    h1 { font-size: 22px; margin: 0 0 4px; }
+    h1 small { font-size: 13px; color: #64748b; font-weight: 400; margin-left: 10px; }
+    .lead { color: #475569; font-size: 13px; margin: 0 0 14px; }
+    .controls { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; align-items: center; }
+    .controls button, .controls label.file {
+        appearance: none; border: 1px solid #cbd5e1; background: #fff; color: inherit;
+        border-radius: 6px; padding: 7px 14px; font-size: 13px; cursor: pointer;
+    }
+    .controls button:hover, .controls label.file:hover { background: #e2e8f0; }
+    .controls input[type="file"] { display: none; }
+    #viewer { height: 78vh; }
+    #log {
+        margin-top: 10px; font-size: 12px; color: #475569; background: #fff;
+        border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 12px;
+        max-height: 90px; overflow: auto; white-space: pre-wrap;
+    }
+    #error-demo-box { margin-top: 14px; }
+    #error-demo { height: 220px; display: none; }
+    @media (prefers-color-scheme: dark) {
+        body { background: #16181c; color: #d7dade; }
+        .lead, #log { color: #9aa1ab; }
+        .controls button, .controls label.file { background: #24262b; border-color: #3c3f44; }
+        .controls button:hover, .controls label.file:hover { background: #2f3238; }
+        #log { background: #1e2024; border-color: #3c3f44; }
+    }
+</style>
+</head>
+<body>
+<div class="page">
+    <h1>rs-pdf <small>v0.1 デモ — 依存ゼロコア + pdf.js アダプタ注入のPDFビューア</small></h1>
+    <p class="lead">
+        ページ仮想化（可視±2枚のみrender・canvasプール・レティナ対応）・ズーム（±/Ctrl+ホイール/ピンチ/フィット幅/フィットページ）・
+        サムネイルサイドバー・ページ番号入力・90°回転・テキスト選択コピー・全ページ横断検索（ハイライト+次/前）・印刷。
+        pdf.js は CDN から注入しています（コアは pdf.js を import しません）。
+    </p>
+    <div class="controls">
+        <label class="file">PDFファイルを開く<input type="file" id="file" accept="application/pdf"></label>
+        <button id="btn-reload">サンプルを開き直す</button>
+        <button id="btn-destroy">destroy()</button>
+        <button id="btn-error-demo">アダプタ未注入エラーを見る</button>
+        <span id="status" style="font-size:12px;color:#64748b;"></span>
+    </div>
+    <div id="viewer"></div>
+    <div id="error-demo-box"><div id="error-demo"></div></div>
+    <div id="log" aria-label="イベントログ"></div>
+</div>
+
+<script type="module">
+    import { createRSPDF, pdfjsAdapter } from '../dist/rs-pdf.esm.min.js';
+
+    const CDN = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38';
+    const log = (msg) => {
+        const el = document.getElementById('log');
+        el.textContent = `${new Date().toLocaleTimeString()} ${msg}\n${el.textContent}`.slice(0, 4000);
+    };
+
+    // pdf.js を CDN から読み込む（コアには注入しない限り関与しない）
+    const pdfjsLib = await import(`${CDN}/build/pdf.min.mjs`);
+    // Worker はクロスオリジン制約を避けるため blob URL 経由で読み込む
+    try {
+        const code = await (await fetch(`${CDN}/build/pdf.worker.min.mjs`)).text();
+        pdfjsLib.GlobalWorkerOptions.workerSrc = URL.createObjectURL(
+            new Blob([code], { type: 'text/javascript' }),
+        );
+    } catch {
+        pdfjsLib.GlobalWorkerOptions.workerSrc = `${CDN}/build/pdf.worker.min.mjs`;
+    }
+
+    const renderer = pdfjsAdapter(pdfjsLib, {
+        cMapUrl: `${CDN}/cmaps/`,
+        cMapPacked: true,
+        standardFontDataUrl: `${CDN}/standard_fonts/`,
+    });
+
+    function create(src) {
+        const viewer = createRSPDF('#viewer', { src, renderer, zoom: 'fit-width', author: 'デモユーザー' });
+        viewer.on('annotationAdd', ({ annotation }) => log(`annotationAdd: ${annotation.type} (p.${annotation.page})`));
+        viewer.on('annotationChange', ({ annotation }) => log(`annotationChange: ${annotation ? annotation.type : '(一括)'}`));
+        viewer.on('annotationRemove', ({ annotation }) => log(`annotationRemove: ${annotation.type}`));
+        viewer.on('flatten', ({ pages, bytes }) => log(`flatten: ${pages}ページ ${Math.round(bytes / 1024)}KB`));
+        viewer.on('formLoad', ({ count }) => log(`formLoad: ${count}フィールド`));
+        viewer.on('redact', ({ count }) => log(`redact: ${count}箇所を黒塗り消去`));
+        viewer.on('formChange', ({ name, value }) => log(`formChange: ${name} = ${JSON.stringify(value)}`));
+        viewer.on('load', ({ numPages }) => log(`load: ${numPages}ページ`));
+        viewer.on('pageChange', ({ page }) => log(`pageChange: ${page}`));
+        viewer.on('zoomChange', ({ zoom, mode }) => log(`zoomChange: ${Math.round(zoom * 100)}% (${mode})`));
+        viewer.on('rotate', ({ rotation }) => log(`rotate: ${rotation}°`));
+        viewer.on('search', ({ query, count }) => log(`search: "${query}" ${count}件`));
+        viewer.on('error', ({ message }) => log(`error: ${message}`));
+        return viewer;
+    }
+
+    let viewer = create('./sample.pdf');
+
+    // ---- デモ用コントロール --------------------------------------------
+    document.getElementById('file').addEventListener('change', (e) => {
+        const f = e.target.files[0];
+        if (f) {
+            viewer.open(f);
+            log(`open: ${f.name}`);
+        }
+    });
+    // ---- v0.3 フォームデモ ----------------------------------------------
+    const formRow = document.createElement('span');
+    formRow.style.cssText = 'display:inline-flex;gap:6px;margin-left:8px';
+    for (const [label, fn] of [
+        ['フォームPDFを開く', () => { viewer.open('./sample-form.pdf'); log('open: sample-form.pdf'); }],
+        ['フォームJSON', () => log('form: ' + JSON.stringify(viewer.form.toJSON()))],
+    ]) {
+        const b = document.createElement('button');
+        b.textContent = label;
+        b.addEventListener('click', fn);
+        formRow.appendChild(b);
+    }
+    document.getElementById('btn-reload').parentNode.insertBefore(formRow, document.getElementById('btn-reload'));
+
+    // ---- v0.3 rs-sign連携: 電子印鑑を注釈スタンプとして押す --------------
+    try {
+        const { createRSHanko } = await import('../../rs-sign/dist/rs-sign.esm.min.js');
+        const hanko = createRSHanko();
+        const sealRow = document.createElement('span');
+        sealRow.style.cssText = 'display:inline-flex;gap:6px;margin-left:8px';
+        const seals = [
+            ['認印を押す', { type: 'mitome', name: '佐野' }, 42],
+            ['角印を押す', { type: 'kaku', name: '株式会社パレラボ' }, 60],
+            ['データー印を押す', { type: 'data', name: '佐野', company: 'パレラボ' }, 48],
+        ];
+        for (const [label, opts, widthPt] of seals) {
+            const b = document.createElement('button');
+            b.textContent = label;
+            b.addEventListener('click', () => {
+                const png = hanko.toPNG(opts);
+                viewer.annotations.setStampImage(png, { widthPt });
+                viewer.annotations.setTool('stamp');
+                log(`${label}: ページ上をクリックすると押せます（rs-sign製PNG）`);
+            });
+            sealRow.appendChild(b);
+        }
+        window.__hanko = hanko;
+        document.getElementById('btn-reload').parentNode.insertBefore(sealRow, document.getElementById('btn-reload'));
+    } catch (err) {
+        log(`rs-sign連携は無効（${err.message}）`);
+    }
+
+    // ---- v0.2 注釈の保存・読込・flatten --------------------------------
+    let savedAnnots = null;
+    const btnRow = document.createElement('span');
+    btnRow.style.cssText = 'display:inline-flex;gap:6px;margin-left:8px';
+    for (const [label, fn] of [
+        ['注釈JSON保存', () => {
+            savedAnnots = viewer.annotations.toJSON();
+            log(`注釈JSON保存: ${savedAnnots.annotations.length}件`);
+        }],
+        ['注釈JSON復元', () => {
+            if (!savedAnnots) { log('先に保存してください'); return; }
+            viewer.annotations.fromJSON(savedAnnots);
+            log('注釈JSONを復元しました');
+        }],
+        ['黒塗り適用して保存(PDF)', async () => {
+            try {
+                const blob = await viewer.applyRedactions({ download: true, filename: 'redacted.pdf' });
+                log(`黒塗り適用: ${Math.round(blob.size / 1024)}KB（画像化・下地ごと消去）`);
+            } catch (err) { log(`黒塗り: ${err.message}`); }
+        }],
+        ['XFDF書出', () => {
+            const xml = viewer.exportXFDF();
+            log(`XFDF: ${Math.round(xml.length / 1024)}KB / ${(xml.match(/<\w+ page=/g) || []).length}注釈`);
+            console.log(xml);
+        }],
+        ['注釈付きで保存(PDF追記)', async () => {
+            try {
+                const blob = await viewer.saveAnnotated({ download: true, filename: 'annotated-real.pdf' });
+                log(`増分更新で保存: ${Math.round(blob.size / 1024)}KB（元PDFは無傷・Acrobatで注釈編集可）`);
+            } catch (err) { log(`保存失敗: ${err.message}`); }
+        }],
+        ['flatten保存(PDF)', async () => {
+            try {
+                const blob = await viewer.flatten({ download: true, filename: 'annotated.pdf' });
+                log(`flatten完了: ${Math.round(blob.size / 1024)}KB`);
+            } catch (err) { log(`flatten失敗: ${err.message}`); }
+        }],
+    ]) {
+        const b = document.createElement('button');
+        b.textContent = label;
+        b.addEventListener('click', fn);
+        btnRow.appendChild(b);
+    }
+    document.getElementById('btn-reload').parentNode.insertBefore(btnRow, document.getElementById('btn-reload'));
+
+    document.getElementById('btn-reload').addEventListener('click', () => {
+        if (viewer.destroyed) viewer = window.viewer = create('./sample.pdf');
+        else viewer.open('./sample.pdf');
+    });
+    document.getElementById('btn-destroy').addEventListener('click', () => {
+        viewer.destroy();
+        log('destroy() 済み。「サンプルを開き直す」で再生成できます');
+    });
+    document.getElementById('btn-error-demo').addEventListener('click', () => {
+        const box = document.getElementById('error-demo');
+        box.style.display = 'block';
+        // renderer を渡さずに開く → 落ちずに日本語エラーが表示される
+        createRSPDF(box, { src: './sample.pdf' });
+        log('アダプタ未注入のビューアを生成しました（下のエラー表示）');
+    });
+
+    // 自動テスト・コンソールから触れるように公開
+    window.viewer = viewer;
+    window.createRSPDF = createRSPDF;
+    window.pdfjsAdapter = pdfjsAdapter;
+    window.pdfjsLib = pdfjsLib;
+    window.demoRenderer = renderer;
+    document.getElementById('status').textContent = 'pdf.js ' + (pdfjsLib.version || '');
+</script>
+</body>
+</html>

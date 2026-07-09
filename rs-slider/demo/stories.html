@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>rs-slider デモ — 14. ストーリーズ風スライダー</title>
+<link rel="stylesheet" href="../dist/rs-slider.css">
+<link rel="stylesheet" href="demo.css">
+<style>
+    .stories-wrap { display: flex; justify-content: center; }
+    #st { width: min(100%, 360px); }
+</style>
+</head>
+<body>
+<div class="page">
+    <p class="back"><a href="./">← デモ一覧へ</a></p>
+    <h1>14. ストーリーズ風スライダー <small>createRSStories</small></h1>
+    <p class="lead">
+        自動進行バー・タップで進む/戻る（右2/3タップで次へ・左1/3で前へ）・長押しで一時停止・
+        縦長画像・画像/動画混在。キーボードは <kbd>←</kbd><kbd>→</kbd><kbd>Space</kbd>（一時停止）<kbd>M</kbd>（ミュート）。
+    </p>
+
+    <div class="card">
+        <h2>画像4本 + 実行時生成の動画1本</h2>
+        <p class="note">
+            3本目は <code>duration: 8000</code> で長め。動画は再生終了と連動して次のストーリーへ進みます。
+            動画は裏側で実時間録画して生成するため、初回訪問時のみ数秒後に4本目として追加されます
+            （2回目以降はキャッシュから即時。生成できない環境では画像のみ）。
+        </p>
+        <div class="stories-wrap">
+            <div id="st"></div>
+        </div>
+        <div class="controls" style="justify-content: center;">
+            <button class="ctl" id="st-prev">← 前へ</button>
+            <button class="ctl" id="st-next">次へ →</button>
+        </div>
+        <div class="value" id="v-st" style="text-align: center;"></div>
+    </div>
+</div>
+
+<script type="module">
+    import { createRSStories } from '../dist/rs-slider.esm.min.js';
+    import { photo, makeVideoCached } from './assets.js';
+
+    const baseStories = [
+        { src: photo(1300, { w: 720, h: 1280, label: 'Story 1' }), heading: '朝の風景' },
+        { src: photo(1301, { w: 720, h: 1280, label: 'Story 2' }), heading: '昼のスナップ' },
+        { src: photo(1302, { w: 720, h: 1280, label: 'Story 3（8秒表示）' }), heading: 'じっくり見せる1枚', duration: 8000 },
+        { src: photo(1304, { w: 720, h: 1280, label: 'Last Story' }), heading: 'おしまい' },
+    ];
+
+    let st = null;
+    function build(stories, startIndex = 0, autoplay = true) {
+        st?.destroy();
+        st = createRSStories('#st', {
+            stories,
+            duration: 5000,
+            startIndex,
+            autoplay,
+            loop: false,
+            onChange: (i, _prev, item) => {
+                document.getElementById('v-st').textContent =
+                    `change: ${i + 1} / ${st.getCount()}（${item.type === 'video' ? '動画' : '画像'}）`;
+            },
+            onEnd: () => {
+                document.getElementById('v-st').textContent = 'end: すべてのストーリーを再生しました';
+            },
+        });
+    }
+    build(baseStories);
+
+    // 動画ストーリーは裏で生成し、完成したら4本目に差し込む（ページ表示をブロックしない）
+    makeVideoCached('stories', { seconds: 5, seed: 21, label: 'STORY MOVIE', w: 480, h: 854 })
+        .then((url) => {
+            if (!url) return;
+            const withVideo = [
+                ...baseStories.slice(0, 3),
+                { type: 'video', src: url, heading: '動画ストーリー' },
+                baseStories[3],
+            ];
+            build(withVideo, Math.min(st.getIndex(), withVideo.length - 1), st.isPlaying());
+        });
+
+    document.getElementById('st-prev').addEventListener('click', () => st.prev());
+    document.getElementById('st-next').addEventListener('click', () => st.next());
+</script>
+</body>
+</html>

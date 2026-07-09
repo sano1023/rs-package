@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>rs-pivot デモ — サンプル売上データ1万行</title>
+<link rel="stylesheet" href="../dist/rs-pivot.css">
+<!-- v0.3 連携: rs-chart / rs-grid のスタイル（読み取り連携・import のみ） -->
+<link rel="stylesheet" href="../../rs-chart/dist/rs-chart.css">
+<link rel="stylesheet" href="../../rs-grid/dist/rs-grid.css">
+<style>
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Noto Sans JP", Meiryo, sans-serif;
+        margin: 16px;
+        background: #fafbfc;
+        color: #24292f;
+    }
+    h1 { font-size: 20px; margin: 0 0 4px; }
+    .sub { color: #57606a; font-size: 13px; margin-bottom: 12px; }
+    .toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+        margin-bottom: 12px;
+        font-size: 13px;
+    }
+    .toolbar button {
+        border: 1px solid #d0d7de;
+        background: #fff;
+        border-radius: 6px;
+        padding: 5px 12px;
+        cursor: pointer;
+        font-size: 13px;
+    }
+    .toolbar button:hover { background: #f3f6f9; }
+    .toolbar label { display: inline-flex; align-items: center; gap: 4px; cursor: pointer; }
+    #pivot { height: 640px; }
+    #pivot2 { height: 400px; margin-top: 16px; display: none; }
+    #pivot2.show { display: block; }
+    details { margin-top: 12px; font-size: 13px; }
+    textarea { width: 100%; height: 120px; font-family: ui-monospace, monospace; font-size: 12px; box-sizing: border-box; }
+    #eventlog {
+        margin-top: 12px;
+        font-family: ui-monospace, monospace;
+        font-size: 12px;
+        background: #fff;
+        border: 1px solid #d0d7de;
+        border-radius: 6px;
+        padding: 8px;
+        max-height: 120px;
+        overflow: auto;
+        white-space: pre-wrap;
+    }
+</style>
+</head>
+<body>
+<h1>rs-pivot デモ</h1>
+<div class="sub">サンプル売上データ 10,000行（固定シード生成: 地域/店舗/区分/カテゴリ/商品/日付/売上/数量/原価）。フィールドをドラッグ＆ドロップで行/列/値/フィルタへ。セルをダブルクリックすると明細を表示。</div>
+
+<div class="toolbar">
+    <label><input type="checkbox" id="opt-fiscal" checked> 会計年度（4月始まり）</label>
+    <label><input type="checkbox" id="opt-subtotals" checked> 小計</label>
+    <label><input type="checkbox" id="opt-grand" checked> 総計</label>
+    <label><input type="checkbox" id="opt-flat"> フラットモード</label>
+    <label><input type="checkbox" id="opt-heatmap"> ヒートマップ</label>
+    <label><input type="checkbox" id="opt-databar"> データバー</label>
+    <label>値の配置
+        <select id="opt-vplace">
+            <option value="inner">列の内側</option>
+            <option value="outer">列の外側</option>
+        </select>
+    </label>
+    <button id="btn-csv">CSVエクスポート</button>
+    <button id="btn-tsv">TSVエクスポート</button>
+    <button id="btn-print">印刷 (A4)</button>
+    <button id="btn-save">レイアウト保存 (toJSON)</button>
+    <button id="btn-load">復元 (fromJSON)</button>
+    <button id="btn-clone">別インスタンスに複製</button>
+    <button id="btn-reset">初期状態に戻す</button>
+</div>
+<div class="sub" style="margin-top:-4px">
+    v0.2: 計算フィールド <b>ƒ粗利 / ƒ粗利率(%)</b>（式で定義）を「値」へドラッグ・値ピルの
+    <b>%</b> で行比/列比/総計比・<b>N</b> で Top-N・行/列グループ見出しの <b>▾</b> で折りたたみ。<br>
+    v0.4: 行/列の日付ピルの <b>粒</b> で 年/四半期/月/<b>週/日</b> 粒度切替・<b>値の配置</b>で複数値を列の内側/外側へ・
+    パネル上部の <b>レポート</b> で名前付きスライスの保存/呼出（localStorage併用）・<b>印刷</b>はA4横でパネル非表示。
+</div>
+
+<div id="pivot"></div>
+<div id="pivot2"></div>
+
+<div class="toolbar" style="margin-top:14px">
+    <strong style="font-size:12px">v0.3 連携:</strong>
+    <button id="btn-chart">現在のスライスをチャート化</button>
+    <label>種類
+        <select id="chart-type">
+            <option value="column">縦棒</option>
+            <option value="bar">横棒</option>
+            <option value="line">折れ線</option>
+            <option value="area">エリア</option>
+            <option value="pie">円（先頭値）</option>
+        </select>
+    </label>
+    <label><input type="checkbox" id="opt-griddetail"> セルWクリック明細を rs-grid で表示</label>
+    <button id="btn-chart-hide" style="display:none">チャートを隠す</button>
+</div>
+<div id="chart" style="height:360px; margin-top:8px; display:none;"></div>
+
+<h2 style="font-size:16px; margin:26px 0 4px">大規模データ & Web Worker（v0.3）</h2>
+<div class="sub">同じエンジンを Web Worker で回して集計をオフスレッド化（DOM非依存の実証）。10万行でも UI が固まりません。</div>
+<div class="toolbar">
+    <label>行数
+        <select id="big-count">
+            <option value="10000">1万</option>
+            <option value="100000" selected>10万</option>
+        </select>
+    </label>
+    <label><input type="checkbox" id="big-worker" checked> Web Worker で集計</label>
+    <button id="btn-big">生成して集計</button>
+    <span id="big-timing" style="font-family:ui-monospace,monospace; font-size:12px; color:#57606a"></span>
+</div>
+<div id="bigpivot" style="height:440px"></div>
+
+<details>
+    <summary>スライスJSON（保存/復元用）</summary>
+    <textarea id="json" spellcheck="false"></textarea>
+</details>
+
+<div id="eventlog">イベントログ:</div>
+
+<script type="module">
+    import { createRSPivot, defineAggregation, heatmap, dataBar, buildStore, aggregate, createRegistry, normalizeSlice } from '../dist/rs-pivot.esm.min.js';
+    import { generateData } from './data.js';
+    // v0.3 読み取り連携（rs-chart / rs-grid は import して使うだけ）
+    import { createRSChart } from '../../rs-chart/dist/rs-chart.esm.min.js';
+    import { createRSGrid } from '../../rs-grid/dist/rs-grid.esm.min.js';
+    // グローバルに公開しておくと pivot.chart() / ドリルスルーの rs-grid が自動解決される
+    window.createRSChart = createRSChart;
+    window.createRSGrid = createRSGrid;
+
+    // カスタム集計（プラグインAPIのデモ）: 範囲 = 最大 - 最小
+    const range = defineAggregation({
+        name: 'range',
+        label: '範囲',
+        init: () => ({ min: Infinity, max: -Infinity }),
+        step: (acc, v) => {
+            if (typeof v === 'number' && isFinite(v)) {
+                if (v < acc.min) acc.min = v;
+                if (v > acc.max) acc.max = v;
+            }
+        },
+        result: (acc) => (acc.max === -Infinity ? null : acc.max - acc.min),
+    });
+
+    const records = generateData(10000, 20260401);
+
+    const initialSlice = {
+        rows: ['地域', '区分'],
+        columns: ['日付'],                     // 日付 → 年度/四半期/月 に自動グルーピング
+        values: [
+            { field: '売上', agg: 'sum' },
+            { field: '数量', agg: 'sum' },
+        ],
+        options: { fiscalYear: true, subtotals: true, grandTotals: true },
+    };
+
+    // 計算フィールド（式で定義・eval不使用の安全パーサ）: 粗利 = 売上 - 原価
+    const calculatedFields = [
+        { name: '粗利', expression: '売上 - 原価' },
+        { name: '粗利率(%)', expression: '(売上 - 原価) / 売上 * 100' },
+    ];
+
+    const pivot = createRSPivot('#pivot', {
+        data: records,
+        slice: initialSlice,
+        format: { 売上: { prefix: '¥' }, 原価: { prefix: '¥' }, 粗利: { prefix: '¥' }, '粗利率(%)': { decimals: 1, suffix: '%' } },
+        aggregations: [range],
+        calculatedFields,
+        // v0.4: レポートテンプレート（名前付きスライス）を localStorage に併用保存
+        templatesKey: 'rs-pivot-demo-templates',
+    });
+
+    // ---- デモUI配線 ----
+    const $ = (s) => document.querySelector(s);
+    const log = (msg) => {
+        $('#eventlog').textContent += `\n${msg}`;
+        $('#eventlog').scrollTop = 1e9;
+    };
+
+    window.eventLog = [];
+    pivot.on('cellDblClick', (e) => {
+        window.eventLog.push(e);
+        log(`cellDblClick: [${e.rowPath.join('/')}] × [${e.colPath.join('/')}] ${e.field}(${e.agg}) = ${e.value} / 明細 ${e.records.length}件`);
+    });
+    pivot.on('sliceChange', () => log('sliceChange'));
+
+    const syncChecks = () => {
+        const o = pivot.toJSON().options;
+        $('#opt-fiscal').checked = o.fiscalYear;
+        $('#opt-subtotals').checked = o.subtotals;
+        $('#opt-grand').checked = o.grandTotals;
+        $('#opt-flat').checked = o.flat;
+        $('#opt-vplace').value = o.valuePlacement || 'inner';
+    };
+    $('#opt-fiscal').addEventListener('change', (e) => pivot.sliceModel.setOption('fiscalYear', e.target.checked));
+    $('#opt-subtotals').addEventListener('change', (e) => pivot.sliceModel.setOption('subtotals', e.target.checked));
+    $('#opt-grand').addEventListener('change', (e) => pivot.sliceModel.setOption('grandTotals', e.target.checked));
+    $('#opt-flat').addEventListener('change', (e) => pivot.sliceModel.setOption('flat', e.target.checked));
+    $('#opt-vplace').addEventListener('change', (e) => pivot.sliceModel.setValuePlacement(e.target.value));
+    $('#btn-print').addEventListener('click', () => window.print());
+    pivot.on('sliceChange', syncChecks);
+
+    // 条件付き書式（カスタムセルレンダラAPI）: ヒートマップ / データバー
+    const applyRenderer = () => {
+        const on = [];
+        if ($('#opt-heatmap').checked) on.push(heatmap());
+        if ($('#opt-databar').checked) on.push(dataBar());
+        pivot.setCellRenderer(on.length === 0 ? null : (td, cell, ctx) => on.forEach((r) => r(td, cell, ctx)));
+    };
+    $('#opt-heatmap').addEventListener('change', applyRenderer);
+    $('#opt-databar').addEventListener('change', applyRenderer);
+
+    $('#btn-csv').addEventListener('click', () => pivot.exportCSV('売上ピボット.csv'));
+    $('#btn-tsv').addEventListener('click', () => pivot.exportTSV('売上ピボット.tsv'));
+    $('#btn-save').addEventListener('click', () => {
+        $('#json').value = JSON.stringify(pivot.toJSON(), null, 2);
+        log('toJSON: レイアウトをテキストエリアへ保存');
+    });
+    $('#btn-load').addEventListener('click', () => {
+        try {
+            pivot.fromJSON(JSON.parse($('#json').value));
+            log('fromJSON: レイアウトを復元');
+        } catch (err) {
+            log(`fromJSON エラー: ${err.message}`);
+        }
+    });
+
+    let pivot2 = null;
+    $('#btn-clone').addEventListener('click', () => {
+        $('#pivot2').classList.add('show');
+        if (pivot2) pivot2.destroy();
+        pivot2 = createRSPivot('#pivot2', {
+            data: records,
+            format: { 売上: { prefix: '¥' }, 原価: { prefix: '¥' } },
+            aggregations: [range],
+            fieldPanel: false,
+        });
+        pivot2.fromJSON(pivot.toJSON());
+        window.pivot2 = pivot2;
+        log('toJSON → 別インスタンスへ fromJSON（同一の表になるはず）');
+    });
+    $('#btn-reset').addEventListener('click', () => pivot.fromJSON(initialSlice));
+
+    // ---- v0.3: rs-chart 連携（ワンクリックでチャート化・再スライスで自動追従） ----
+    let demoChart = null;
+    $('#btn-chart').addEventListener('click', () => {
+        $('#chart').style.display = 'block';
+        $('#btn-chart-hide').style.display = 'inline-block';
+        const type = $('#chart-type').value;
+        if (demoChart) { demoChart.destroy(); demoChart = null; }
+        // pivot.chart は現在のスライスをシリーズ/カテゴリに変換して createRSChart を呼ぶ
+        demoChart = pivot.chart('#chart', { type, legend: { show: true } });
+        window.demoChart = demoChart;
+        log(`chart(): 現在のスライスを ${type} チャート化（再スライスで自動更新）`);
+    });
+    $('#chart-type').addEventListener('change', () => { if (demoChart) $('#btn-chart').click(); });
+    $('#btn-chart-hide').addEventListener('click', () => {
+        if (demoChart) { demoChart.destroy(); demoChart = null; window.demoChart = null; }
+        $('#chart').style.display = 'none';
+        $('#btn-chart-hide').style.display = 'none';
+    });
+
+    // ---- v0.3: rs-grid 明細連携（ドリルスルーを組み込みモーダルの代わりに rs-grid で） ----
+    $('#opt-griddetail').addEventListener('change', (e) => {
+        pivot.options.drillThrough = e.target.checked
+            ? { grid: true, limit: 1000, height: 380 }  // createRSGrid はグローバルから解決
+            : null;
+        log(`ドリルスルー明細: ${e.target.checked ? 'rs-grid' : '組み込みモーダル'}`);
+    });
+
+    // ---- v0.3: 大規模データ & Web Worker ----
+    let bigPivot = null;
+    async function makeBig(count, worker) {
+        count = count != null ? count : +$('#big-count').value;
+        worker = worker != null ? worker : $('#big-worker').checked;
+        const data = generateData(count, 20260401);
+        if (bigPivot) { bigPivot.destroy(); bigPivot = null; }
+        const t0 = performance.now();
+        bigPivot = createRSPivot('#bigpivot', {
+            data,
+            slice: {
+                rows: ['地域', '店舗'], columns: ['日付'],
+                values: [{ field: '売上', agg: 'sum' }, { field: '数量', agg: 'sum' }],
+                options: { fiscalYear: true },
+            },
+            format: { 売上: { prefix: '¥' } },
+            worker,                      // ← ここが v0.3 の肝（集計を Worker へ）
+            drillThrough: { grid: true, limit: 500 },
+        });
+        window.bigPivot = bigPivot;
+        await bigPivot.whenRendered();   // worker:true は非同期描画なので待つ
+        const ms = performance.now() - t0;
+        window.bigTiming = { count, worker, ms };
+        $('#big-timing').textContent = `${count.toLocaleString()}行 / ${worker ? 'Worker' : 'メインスレッド'} : 読込＋集計 ${ms.toFixed(0)}ms`;
+        return window.bigTiming;
+    }
+    $('#btn-big').addEventListener('click', () => makeBig());
+    window.makeBig = makeBig;
+
+    // §5 性能目標の in-browser 計測（描画抜きの純集計・辞書再利用）
+    window.__benchAggregate = (count = 100000) => {
+        const data = generateData(count, 20260401);
+        const reg = createRegistry();
+        let t = performance.now();
+        const store = buildStore(data);
+        const s1 = normalizeSlice({
+            rows: ['地域', '店舗'], columns: ['日付'],
+            values: [{ field: '売上', agg: 'sum' }, { field: '数量', agg: 'sum' }],
+            options: { fiscalYear: true },
+        }, (n) => store.fieldType(n));
+        aggregate(store, s1, reg);
+        const initMs = performance.now() - t;
+        const s2 = normalizeSlice({
+            rows: ['カテゴリ', '商品'], columns: ['区分'],
+            values: [{ field: '売上', agg: 'sum' }, { field: '原価', agg: 'avg' }],
+        }, (n) => store.fieldType(n));
+        t = performance.now();
+        aggregate(store, s2, reg);
+        const resliceMs = performance.now() - t;
+        return { count, initMs, resliceMs };
+    };
+
+    // 検証・コンソール操作用に公開
+    window.pivot = pivot;
+    window.createRSPivot = createRSPivot;
+    window.records = records;
+    window.createRSPivot = createRSPivot;
+    window.defineAggregation = defineAggregation;
+    window.generateData = generateData;
+    window.heatmap = heatmap;
+    window.dataBar = dataBar;
+    window.calculatedFields = calculatedFields;
+</script>
+</body>
+</html>

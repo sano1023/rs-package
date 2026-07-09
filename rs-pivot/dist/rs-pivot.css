@@ -482,6 +482,176 @@
     font-size: 12px;
 }
 
+/* ---------------------------------------------------- v0.2: 展開/折りたたみトグル */
+.rs-pivot .rsp-toggle {
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    color: var(--rsp-accent);
+    font-size: 10px;
+    line-height: 1;
+    padding: 0 3px 0 0;
+    margin-right: 2px;
+    vertical-align: baseline;
+}
+
+.rs-pivot .rsp-toggle:hover {
+    color: var(--rsp-fg);
+}
+
+.rs-pivot .rsp-h-label {
+    /* ラベルはインライン（トグルと横並び） */
+}
+
+/* 折りたたみ済みの集約行/列は小計と同系色 */
+.rs-pivot .rsp-table td.rsp-cell-collapsed {
+    background: var(--rsp-subtotal-bg);
+    font-weight: 600;
+}
+
+.rs-pivot .rsp-table th.rsp-h-collapsed {
+    background: var(--rsp-subtotal-bg);
+}
+
+.rs-pivot .rsp-table tr.rsp-row-collapsed th.rsp-rowhead {
+    background: var(--rsp-subtotal-bg);
+    font-weight: 600;
+}
+
+/* 計算フィールドのピル（式で定義） */
+.rs-pivot .rsp-pill.rsp-calc .rsp-pill-label {
+    font-style: italic;
+}
+
+.rs-pivot .rsp-pill.rsp-calc .rsp-pill-label::before {
+    content: 'ƒ ';
+    color: var(--rsp-accent);
+    font-style: normal;
+    font-weight: 700;
+}
+
+/* 条件付き書式（ヒートマップ/データバー）の可読性 */
+.rs-pivot .rsp-table td.rsp-heat,
+.rs-pivot .rsp-table td.rsp-databar {
+    background-clip: padding-box;
+}
+
+/* フラットテーブルモード: 全ての次元ラベルを繰り返し表示 */
+.rs-pivot .rsp-table-flat tbody th.rsp-rowhead {
+    font-weight: 400;
+}
+
+/* ---------------------------------------------------- v0.4: レポートテンプレートバー */
+.rs-pivot .rsp-templates {
+    border: 1px solid var(--rsp-border);
+    border-radius: var(--rsp-radius);
+    background: var(--rsp-bg);
+    padding: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 0 0 auto;
+}
+
+.rs-pivot .rsp-templates-title {
+    font-weight: 600;
+    font-size: 11px;
+    color: #57606a;
+}
+
+.rs-pivot .rsp-tpl-row {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+
+.rs-pivot .rsp-tpl-select,
+.rs-pivot .rsp-tpl-name {
+    flex: 1;
+    min-width: 0;
+    padding: 3px 6px;
+    border: 1px solid var(--rsp-border);
+    border-radius: 4px;
+    font-size: 12px;
+    background: var(--rsp-bg);
+    color: var(--rsp-fg);
+}
+
+.rs-pivot .rsp-templates .rsp-btn {
+    font-size: 11px;
+    padding: 3px 8px;
+    flex: 0 0 auto;
+}
+
+/* ---------------------------------------------------- v0.4: 印刷CSS（A4横想定・パネル非表示・改ページ制御） */
+@media print {
+    @page {
+        size: A4 landscape;
+        margin: 12mm;
+    }
+
+    body {
+        background: #fff;
+    }
+
+    /* フィールドパネル・ポップアップ・モーダル・警告は印刷しない */
+    .rs-pivot .rsp-panel,
+    .rsp-popup,
+    .rsp-modal-overlay,
+    .rs-pivot .rsp-warning {
+        display: none !important;
+    }
+
+    .rs-pivot {
+        display: block;
+        height: auto;
+        min-height: 0;
+    }
+
+    .rs-pivot .rsp-table-area {
+        display: block;
+    }
+
+    /* スクロール枠を解除して表全体を出す */
+    .rs-pivot .rsp-table-wrap {
+        overflow: visible;
+        border: none;
+        height: auto;
+        min-height: 0;
+    }
+
+    .rs-pivot table.rsp-table {
+        width: 100%;
+        font-size: 10px;
+    }
+
+    .rs-pivot .rsp-table th,
+    .rs-pivot .rsp-table td {
+        padding: 2px 5px;
+    }
+
+    /* 改ページ制御: 各ページで多段ヘッダを繰り返し、行の途中で切らない */
+    .rs-pivot .rsp-table thead {
+        display: table-header-group;
+    }
+
+    .rs-pivot .rsp-table tr {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+
+    /* 小計/総計の直後で改ページを促す（区切りを見やすく） */
+    .rs-pivot .rsp-table tr.rsp-row-grand {
+        break-before: auto;
+    }
+
+    /* 操作用トグル/ピルボタンは印刷しない */
+    .rs-pivot .rsp-toggle,
+    .rs-pivot .rsp-pill-btn {
+        display: none !important;
+    }
+}
+
 /* ---------------------------------------------------- レスポンシブ */
 @media (max-width: 720px) {
     .rs-pivot {
@@ -492,4 +662,21 @@
         flex: 0 0 auto;
         width: 100%;
     }
+}
+
+/* ---------------------------------------------------- v0.3: rs-grid 明細モーダル */
+.rsp-modal-grid {
+    width: min(1040px, 100%);
+    max-width: min(1040px, 100%);
+}
+
+.rsp-modal-body-grid {
+    padding: 10px 12px 12px;
+    overflow: hidden;
+}
+
+.rsp-detail-grid {
+    width: 100%;
+    height: 100%;
+    min-height: 200px;
 }

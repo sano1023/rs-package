@@ -4,17 +4,24 @@ export function normalizeSlice(raw: any, fieldType: any): {
         dateGroup: any;
         field: any;
         sort: any;
+        topN: {
+            n: number;
+        } | null;
     }[];
     columns: {
         dateGroup: any;
         field: any;
         sort: any;
+        topN: {
+            n: number;
+        } | null;
     }[];
     values: {
         field: any;
         agg: any;
         label: any;
         format: any;
+        showAs: any;
     }[];
     filters: {
         field: any;
@@ -25,6 +32,12 @@ export function normalizeSlice(raw: any, fieldType: any): {
         fiscalYear: boolean;
         subtotals: boolean;
         grandTotals: boolean;
+        flat: boolean;
+        collapsed: {
+            rows: string[][];
+            columns: string[][];
+        };
+        valuePlacement: string;
     };
 };
 /** ゾーン名の一覧（D&D・キーボード移動の巡回順） */
@@ -45,17 +58,24 @@ export class SliceModel {
             dateGroup: any;
             field: any;
             sort: any;
+            topN: {
+                n: number;
+            } | null;
         }[];
         columns: {
             dateGroup: any;
             field: any;
             sort: any;
+            topN: {
+                n: number;
+            } | null;
         }[];
         values: {
             field: any;
             agg: any;
             label: any;
             format: any;
+            showAs: any;
         }[];
         filters: {
             field: any;
@@ -66,6 +86,12 @@ export class SliceModel {
             fiscalYear: boolean;
             subtotals: boolean;
             grandTotals: boolean;
+            flat: boolean;
+            collapsed: {
+                rows: string[][];
+                columns: string[][];
+            };
+            valuePlacement: string;
         };
     };
     _emit(): void;
@@ -87,6 +113,12 @@ export class SliceModel {
             fiscalYear: boolean;
             subtotals: boolean;
             grandTotals: boolean;
+            flat: boolean;
+            collapsed: {
+                rows: string[][];
+                columns: string[][];
+            };
+            valuePlacement: string;
         };
     };
     fromJSON(json: any): void;
@@ -95,11 +127,15 @@ export class SliceModel {
         dateGroup: any;
         field: any;
         sort: any;
+        topN: {
+            n: number;
+        } | null;
     }[] | {
         field: any;
         agg: any;
         label: any;
         format: any;
+        showAs: any;
     }[] | {
         field: any;
         include: any[] | null;
@@ -122,12 +158,27 @@ export class SliceModel {
     /** 行/列フィールドのソートを設定する（'asc'|'desc'|{byValue,dir}|null） */
     setSort(zone: any, index: any, sort: any): void;
     /**
+     * 行/列に置いた日付フィールドの粒度を切り替える（v0.4: year/quarter/month/week/day）。
+     * 同一 field+group が既にそのゾーンにあれば何もしない（重複防止）。
+     */
+    setDateGroup(zone: any, index: any, group: any): void;
+    /**
      * 値リストフィルタを設定する。include=null でフィルタ解除。
      * フィルタゾーンに無いフィールドなら追加する。
      */
     setFilter(field: any, include: any): void;
-    /** 表示オプション（fiscalYear/subtotals/grandTotals）を設定する */
+    /** 表示オプション（真偽値: fiscalYear/subtotals/grandTotals/flat）を設定する */
     setOption(key: any, value: any): void;
+    /** 複数値フィールドの列配置を切り替える（v0.4: 'inner'=列の内側 / 'outer'=列の外側） */
+    setValuePlacement(placement: any): void;
+    /** 値フィールドの割合表示を設定する（'value'|'row'|'column'|'total'） */
+    setShowAs(index: any, showAs: any): void;
+    /** 行/列フィールドの Top-N を設定する（null で解除） */
+    setTopN(zone: any, index: any, topN: any): void;
+    /** 展開/折りたたみを切り替える（axis: 'rows'|'columns'、path はラベル配列） */
+    toggleCollapse(axis: any, path: any): void;
+    /** 指定パスが折りたたまれているか */
+    isCollapsed(axis: any, path: any): any;
     /** setData 後、消えたフィールドをスライスから除去する */
     pruneFields(fieldExists: any): void;
 }

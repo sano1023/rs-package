@@ -1,5 +1,5 @@
 {
-    "name": "rs-baslider",
+    "name": "@parelabo/rs-baslider",
     "version": "0.1.0",
     "description": "Before/After比較スライダー（依存ゼロ・横/縦・タッチ対応・ラベル・複数設置）",
     "type": "module",
@@ -14,7 +14,15 @@
             "default": "./dist/rs-baslider.esm.min.js"
         },
         "./dist/*": "./dist/*",
-        "./rs-baslider.css": "./dist/rs-baslider.css"
+        "./rs-baslider.css": "./dist/rs-baslider.css",
+        "./vue": {
+            "types": "./dist/types/vue.d.ts",
+            "import": "./dist/rs-baslider.vue.esm.min.js"
+        },
+        "./react": {
+            "types": "./dist/types/react.d.ts",
+            "import": "./dist/rs-baslider.react.esm.min.js"
+        }
     },
     "files": [
         "dist"
@@ -22,11 +30,35 @@
     "keywords": [
         "before-after",
         "image-comparison",
-        "slider",
-        "twentytwenty"
+        "slider"
     ],
     "author": "ryusuke.sano <ryusuke.sano@parelabo.com>",
     "license": "SEE LICENSE IN LICENSE.txt",
+    "homepage": "https://github.com/sano1023/rs-package/tree/main/rs-baslider#readme",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/sano1023/rs-package.git",
+        "directory": "rs-baslider"
+    },
+    "bugs": {
+        "url": "https://parelabo.com",
+        "email": "contact@parelabo.com"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
     "types": "./dist/types/index.d.ts",
-    "style": "./dist/rs-baslider.css"
+    "style": "./dist/rs-baslider.css",
+    "peerDependencies": {
+        "vue": "^3.0.0",
+        "react": ">=18"
+    },
+    "peerDependenciesMeta": {
+        "vue": {
+            "optional": true
+        },
+        "react": {
+            "optional": true
+        }
+    }
 }

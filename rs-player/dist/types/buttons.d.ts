@@ -19,6 +19,13 @@ export namespace ICONS {
     let check: string;
     let chevron: string;
     let back: string;
+    let close: string;
+    let expand: string;
+    let next: string;
+    let prev: string;
+    let skipNext: string;
+    let skipPrev: string;
+    let playlist: string;
 }
 export const BUILTIN_BUTTONS: any[];
 declare function resolve(v: any, player: any): any;

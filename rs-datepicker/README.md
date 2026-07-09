@@ -2,24 +2,67 @@
 > 利用は無償（商用可）ですが、**改変・再配布はできません**（LICENSE.txt 参照）。
 > 機能追加・改修のご依頼は有償で承ります → https://parelabo.com （contact@parelabo.com）
 
-## インストール / 読み込み
+## インストール
 
 ```bash
-# npm（GitHubのtarball指定）
-npm install https://github.com/sano1023/ryusuke-packages-dist/raw/main/tarballs/rs-datepicker-0.3.0.tgz
+npm install @parelabo/rs-datepicker
 ```
 
-```html
-<!-- CDN（jsDelivr・scriptタグ直読み） -->
-<script src="https://cdn.jsdelivr.net/gh/sano1023/ryusuke-packages-dist@main/rs-datepicker/dist/rs-datepicker.min.js"></script>
+<details>
+<summary>npm レジストリを使わない場合（GitHub tarball 直指定）</summary>
+
+```bash
+npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-datepicker-0.3.0.tgz
 ```
+</details>
+
+## 使い方
+
+### バニラ JS（ESM・バンドラあり）
 
 ```js
-// ESM import（npmインストール後）
-import { /* 公開API */ } from 'rs-datepicker';
+import { createRSDatePicker } from '@parelabo/rs-datepicker';
+import '@parelabo/rs-datepicker/rs-datepicker.css';   // スタイル（バンドラ経由）
+
+createRSDatePicker(document.querySelector('#app'), { /* オプション */ });
 ```
 
-CSSが必要なパッケージは `dist/rs-datepicker.css` を link してください。
+### `<script>` タグ（CDN・ビルド環境不要）
+
+```html
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@parelabo/rs-datepicker@0.3.0/dist/rs-datepicker.css">
+<script src="https://cdn.jsdelivr.net/npm/@parelabo/rs-datepicker@0.3.0/dist/rs-datepicker.min.js"></script>
+<script>
+  // 公開APIはグローバル RSDatepicker に載る
+  RSDatepicker.createRSDatePicker(document.querySelector('#app'), { /* オプション */ });
+</script>
+```
+
+### Vue 3
+
+```js
+import { RsDatePicker, RsDateSelect } from '@parelabo/rs-datepicker/vue';
+import '@parelabo/rs-datepicker/rs-datepicker.css';   // スタイル（バンドラ経由）
+```
+
+```vue
+<template>
+  <RsDatePicker />
+</template>
+```
+
+### React 18 / 19
+
+```jsx
+import { RsDatePicker, RsDateSelect } from '@parelabo/rs-datepicker/react';
+import '@parelabo/rs-datepicker/rs-datepicker.css';   // スタイル（バンドラ経由）
+
+export default function App() {
+  return <RsDatePicker />;
+}
+```
+
+> `vue` / `react` は peerDependency です（バンドルには含みません）。アプリ側のものが使われます。
 
 ---
 

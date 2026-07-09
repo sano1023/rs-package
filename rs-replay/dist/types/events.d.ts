@@ -52,6 +52,30 @@ export function isRedundantMove(a: {
     y: any;
 }, tol?: number): boolean;
 /**
+ * 無操作（イベントの無い）区間を求める（v0.2・skipInactive 用）。
+ * 連続する2イベントの間隔が threshold(ms) を超えたら、その隙間を
+ * スキップ区間 { start, end } として返す。区間の前後には margin(ms) を残し、
+ * 直前直後の状態が一瞬見えるようにする。events は t 昇順であること。
+ * @returns {Array<{start:number,end:number}>}
+ */
+export function computeInactiveSkips(events: any, threshold?: number, margin?: number): Array<{
+    start: number;
+    end: number;
+}>;
+/** 時刻 t がいずれかのスキップ区間の内側なら、その区間の end を返す（外なら null） */
+export function skipEndFor(skips: any, t: any): any;
+/**
+ * タイムラインに出すマーカー（ルート変化・エラー・カスタムイベント）を抽出する（v0.2）。
+ * @returns {Array<{t:number, type:string, label:string}>}
+ */
+export function extractMarkers(events: any): Array<{
+    t: number;
+    type: string;
+    label: string;
+}>;
+/** マーカーの表示ラベル（title属性用・生値は載せない前提のカスタムデータのみ） */
+export function markerLabel(ev: any): any;
+/**
  * rs-replay イベント/セッション/チャンクのユーティリティ
  *
  * セッションJSONスキーマ（REQUIREMENTS §3 決定事項）:
@@ -75,4 +99,10 @@ export namespace EV {
     let RESIZE: string;
     let ROUTE: string;
     let ERROR: string;
+    let CUSTOM: string;
 }
+/**
+ * タイムラインにマーカーを出すイベント種別（v0.2）。
+ * ルート変化・エラー・カスタムイベントは点マーカーとして表示する。
+ */
+export const MARKER_TYPES: Set<string>;

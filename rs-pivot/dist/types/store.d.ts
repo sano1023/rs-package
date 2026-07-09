@@ -1,14 +1,17 @@
 /**
  * 列指向ストアを構築する。
  * @param {object[]} records フラットなJSON配列
+ * @param {object[]} calculatedFields [{ name, expression }]（v0.2 計算フィールド。式は eval 不使用の自前パーサ）
  */
-export function buildStore(records: object[]): {
+export function buildStore(records: object[], calculatedFields?: object[]): {
     count: number;
     records: object[];
-    fieldNames: string[];
+    fieldNames: any[];
+    calcFieldNames: any[];
     fields: {
-        name: string;
+        name: any;
         type: any;
+        calc: boolean;
     }[];
     column: (n: any) => any;
     fieldType: (n: any) => any;

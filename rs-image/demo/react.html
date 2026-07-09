@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>rs-image Reactラッパー デモ</title>
+<link rel="stylesheet" href="../dist/rs-image.css">
+<style>
+    body { font-family: system-ui, sans-serif; max-width: 980px; margin: 24px auto; padding: 0 16px; color: #1e293b; }
+    h1 { font-size: 18px; }
+    .row { display: flex; gap: 8px; align-items: center; margin: 10px 0; flex-wrap: wrap; }
+    button { padding: 6px 12px; border: 1px solid #cbd5e1; border-radius: 6px; background: #fff; cursor: pointer; }
+    .note { font-size: 12px; color: #64748b; }
+    #result img { max-height: 120px; border: 1px solid #e2e8f0; border-radius: 6px; }
+</style>
+<script type="importmap">
+{
+    "imports": {
+        "react": "https://esm.sh/react@18.3.1",
+        "react-dom/client": "https://esm.sh/react-dom@18.3.1/client"
+    }
+}
+</script>
+</head>
+<body>
+<h1>rs-image × React 18（ビルド済み dist/rs-image.react.esm.min.js を使用）</h1>
+<p class="note">※ 先に <code>node build.mjs rs-image</code> で dist を生成しておくこと。</p>
+<div id="app"></div>
+
+<script type="module">
+    import React from 'react';
+    import { createRoot } from 'react-dom/client';
+    import { RsImageEditor } from '../dist/rs-image.react.esm.min.js';
+
+    const e = React.createElement;
+
+    function makeSample() {
+        const c = document.createElement('canvas');
+        c.width = 800; c.height = 500;
+        const ctx = c.getContext('2d');
+        const g = ctx.createLinearGradient(0, 0, 800, 500);
+        g.addColorStop(0, '#59a14f'); g.addColorStop(1, '#e15759');
+        ctx.fillStyle = g; ctx.fillRect(0, 0, 800, 500);
+        ctx.fillStyle = '#fff'; ctx.font = 'bold 64px sans-serif';
+        ctx.fillText('React!', 290, 270);
+        return c.toDataURL('image/png');
+    }
+
+    function App() {
+        const [src, setSrc] = React.useState(null);
+        const [mounted, setMounted] = React.useState(true);
+        const [changeCount, setChangeCount] = React.useState(0);
+        const [exported, setExported] = React.useState('');
+        const ed = React.useRef(null);
+        window.state = { src, mounted, changeCount, ed, setSrc, setMounted };
+        return e('div', null,
+            e('div', { className: 'row' },
+                e('button', { id: 'btn-sample', onClick: () => setSrc(makeSample()) }, 'サンプル画像を読み込む'),
+                e('button', { id: 'btn-text', onClick: () => ed.current?.editor()?.addText('Reactから追加') }, '文字を追加（API）'),
+                e('button', {
+                    id: 'btn-export',
+                    onClick: async () => {
+                        const r = await ed.current?.export({ format: 'png', output: 'dataURL' });
+                        if (r) setExported(r.dataURL);
+                    },
+                }, '書き出す'),
+                e('button', { id: 'btn-unmount', onClick: () => setMounted((v) => !v) }, 'mount/unmount'),
+                e('span', { className: 'note', id: 'count' }, `change: ${changeCount}回`)),
+            mounted
+                ? e(RsImageEditor, {
+                    ref: ed,
+                    src,
+                    height: 380,
+                    onChange: () => setChangeCount((c) => c + 1),
+                })
+                : e('p', { className: 'note' }, 'アンマウント中'),
+            e('div', { id: 'result' },
+                exported ? [e('p', { key: 'p' }, '書き出し結果:'), e('img', { key: 'i', src: exported })] : null));
+    }
+
+    window.root = createRoot(document.getElementById('app'));
+    window.root.render(e(App));
+</script>
+</body>
+</html>

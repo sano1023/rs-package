@@ -10,9 +10,11 @@
  * @returns {(v:any) => string}
  */
 export function makeFormatter(fmt?: object): (v: any) => string;
+/** 割合表示（行比/列比/総計比）用のパーセントフォーマッタ */
+export function makePercentFormatter(decimals?: number): (v: any) => string;
 /**
  * 値フィールドのフォーマッタを解決する。
- * 優先順: 値フィールド自身の format → options.format[フィールド名] → 既定。
+ * 優先順: 割合表示 → 値フィールド自身の format → options.format[フィールド名] → 既定。
  * 件数系（count / countDistinct 等 countLike:true）はフィールドの¥等を適用せず桁区切りのみ。
  */
 export function resolveFormatter(valueDef: any, formatOptions: any): (v: any) => string;

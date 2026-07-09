@@ -6,51 +6,82 @@
 - **改変・再配布・リバースエンジニアリングは禁止**（各パッケージの LICENSE.txt 参照）
 - 機能追加・改修・カスタマイズは作者への**有償依頼**として承ります → **https://parelabo.com** / contact@parelabo.com
 
+すべてのパッケージが **バニラJS / Vue 3 / React / `<script>`タグ** の4形態で使えます。
+
+## インストール
+
+```bash
+npm install @parelabo/rs-editor
+```
+
+npm レジストリを使わない場合は GitHub の tarball を直接指定できます。
+
+```bash
+npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-editor-0.5.0.tgz
+```
+
 ## 使い方
 
-**scriptタグ（CDN・ビルド環境不要）**
+**バニラ JS（ESM）**
+```js
+import { createRSEditor } from '@parelabo/rs-editor';
+import '@parelabo/rs-editor/rs-editor.css';
+
+createRSEditor('#editor', { toolbar: 'undo redo | bold italic' });
+```
+
+**Vue 3**
+```js
+import { RsEditor } from '@parelabo/rs-editor/vue';
+import '@parelabo/rs-editor/rs-editor.css';
+```
+```vue
+<RsEditor v-model="html" toolbar="undo redo | bold italic" />
+```
+
+**React**
+```jsx
+import { RsEditor } from '@parelabo/rs-editor/react';
+import '@parelabo/rs-editor/rs-editor.css';
+
+<RsEditor value={html} onChange={setHtml} />
+```
+
+`vue` / `react` は peerDependency（バンドルに同梱しません）。
+
+**`<script>` タグ（CDN・ビルド環境不要）**
 ```html
-<script src="https://cdn.jsdelivr.net/gh/sano1023/ryusuke-packages-dist@main/rs-editor/dist/rs-editor.min.js"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sano1023/ryusuke-packages-dist@main/rs-editor/dist/rs-editor.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@parelabo/rs-editor/dist/rs-editor.css">
+<script src="https://cdn.jsdelivr.net/npm/@parelabo/rs-editor/dist/rs-editor.min.js"></script>
 <script>
   RSEditor.createRSEditor('#editor', { plugins: [RSEditor.plugins.checklist] });
 </script>
 ```
 
-**npm（tarball URL 指定）**
-```bash
-npm install https://github.com/sano1023/ryusuke-packages-dist/raw/main/tarballs/rs-editor-0.5.0.tgz
-```
-```js
-import { createRSEditor } from 'rs-editor';
-import { RsEditor } from 'rs-editor/vue';    // Vue 3 ラッパー
-import { RsEditor } from 'rs-editor/react';  // React 18 ラッパー
-```
-
 ## パッケージ一覧
 
-| パッケージ | バージョン | 概要 |
-|---|---|---|
-| [rs-baslider](./rs-baslider/) | 0.1.0 | Before/After比較スライダー |
-| [rs-chart](./rs-chart/) | 0.5.0 | 有料チャートライブラリの機能網羅を目指す、依存ゼロのSVGチャートライブラリ |
-| [rs-datepicker](./rs-datepicker/) | 0.3.0 | 日本語ファースト・依存ゼロの日付ピッカー |
-| [rs-diagram](./rs-diagram/) | 0.2.0 | 有料ダイアグラムライブラリの機能網羅を目指す、依存ゼロのSVG作図ライブラリ |
-| [rs-editor](./rs-editor/) | 0.5.0 | プラグインアーキテクチャを持つ、依存ゼロのWYSIWYGエディタライブラリ |
-| [rs-form](./rs-form/) | 0.1.0 | 有料フォームビルダー製品の機能網羅を目指す、依存ゼロのスキーマ駆動フォームライブラリ |
-| [rs-gantt](./rs-gantt/) | 0.1.0 | 有料ガントチャートライブラリの機能網羅を目指す、依存ゼロの対話型プロジェクトガント |
-| [rs-grid](./rs-grid/) | 0.4.1 | Excel風データグリッド |
-| [rs-image](./rs-image/) | 0.6.0 | 依存ゼロの画像処理＆合成エディタ |
-| [rs-livecam](./rs-livecam/) | 0.2.0 | リアルタイムカメラ加工 |
-| [rs-pdf](./rs-pdf/) | 0.5.0 | 有料PDF SDKの機能網羅を目指す、依存ゼロのPDFビューア＆注釈ライブラリ |
-| [rs-pivot](./rs-pivot/) | 0.1.0 | 有料ピボットテーブルライブラリの機能網羅を目指す、依存ゼロのピボットテーブルライブラリ |
-| [rs-player](./rs-player/) | 0.1.0 | 有料動画プレイヤーの機能網羅を目指す、依存ゼロのHTML5動画プレイヤー |
-| [rs-qrcode](./rs-qrcode/) | 0.1.2 | QRコード/バーコード生成 |
-| [rs-replay](./rs-replay/) | 0.1.0 | 有料セッションリプレイSaaSの機能網羅を目指す、完全セルフホスト・依存ゼロのセッション記録/再生ライブラリ |
-| [rs-scanner](./rs-scanner/) | 0.1.0 | QR/バーコード読み取り |
-| [rs-sheet](./rs-sheet/) | 0.1.0 | 本格数式エンジン内蔵・依存ゼロのセル指向スプレッドシートライブラリ |
-| [rs-sign](./rs-sign/) | 0.1.0 | 電子署名SaaSの画面部品網羅を目指す、依存ゼロの署名パッド＋電子印鑑ライブラリ |
-| [rs-slider](./rs-slider/) | 0.1.0 | 依存ゼロの画像スライダーコレクション |
-| [rs-upload](./rs-upload/) | 0.1.0 | 有料アップロードSaaS/ウィジェットの機能網羅を目指す、依存ゼロのファイルアップロードUI＋転送エンジン |
-| [@knoweble/spotlight-tour](./tour/) | 0.1.0 | 依存ゼロ・フレームワーク非依存のスポットライト型ガイドツアーライブラリ |
+| パッケージ | バージョン | Vue/React | CSS | 概要 |
+|---|---|---|---|---|
+| [@parelabo/rs-baslider](./rs-baslider/) | 0.1.0 | ✅ | 要 | Before/After比較スライダー |
+| [@parelabo/rs-chart](./rs-chart/) | 0.5.0 | ✅ | 要 | 依存ゼロのSVG/Canvasチャートライブラリ |
+| [@parelabo/rs-datepicker](./rs-datepicker/) | 0.3.0 | ✅ | 要 | 日本語ファースト・依存ゼロの日付ピッカー |
+| [@parelabo/rs-diagram](./rs-diagram/) | 0.5.0 | ✅ | 要 | 依存ゼロのSVG作図・ダイアグラムライブラリ |
+| [@parelabo/rs-editor](./rs-editor/) | 0.5.0 | ✅ | 要 | プラグインアーキテクチャを持つ、依存ゼロのWYSIWYGエディタライブラリ |
+| [@parelabo/rs-form](./rs-form/) | 0.5.0 | ✅ | 要 | 依存ゼロのスキーマ駆動フォームビルダー |
+| [@parelabo/rs-gantt](./rs-gantt/) | 0.5.0 | ✅ | 要 | 依存ゼロの対話型プロジェクトガントチャート |
+| [@parelabo/rs-grid](./rs-grid/) | 0.4.1 | ✅ | 要 | Excel風データグリッド |
+| [@parelabo/rs-image](./rs-image/) | 0.6.0 | ✅ | 要 | 依存ゼロの画像処理＆合成エディタ |
+| [@parelabo/rs-livecam](./rs-livecam/) | 0.2.0 | ✅ | 不要 | リアルタイムカメラ加工 |
+| [@parelabo/rs-pdf](./rs-pdf/) | 0.5.0 | ✅ | 要 | 依存ゼロのPDFビューア＆注釈ライブラリ |
+| [@parelabo/rs-pivot](./rs-pivot/) | 0.4.0 | ✅ | 要 | 依存ゼロのピボットテーブルライブラリ |
+| [@parelabo/rs-player](./rs-player/) | 0.5.0 | ✅ | 要 | 依存ゼロのHTML5動画プレイヤー |
+| [@parelabo/rs-qrcode](./rs-qrcode/) | 0.1.2 | ✅ | 不要 | QRコード/バーコード生成 |
+| [@parelabo/rs-replay](./rs-replay/) | 0.4.0 | ✅ | 要 | 完全セルフホスト・依存ゼロのセッション記録/再生ライブラリ |
+| [@parelabo/rs-scanner](./rs-scanner/) | 0.1.0 | ✅ | 要 | QR/バーコード読み取り |
+| [@parelabo/rs-sheet](./rs-sheet/) | 0.5.0 | ✅ | 要 | 本格数式エンジン内蔵・依存ゼロのセル指向スプレッドシートライブラリ |
+| [@parelabo/rs-sign](./rs-sign/) | 0.4.0 | ✅ | 要 | 電子署名SaaSの画面部品網羅を目指す、依存ゼロの署名パッド＋電子印鑑ライブラリ |
+| [@parelabo/rs-slider](./rs-slider/) | 0.1.0 | ✅ | 要 | 依存ゼロの画像スライダーコレクション |
+| [@parelabo/rs-tour](./rs-tour/) | 0.1.0 | ✅ | 不要 | 依存ゼロ・フレームワーク非依存のスポットライト型ガイドツアーライブラリ |
+| [@parelabo/rs-upload](./rs-upload/) | 0.4.0 | ✅ | 要 | 依存ゼロのファイルアップロードUI＋転送エンジン |
 
-各パッケージの詳しい使い方は、それぞれの README を参照してください。
+各パッケージの詳しい使い方（props・イベント・メソッド）は、それぞれの README を参照してください。

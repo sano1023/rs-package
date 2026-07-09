@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>rs-editor Reactラッパー デモ</title>
+<link rel="stylesheet" href="../dist/rs-editor.css">
+<style>
+    body { font-family: system-ui, sans-serif; max-width: 860px; margin: 24px auto; padding: 0 16px; color: #1e293b; }
+    h1 { font-size: 18px; }
+    .row { display: flex; gap: 8px; align-items: center; margin: 10px 0; flex-wrap: wrap; }
+    button { padding: 6px 12px; border: 1px solid #cbd5e1; border-radius: 6px; background: #fff; cursor: pointer; }
+    textarea { width: 100%; height: 110px; font: 12px ui-monospace, monospace; }
+    .note { font-size: 12px; color: #64748b; }
+</style>
+<script type="importmap">
+{
+    "imports": {
+        "react": "https://esm.sh/react@18.3.1",
+        "react-dom/client": "https://esm.sh/react-dom@18.3.1/client"
+    }
+}
+</script>
+</head>
+<body>
+<h1>rs-editor × React 18（ビルド済み dist/rs-editor.react.esm.min.js を使用）</h1>
+<p class="note">※ 先に <code>node build.mjs rs-editor</code> で dist を生成しておくこと。react は esm.sh。JSXは使わず createElement 直書き。</p>
+<div id="app"></div>
+
+<script type="module">
+    import React from 'react';
+    import { createRoot } from 'react-dom/client';
+    import { RsEditor } from '../dist/rs-editor.react.esm.min.js';
+
+    const e = React.createElement;
+
+    function App() {
+        const [html, setHtml] = React.useState('<p>Reactから<strong>こんにちは</strong></p>');
+        const [readOnly, setReadOnly] = React.useState(false);
+        const [mounted, setMounted] = React.useState(true);
+        const [changeCount, setChangeCount] = React.useState(0);
+        const editorRef = React.useRef(null);
+        window.state = { html, readOnly, mounted, changeCount, setHtml, setReadOnly, setMounted, editorRef };
+        return e('div', null,
+            e('div', { className: 'row' },
+                e('label', null,
+                    e('input', {
+                        type: 'checkbox', id: 'chk-readonly',
+                        onChange: (ev) => setReadOnly(ev.target.checked),
+                    }),
+                    ' readOnly'),
+                e('button', { id: 'btn-set', onClick: () => setHtml('<p>親から流し込んだ<em>新しい内容</em></p>') }, '親からsetする'),
+                e('button', { id: 'btn-echo', onClick: () => setHtml((v) => `${v}`) }, '同じ値を書き戻す'),
+                e('button', { id: 'btn-unmount', onClick: () => setMounted((v) => !v) }, 'mount/unmount')),
+            mounted
+                ? e(RsEditor, {
+                    ref: editorRef,
+                    value: html,
+                    onChange: (v) => { setHtml(v); setChangeCount((c) => c + 1); },
+                    readOnly,
+                    toolbar: 'undo redo | bold italic underline | h1 h2 | bullist numlist | code',
+                    placeholder: '本文を入力…',
+                })
+                : e('p', { className: 'note' }, 'アンマウント中'),
+            e('h3', null, 'value の中身（リアルタイム）'),
+            e('textarea', { id: 'out', value: html, readOnly: true }),
+            e('p', { className: 'note', id: 'count' }, `onChange 発火回数: ${changeCount}`));
+    }
+
+    window.root = createRoot(document.getElementById('app'));
+    window.root.render(e(App));
+</script>
+</body>
+</html>

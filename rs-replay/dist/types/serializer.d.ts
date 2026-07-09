@@ -8,12 +8,15 @@ export function idOf(reg: any, node: any): any;
 /**
  * 1ノードをシリアライズする（子孫を含む）。記録対象外なら null。
  * @param {Node} node
- * @param {{reader: object, reg: object, ignore?: (el) => boolean}} ctx
+ * @param {{reader: object, reg: object, ignore?: (el) => boolean,
+ *          recordCanvas?: boolean, onSubRoot?: (root: Node, kind: string, host: Node) => void}} ctx
  */
 export function serializeNode(node: Node, ctx: {
     reader: object;
     reg: object;
     ignore?: (el: any) => boolean;
+    recordCanvas?: boolean;
+    onSubRoot?: (root: Node, kind: string, host: Node) => void;
 }): {
     id: any;
     k: number;
@@ -43,8 +46,15 @@ export function serializeDocument(doc: any, ctx: any): {
  *
  * シリアライズ形式（セッションJSONの snapshot.node / mutation add の node）:
  *   要素:       { id, k: 1, t: 'div', a: {属性}, ch: [子...], ns?: 's'(SVG),
- *                 v?: マスク済み値, c?: checked, s?: selectedIndex }
+ *                 v?: マスク済み値, c?: checked, s?: selectedIndex,
+ *                 sh?: [シャドウルートの子...], shId?: シャドウルートのrsid (v0.2),
+ *                 doc?: { node } 同一オリジンiframeの中身 (v0.2),
+ *                 cv?: canvasのdataURL画像 (v0.2・recordCanvas時・マスク対象外のみ) }
  *   テキスト:   { id, k: 3, x: 'マスク済みテキスト' }
  *   ※ コメントノードは記録しない。script / noscript はタグだけ残し中身・属性を落とす
+ *
+ * 【v0.2 の安全設計】シャドウDOM・同一オリジンiframe・canvas も必ず ctx.reader を経由する。
+ *   - マスク対象ツリー内の canvas はピクセルを取り込まない（cv を付けない）
+ *   - シャドウ/iframe 内のテキスト・値・属性も reader.text/value/attr でマスク済みになる
  */
 export const SVG_NS: "http://www.w3.org/2000/svg";

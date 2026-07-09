@@ -1,7 +1,7 @@
 {
-    "name": "rs-player",
-    "version": "0.1.0",
-    "description": "有料動画プレイヤーの機能網羅を目指す、依存ゼロのHTML5動画プレイヤー",
+    "name": "@parelabo/rs-player",
+    "version": "0.5.0",
+    "description": "依存ゼロのHTML5動画プレイヤー",
     "type": "module",
     "main": "./dist/rs-player.esm.min.js",
     "module": "./dist/rs-player.esm.min.js",
@@ -14,7 +14,15 @@
             "default": "./dist/rs-player.esm.min.js"
         },
         "./dist/*": "./dist/*",
-        "./rs-player.css": "./dist/rs-player.css"
+        "./rs-player.css": "./dist/rs-player.css",
+        "./vue": {
+            "types": "./dist/types/vue.d.ts",
+            "import": "./dist/rs-player.vue.esm.min.js"
+        },
+        "./react": {
+            "types": "./dist/types/react.d.ts",
+            "import": "./dist/rs-player.react.esm.min.js"
+        }
     },
     "files": [
         "dist"
@@ -25,11 +33,52 @@
         "html5",
         "subtitles",
         "vtt",
+        "chapters",
+        "thumbnails",
+        "playlist",
+        "ab-loop",
+        "watermark",
+        "mini-player",
         "youtube-like",
-        "zero-dependency"
+        "zero-dependency",
+        "hls",
+        "streaming",
+        "live",
+        "dvr",
+        "adaptive-bitrate",
+        "preserves-pitch",
+        "mediastream",
+        "webrtc",
+        "livecam",
+        "analytics"
     ],
     "author": "ryusuke.sano <ryusuke.sano@parelabo.com>",
     "license": "SEE LICENSE IN LICENSE.txt",
+    "homepage": "https://github.com/sano1023/rs-package/tree/main/rs-player#readme",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/sano1023/rs-package.git",
+        "directory": "rs-player"
+    },
+    "bugs": {
+        "url": "https://parelabo.com",
+        "email": "contact@parelabo.com"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
     "types": "./dist/types/index.d.ts",
-    "style": "./dist/rs-player.css"
+    "style": "./dist/rs-player.css",
+    "peerDependencies": {
+        "vue": "^3.0.0",
+        "react": ">=18"
+    },
+    "peerDependenciesMeta": {
+        "vue": {
+            "optional": true
+        },
+        "react": {
+            "optional": true
+        }
+    }
 }

@@ -24,6 +24,13 @@ export class UploadQueue {
     _seq: number;
     _busy: boolean;
     _destroyed: boolean;
+    _eta: {
+        push(loaded: any): /*elided*/ any;
+        speed(): number | null;
+        eta(remainingBytes: any): number | null;
+        reset(): /*elided*/ any;
+        readonly size: number;
+    };
     on(event: any, fn: any): this;
     off(event: any, fn: any): this;
     _emit(event: any, payload: any): void;
@@ -76,6 +83,13 @@ export class UploadQueue {
     cancelAll(): void;
     /** error / canceled のアイテムを最初からやり直す（試行回数リセット） */
     retryFile(id: any): boolean;
+    /**
+     * アイテムのファイル実体を差し替える（v0.3 の簡易編集＝回転/クロップ結果の反映など）。
+     * 進行中なら abort してから差し替え、前処理キャッシュ・進捗・結果をリセットして queued に戻す。
+     * done 済みは差し替えない（再送したい場合は retryFile 後に）。
+     * @returns {boolean} 差し替えたら true
+     */
+    replaceFile(id: any, file: any): boolean;
     /** アイテムをキューから取り除く（進行中なら abort してから） */
     remove(id: any): boolean;
     /** 全アイテムを取り除く */

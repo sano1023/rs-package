@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>rs-slider デモ — 2. フェード画像スライダー</title>
+<link rel="stylesheet" href="../dist/rs-slider.css">
+<link rel="stylesheet" href="demo.css">
+</head>
+<body>
+<div class="page">
+    <p class="back"><a href="./">← デモ一覧へ</a></p>
+    <h1>2. フェード画像スライダー <small>createRSSlider (mode: 'fade')</small></h1>
+    <p class="lead">クロスフェード切替・画像ごとの表示時間とテキスト・背景オーバーレイ・スマホ画像切替。</p>
+
+    <div class="card">
+        <h2>クロスフェード + 画像ごとのテキスト + オーバーレイ</h2>
+        <p class="note">
+            2枚目だけ <code>duration: 7000</code> で長く表示します（表示時間の個別設定）。
+            ウィンドウ幅を768px未満にすると「スマホ用画像」に切り替わります（<code>mobileImage</code>）。
+        </p>
+        <div id="s-fade"></div>
+        <div class="value" id="v-fade"></div>
+    </div>
+
+    <div class="card">
+        <h2>表示時間・フェード速度の設定</h2>
+        <p class="note">共通の表示時間は <code>autoplay: {interval}</code>、フェード自体の速さは <code>speed</code> で指定します。</p>
+        <div id="s-speed"></div>
+        <div class="controls">
+            <label>表示時間
+                <select id="sel-interval">
+                    <option value="2000">2秒</option>
+                    <option value="4000" selected>4秒</option>
+                    <option value="7000">7秒</option>
+                </select>
+            </label>
+            <label>フェード速度
+                <select id="sel-speed">
+                    <option value="300">300ms</option>
+                    <option value="800" selected>800ms</option>
+                    <option value="1600">1600ms</option>
+                </select>
+            </label>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { createRSSlider } from '../dist/rs-slider.esm.min.js';
+    import { photo } from './assets.js';
+
+    const texts = [
+        { title: '海と山のグラデーション', text: '画像ごとに任意のタイトル・説明文を重ねられます。' },
+        { title: 'このスライドだけ7秒表示', text: 'duration オプションで1枚ごとの表示時間を上書きできます。', duration: 7000 },
+        { title: '背景オーバーレイ', text: 'overlay: "gradient" で文字の可読性を確保します。' },
+        { title: 'スマホ画像切替', text: '768px未満では縦構図の画像に自動で切り替わります。' },
+    ];
+
+    createRSSlider('#s-fade', {
+        mode: 'fade',
+        overlay: 'gradient',
+        autoplay: 3500,
+        speed: 900,
+        slides: texts.map((t, i) => ({
+            ...t,
+            image: photo(i + 60, { w: 1200, h: 675, label: `Fade ${i + 1}` }),
+            mobileImage: photo(i + 60, { w: 720, h: 900, label: `Fade ${i + 1}（スマホ用）` }),
+            alt: t.title,
+        })),
+        onChange: (i) => {
+            document.getElementById('v-fade').textContent = `change: index = ${i + 1}`;
+        },
+    });
+
+    // 表示時間/速度を切り替えるデモ（再生成方式）
+    let speedSlider = null;
+    function buildSpeedSlider() {
+        const interval = Number(document.getElementById('sel-interval').value);
+        const speed = Number(document.getElementById('sel-speed').value);
+        speedSlider?.destroy();
+        speedSlider = createRSSlider('#s-speed', {
+            mode: 'fade',
+            autoplay: { interval },
+            speed,
+            overlay: 'gradient',
+            aspectRatio: '3 / 1',
+            slides: Array.from({ length: 4 }, (_, i) => ({
+                image: photo(i + 80, { w: 1500, h: 500, label: `interval ${interval}ms / speed ${speed}ms` }),
+            })),
+        });
+    }
+    document.getElementById('sel-interval').addEventListener('change', buildSpeedSlider);
+    document.getElementById('sel-speed').addEventListener('change', buildSpeedSlider);
+    buildSpeedSlider();
+</script>
+</body>
+</html>

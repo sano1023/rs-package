@@ -1,7 +1,7 @@
 {
-    "name": "rs-sign",
-    "version": "0.1.0",
-    "description": "電子署名SaaSの画面部品網羅を目指す、依存ゼロの署名パッド＋電子印鑑ライブラリ",
+    "name": "@parelabo/rs-sign",
+    "version": "0.4.0",
+    "description": "電子署名SaaSの画面部品網羅を目指す、依存ゼロの署名パッド＋電子印鑑ライブラリ（rs-pdf / rs-form 連携アダプタ同梱）",
     "type": "module",
     "main": "./dist/rs-sign.esm.min.js",
     "module": "./dist/rs-sign.esm.min.js",
@@ -14,7 +14,15 @@
             "default": "./dist/rs-sign.esm.min.js"
         },
         "./dist/*": "./dist/*",
-        "./rs-sign.css": "./dist/rs-sign.css"
+        "./rs-sign.css": "./dist/rs-sign.css",
+        "./vue": {
+            "types": "./dist/types/vue.d.ts",
+            "import": "./dist/rs-sign.vue.esm.min.js"
+        },
+        "./react": {
+            "types": "./dist/types/react.d.ts",
+            "import": "./dist/rs-sign.react.esm.min.js"
+        }
     },
     "files": [
         "dist"
@@ -29,6 +37,31 @@
     ],
     "author": "ryusuke.sano <ryusuke.sano@parelabo.com>",
     "license": "SEE LICENSE IN LICENSE.txt",
+    "homepage": "https://github.com/sano1023/rs-package/tree/main/rs-sign#readme",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/sano1023/rs-package.git",
+        "directory": "rs-sign"
+    },
+    "bugs": {
+        "url": "https://parelabo.com",
+        "email": "contact@parelabo.com"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
     "types": "./dist/types/index.d.ts",
-    "style": "./dist/rs-sign.css"
+    "style": "./dist/rs-sign.css",
+    "peerDependencies": {
+        "vue": "^3.0.0",
+        "react": ">=18"
+    },
+    "peerDependenciesMeta": {
+        "vue": {
+            "optional": true
+        },
+        "react": {
+            "optional": true
+        }
+    }
 }

@@ -2,30 +2,73 @@
 > 利用は無償（商用可）ですが、**改変・再配布はできません**（LICENSE.txt 参照）。
 > 機能追加・改修のご依頼は有償で承ります → https://parelabo.com （contact@parelabo.com）
 
-## インストール / 読み込み
+## インストール
 
 ```bash
-# npm（GitHubのtarball指定）
-npm install https://github.com/sano1023/ryusuke-packages-dist/raw/main/tarballs/rs-baslider-0.1.0.tgz
+npm install @parelabo/rs-baslider
 ```
 
-```html
-<!-- CDN（jsDelivr・scriptタグ直読み） -->
-<script src="https://cdn.jsdelivr.net/gh/sano1023/ryusuke-packages-dist@main/rs-baslider/dist/rs-baslider.min.js"></script>
+<details>
+<summary>npm レジストリを使わない場合（GitHub tarball 直指定）</summary>
+
+```bash
+npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-baslider-0.1.0.tgz
 ```
+</details>
+
+## 使い方
+
+### バニラ JS（ESM・バンドラあり）
 
 ```js
-// ESM import（npmインストール後）
-import { /* 公開API */ } from 'rs-baslider';
+import { createRSBASlider } from '@parelabo/rs-baslider';
+import '@parelabo/rs-baslider/rs-baslider.css';   // スタイル（バンドラ経由）
+
+createRSBASlider(document.querySelector('#app'), { /* オプション */ });
 ```
 
-CSSが必要なパッケージは `dist/rs-baslider.css` を link してください。
+### `<script>` タグ（CDN・ビルド環境不要）
+
+```html
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@parelabo/rs-baslider@0.1.0/dist/rs-baslider.css">
+<script src="https://cdn.jsdelivr.net/npm/@parelabo/rs-baslider@0.1.0/dist/rs-baslider.min.js"></script>
+<script>
+  // 公開APIはグローバル RSBaslider に載る
+  RSBaslider.createRSBASlider(document.querySelector('#app'), { /* オプション */ });
+</script>
+```
+
+### Vue 3
+
+```js
+import { RsBaSlider } from '@parelabo/rs-baslider/vue';
+import '@parelabo/rs-baslider/rs-baslider.css';   // スタイル（バンドラ経由）
+```
+
+```vue
+<template>
+  <RsBaSlider />
+</template>
+```
+
+### React 18 / 19
+
+```jsx
+import { RsBaSlider } from '@parelabo/rs-baslider/react';
+import '@parelabo/rs-baslider/rs-baslider.css';   // スタイル（バンドラ経由）
+
+export default function App() {
+  return <RsBaSlider />;
+}
+```
+
+> `vue` / `react` は peerDependency です（バンドルには含みません）。アプリ側のものが使われます。
 
 ---
 
 # rs-baslider
 
-Before/After 比較スライダー（twentytwenty / img-comparison-slider の代替）。2枚の画像（または canvas 等の任意要素）を重ね、ハンドルのドラッグで見比べられます。依存ゼロ・ビルド不要・ESモジュール。
+Before/After 比較スライダー。2枚の画像（または canvas 等の任意要素）を重ね、ハンドルのドラッグで見比べられます。依存ゼロ・ビルド不要・ESモジュール。
 
 - **左右比較**（既定）と**上下比較**（`direction: 'vertical'`）
 - **スマホ対応**: Pointer Events。横スライダーは縦スクロールを邪魔しない `touch-action` 設計

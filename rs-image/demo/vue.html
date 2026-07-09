@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>rs-image Vueラッパー デモ</title>
+<link rel="stylesheet" href="../dist/rs-image.css">
+<style>
+    body { font-family: system-ui, sans-serif; max-width: 980px; margin: 24px auto; padding: 0 16px; color: #1e293b; }
+    h1 { font-size: 18px; }
+    .row { display: flex; gap: 8px; align-items: center; margin: 10px 0; flex-wrap: wrap; }
+    button { padding: 6px 12px; border: 1px solid #cbd5e1; border-radius: 6px; background: #fff; cursor: pointer; }
+    .note { font-size: 12px; color: #64748b; }
+    #result img { max-height: 120px; border: 1px solid #e2e8f0; border-radius: 6px; }
+</style>
+<script type="importmap">
+{ "imports": { "vue": "https://cdn.jsdelivr.net/npm/vue@3/dist/vue.esm-browser.prod.js" } }
+</script>
+</head>
+<body>
+<h1>rs-image × Vue 3（ビルド済み dist/rs-image.vue.esm.min.js を使用）</h1>
+<p class="note">※ 先に <code>node build.mjs rs-image</code> で dist を生成しておくこと。</p>
+<div id="app"></div>
+
+<script type="module">
+    import { createApp, defineComponent, h, ref } from 'vue';
+    import { RsImageEditor } from '../dist/rs-image.vue.esm.min.js';
+
+    // 外部ファイル不要のサンプル画像
+    function makeSample() {
+        const c = document.createElement('canvas');
+        c.width = 800; c.height = 500;
+        const ctx = c.getContext('2d');
+        const g = ctx.createLinearGradient(0, 0, 800, 500);
+        g.addColorStop(0, '#4e79a7'); g.addColorStop(1, '#f28e2b');
+        ctx.fillStyle = g; ctx.fillRect(0, 0, 800, 500);
+        ctx.fillStyle = '#fff'; ctx.font = 'bold 64px sans-serif';
+        ctx.fillText('Vue!', 320, 270);
+        return c.toDataURL('image/png');
+    }
+
+    const App = defineComponent({
+        setup() {
+            const src = ref(null);
+            const mounted = ref(true);
+            const changeCount = ref(0);
+            const exported = ref('');
+            const ed = ref(null);
+            window.state = { src, mounted, changeCount, ed };
+            return () => h('div', [
+                h('div', { class: 'row' }, [
+                    h('button', { id: 'btn-sample', onClick: () => { src.value = makeSample(); } }, 'サンプル画像を読み込む'),
+                    h('button', {
+                        id: 'btn-text',
+                        onClick: () => ed.value?.editor()?.addText('Vueから追加'),
+                    }, '文字を追加（API）'),
+                    h('button', {
+                        id: 'btn-export',
+                        onClick: async () => {
+                            const r = await ed.value?.export({ format: 'png', output: 'dataURL' });
+                            if (r) exported.value = r.dataURL;
+                        },
+                    }, '書き出す'),
+                    h('button', { id: 'btn-unmount', onClick: () => { mounted.value = !mounted.value; } }, 'mount/unmount'),
+                    h('span', { class: 'note', id: 'count' }, `change: ${changeCount.value}回`),
+                ]),
+                mounted.value
+                    ? h(RsImageEditor, {
+                        ref: ed,
+                        src: src.value,
+                        height: 380,
+                        onChange: () => { changeCount.value++; },
+                    })
+                    : h('p', { class: 'note' }, 'アンマウント中'),
+                h('div', { id: 'result' }, exported.value ? [h('p', '書き出し結果:'), h('img', { src: exported.value })] : []),
+            ]);
+        },
+    });
+
+    window.app = createApp(App);
+    window.vm = window.app.mount('#app');
+</script>
+</body>
+</html>

@@ -1,7 +1,7 @@
 {
-    "name": "rs-pdf",
+    "name": "@parelabo/rs-pdf",
     "version": "0.5.0",
-    "description": "有料PDF SDKの機能網羅を目指す、依存ゼロのPDFビューア＆注釈ライブラリ（レンダラはアダプタ注入・pdf.jsマッパー同梱）",
+    "description": "依存ゼロのPDFビューア＆注釈ライブラリ（レンダラはアダプタ注入・pdf.jsマッパー同梱）",
     "type": "module",
     "main": "./dist/rs-pdf.esm.min.js",
     "module": "./dist/rs-pdf.esm.min.js",
@@ -14,7 +14,15 @@
             "default": "./dist/rs-pdf.esm.min.js"
         },
         "./dist/*": "./dist/*",
-        "./rs-pdf.css": "./dist/rs-pdf.css"
+        "./rs-pdf.css": "./dist/rs-pdf.css",
+        "./vue": {
+            "types": "./dist/types/vue.d.ts",
+            "import": "./dist/rs-pdf.vue.esm.min.js"
+        },
+        "./react": {
+            "types": "./dist/types/react.d.ts",
+            "import": "./dist/rs-pdf.react.esm.min.js"
+        }
     },
     "files": [
         "dist"
@@ -29,6 +37,31 @@
     ],
     "author": "ryusuke.sano <ryusuke.sano@parelabo.com>",
     "license": "SEE LICENSE IN LICENSE.txt",
+    "homepage": "https://github.com/sano1023/rs-package/tree/main/rs-pdf#readme",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/sano1023/rs-package.git",
+        "directory": "rs-pdf"
+    },
+    "bugs": {
+        "url": "https://parelabo.com",
+        "email": "contact@parelabo.com"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
     "types": "./dist/types/index.d.ts",
-    "style": "./dist/rs-pdf.css"
+    "style": "./dist/rs-pdf.css",
+    "peerDependencies": {
+        "vue": "^3.0.0",
+        "react": ">=18"
+    },
+    "peerDependenciesMeta": {
+        "vue": {
+            "optional": true
+        },
+        "react": {
+            "optional": true
+        }
+    }
 }

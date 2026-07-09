@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>rs-slider デモ — 12. 3Dカバーフロー</title>
+<link rel="stylesheet" href="../dist/rs-slider.css">
+<link rel="stylesheet" href="demo.css">
+<style>
+    #cf-main { --rss-cf-h: 380px; --rss-cf-w: 44%; }
+    #cf-dense { --rss-cf-h: 300px; --rss-cf-w: 36%; }
+    @media (max-width: 640px) {
+        #cf-main { --rss-cf-h: 280px; --rss-cf-w: 62%; }
+        #cf-dense { --rss-cf-h: 230px; --rss-cf-w: 54%; }
+    }
+</style>
+</head>
+<body>
+<div class="page">
+    <p class="back"><a href="./">← デモ一覧へ</a></p>
+    <h1>12. 3Dカバーフロー <small>createRSCoverflow</small></h1>
+    <p class="lead">
+        中央拡大・左右に奥行きのある3D回転・影と鏡面反射・ドラッグ/スワイプ追従。
+        左右のアイテムをクリックすると選択、フォーカスして <kbd>←</kbd><kbd>→</kbd> でも操作できます。
+    </p>
+
+    <div class="card">
+        <h2>標準（反射あり・ループ）</h2>
+        <p class="note">ドラッグ中はスライドが指に追従し、離すと最寄りのアイテムへスナップします。</p>
+        <div id="cf-main"></div>
+        <div class="value" id="v-cf"></div>
+    </div>
+
+    <div class="card">
+        <h2>密度高め + 自動再生（angle: 58, visible: 3）</h2>
+        <p class="note">ホバーで自動再生が一時停止します。反射なし（影のみ）。</p>
+        <div id="cf-dense"></div>
+    </div>
+</div>
+
+<script type="module">
+    import { createRSCoverflow } from '../dist/rs-slider.esm.min.js';
+    import { photo } from './assets.js';
+
+    const items = (base, n, title) => Array.from({ length: n }, (_, i) => ({
+        image: photo(base + i, { w: 900, h: 675, label: `${title} ${i + 1}` }),
+        title: `${title} — 作品 ${i + 1}`,
+        alt: `${title} ${i + 1}`,
+    }));
+
+    const cf = createRSCoverflow('#cf-main', {
+        items: items(1000, 7, 'Cover Flow'),
+        startIndex: 3,
+        loop: true,
+        reflection: true,
+        onChange: (i) => {
+            document.getElementById('v-cf').textContent = `change: ${i + 1} / ${cf.getCount()}`;
+        },
+    });
+
+    createRSCoverflow('#cf-dense', {
+        items: items(1030, 9, 'Dense'),
+        startIndex: 4,
+        visible: 3,
+        angle: 58,
+        depth: 230,
+        spacing: 0.42,
+        scale: 0.78,
+        reflection: false,
+        loop: true,
+        autoplay: 2800,
+        dots: true,
+    });
+</script>
+</body>
+</html>

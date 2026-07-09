@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>rs-sheet デモ — 数式エンジン内蔵スプレッドシート</title>
+<link rel="stylesheet" href="../dist/rs-sheet.css">
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+        font-family: -apple-system, "Segoe UI", "Hiragino Kaku Gothic ProN", "Noto Sans JP", Meiryo, sans-serif;
+        background: #f0f2f5;
+        color: #24292f;
+        padding: 24px;
+    }
+    .page { max-width: 1160px; margin: 0 auto; }
+    h1 { font-size: 22px; margin-bottom: 4px; }
+    .sub { color: #667085; font-size: 13px; margin-bottom: 16px; }
+    .toolbar { display: flex; gap: 8px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; }
+    .toolbar .spacer { flex: 1; }
+    button.tab, button.act {
+        font: inherit; font-size: 13px; padding: 7px 14px; border-radius: 6px;
+        border: 1px solid #d0d7de; background: #fff; cursor: pointer;
+    }
+    button.tab.active { background: #1a73e8; color: #fff; border-color: #1a73e8; }
+    button.act:hover, button.tab:hover:not(.active) { background: #eef2f8; }
+    button.act.on { background: #1a73e8; color: #fff; border-color: #1a73e8; }
+    button.act.on:hover { background: #1667d3; }
+    #opstream { margin-top: 12px; }
+    #opstream .oshead {
+        display: flex; align-items: center; gap: 8px; font-size: 12px; color: #445; margin-bottom: 4px;
+    }
+    #opstream .oshead b { color: #24292f; }
+    #opstream .oshead .badge {
+        background: #eef2f8; border: 1px solid #d0d7de; border-radius: 999px; padding: 1px 8px; font-size: 11px;
+    }
+    #opstream button.clear { font: inherit; font-size: 11px; padding: 2px 8px; border: 1px solid #d0d7de; border-radius: 6px; background: #fff; cursor: pointer; }
+    #op-log {
+        width: 100%; height: 132px; overflow: auto; margin: 0;
+        font: 11px/1.55 ui-monospace, "SF Mono", Menlo, monospace;
+        border: 1px solid #d0d7de; border-radius: 8px; padding: 8px 10px; background: #0f172a; color: #d7e3f4;
+    }
+    #op-log .op-set { color: #7fd1a6; }
+    #op-log .op-clear { color: #f0a3a3; }
+    #op-log .op-struct { color: #f2c879; }
+    #op-log .seq { color: #7c93b3; }
+    .desc {
+        background: #fff; border: 1px solid #d0d7de; border-radius: 8px;
+        padding: 10px 14px; font-size: 13px; color: #445; margin-bottom: 12px; line-height: 1.7;
+    }
+    .desc code { background: #f4f6f9; padding: 1px 5px; border-radius: 4px; font-size: 12px; }
+    #sheet { background: #fff; border-radius: 8px; }
+    #chart-box { display: none; margin-top: 14px; }
+    #chart-box.show { display: block; }
+    #chart { background: #fff; border: 1px solid #d0d7de; border-radius: 8px; height: 320px; padding: 8px; }
+    .chart-head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 13px; color: #445; }
+    .chart-head button { font: inherit; font-size: 12px; padding: 3px 8px; border: 1px solid #d0d7de; border-radius: 6px; background: #fff; cursor: pointer; }
+    .footer { margin-top: 14px; font-size: 12px; color: #98a2b3; }
+    #json-out {
+        display: none; width: 100%; height: 160px; margin-top: 12px; font: 11px/1.5 ui-monospace, monospace;
+        border: 1px solid #d0d7de; border-radius: 8px; padding: 10px; background: #fff;
+    }
+    #json-out.show { display: block; }
+</style>
+</head>
+<body>
+<div class="page">
+    <h1>rs-sheet <span style="font-weight:normal;font-size:14px;color:#667085">v0.5</span></h1>
+    <div class="sub">本格数式エンジン内蔵・依存ゼロのセル指向スプレッドシート — 136関数 / 依存差分再計算 / 複数シート・名前付き範囲 / CSV・JSON入出力 / 検索置換 / 印刷 / 10万セル性能 ＋ <b>変更イベントストリーム（共同編集の土台）・読み取り専用ビュー・数式監査（参照元/参照先トレース）</b></div>
+
+    <div class="toolbar">
+        <button class="tab active" id="tab-estimate">見積書</button>
+        <button class="tab" id="tab-sales">売上集計</button>
+        <button class="tab" id="tab-workbook">複数シート</button>
+        <button class="tab" id="tab-tasks">タスク表（部品）</button>
+        <button class="tab" id="tab-big">10万セル</button>
+        <span class="spacer"></span>
+        <button class="act" id="btn-audit" title="選択セルの参照元/参照先を矢印表示">🔍 数式監査</button>
+        <button class="act" id="btn-readonly" title="編集を禁止して閲覧のみに">🔒 読み取り専用</button>
+        <button class="act" id="btn-chart">選択範囲をグラフ化</button>
+        <button class="act" id="btn-undo" title="Ctrl+Z">↩ 元に戻す</button>
+        <button class="act" id="btn-redo" title="Ctrl+Y">↪ やり直す</button>
+        <button class="act" id="btn-addsheet">＋シート</button>
+        <button class="act" id="btn-replace">検索置換</button>
+        <button class="act" id="btn-csv">CSV出力</button>
+        <button class="act" id="btn-print">印刷</button>
+        <button class="act" id="btn-json">toJSON</button>
+    </div>
+
+    <div class="desc" id="desc"></div>
+    <div id="sheet"></div>
+    <div id="chart-box">
+        <div class="chart-head"><span id="chart-title">選択範囲のグラフ</span><button id="chart-type">種類切替</button><button id="chart-close">閉じる</button></div>
+        <div id="chart"></div>
+    </div>
+    <div id="opstream">
+        <div class="oshead">
+            <b>変更イベントストリーム</b>
+            <span>共同編集サーバへ流せる op 粒度の差分（<code>on('ops', ops =&gt; …)</code>）。セルを編集すると下に追記されます。</span>
+            <span class="spacer" style="flex:1"></span>
+            <span class="badge" id="op-count">0 ops</span>
+            <button class="clear" id="op-clear">クリア</button>
+        </div>
+        <pre id="op-log"></pre>
+    </div>
+    <textarea id="json-out" readonly spellcheck="false"></textarea>
+
+    <div class="footer">
+        操作: ダブルクリック / F2 / 文字キーで編集（<code>=XLOOKUP()</code> や <code>=Sheet2!A1</code>・<code>=SUM(名前)</code> などの数式が使えます）・
+        下部のシートタブで切替（＋で追加・ダブルクリックで名前変更・右クリックで削除）・
+        右クリックで結合 / 枠固定 / 並べ替え / フィルタ / 条件付き書式・
+        ツールバーの CSV出力・検索置換・印刷・Ctrl+Z / Ctrl+Y で undo / redo・
+        <b>🔍数式監査</b>でセルを選ぶと参照元(青)/参照先(赤)に矢印・<b>🔒読み取り専用</b>で閲覧のみに切替・
+        編集すると下の<b>変更イベントストリーム</b>に op が追記されます
+    </div>
+</div>
+
+<script type="module">
+import { createRSSheet, defineFunction } from '../dist/rs-sheet.esm.min.js';
+
+// カスタムワークシート関数の例: 税込み価格（=TAXINC(B2)）
+defineFunction('TAXINC', (v) => Math.floor(v * 1.10), { minArgs: 1, maxArgs: 1 });
+
+// rs-chart 連携（opt-in・ハード依存にしない）: 読み込めたら window.createRSChart として使えるようにする。
+// この相対パスは lib（../../rs-chart）でも features 配下（/features/rs-chart）でも解決できる。
+try {
+    const mod = await import('../../rs-chart/dist/rs-chart.esm.min.js');
+    window.createRSChart = mod.createRSChart;
+} catch (e) {
+    console.warn('rs-chart が読み込めませんでした（チャート連携は無効）:', e.message);
+}
+
+const scenarios = {
+    // ------------------------------------------------------------ シナリオ1: 見積書
+    estimate: {
+        desc: '見積書サンプル: 単価×数量→小計→合計→消費税が数式で連動します。' +
+            'タイトル行は<b>セル結合</b>、見出しまでの6行は<b>ウィンドウ枠固定</b>。数量(D列)は 1〜999 の<b>数値検証</b>、' +
+            'コード(C列)は商品マスタからの<b>リスト入力（ドロップダウン）</b>。小計(F列)には<b>データバー</b>を表示。単価は <code>XLOOKUP</code> でマスタから取得。',
+        options: {
+            rows: 60,
+            cols: 12,
+            height: 460,
+            data: [
+                ['御　見　積　書'],
+                [],
+                ['株式会社サンプル商事 御中', '', '', '発行日:', '=TODAY()'],
+                ['下記の通りお見積り申し上げます。', '', '', '見積番号:', 'Q-2026-0707'],
+                [],
+                ['No.', '品名', 'コード', '数量', '単価', '小計'],
+                ['1', 'ノートPC 15インチ', 'PC-01', '3', '=XLOOKUP(C7,$H$7:$H$11,$I$7:$I$11,0)', '=D7*E7'],
+                ['2', '27インチモニター', 'MN-01', '5', '=XLOOKUP(C8,$H$7:$H$11,$I$7:$I$11,0)', '=D8*E8'],
+                ['3', 'ドッキングステーション', 'DK-01', '3', '=XLOOKUP(C9,$H$7:$H$11,$I$7:$I$11,0)', '=D9*E9'],
+                ['4', 'ワイヤレスマウス', 'MS-01', '10', '=XLOOKUP(C10,$H$7:$H$11,$I$7:$I$11,0)', '=D10*E10'],
+                ['5', 'キッティング作業費', 'SV-01', '1', '=XLOOKUP(C11,$H$7:$H$11,$I$7:$I$11,0)', '=D11*E11'],
+                [],
+                ['', '', '', '', '小計', '=SUM(F7:F11)'],
+                ['', '', '', '', '消費税(10%)', '=ROUND(F13*0.1,0)'],
+                ['', '', '', '', '合計金額', '=F13+F14'],
+            ],
+            cells: {
+                H6: '商品マスタ',
+                H7: 'PC-01', I7: '128000',
+                H8: 'MN-01', I8: '32800',
+                H9: 'DK-01', I9: '18500',
+                H10: 'MS-01', I10: '2980',
+                H11: 'SV-01', I11: '45000',
+            },
+            columnWidths: { A: 40, B: 180, C: 72, D: 52, E: 96, F: 110, G: 24, H: 72, I: 88 },
+            formats: {
+                E3: 'ggge年m月d日',
+                'E7:E11': '¥#,##0',
+                'F7:F11': '¥#,##0',
+                'F13:F15': '¥#,##0',
+                'I7:I11': '¥#,##0',
+            },
+        },
+        after(sheet) {
+            sheet.setStyle('A1', { bold: true, align: 'center' });
+            sheet.setStyle('A6:F6', { bold: true, bg: '#eef2f8' });
+            sheet.setStyle('E13:F15', { bold: true });
+            sheet.setStyle('F15', { color: '#c0392b' });
+            sheet.setStyle('H6', { bold: true, bg: '#f6f8fa' });
+            sheet.setRowHeight(0, 36);
+            sheet.mergeCells('A1:F1');                       // タイトルを結合
+            sheet.setFreeze(6, 0);                            // 見出しまでを固定
+            sheet.setValidation('C7:C11', { type: 'list', values: ['PC-01', 'MN-01', 'DK-01', 'MS-01', 'SV-01'] });
+            sheet.setValidation('D7:D11', { type: 'number', op: 'between', min: 1, max: 999 });
+            sheet.addConditionalFormat('F7:F11', { type: 'dataBar', color: '#bcd8ff' });
+            sheet.history.clear();                            // 初期設定は undo 対象にしない
+            sheet.select('D7');
+        },
+    },
+    // ------------------------------------------------------------ シナリオ2: 売上集計
+    sales: {
+        desc: '売上集計サンプル: 支店×月のマトリクスを <code>SUMIFS / AVERAGEIF / MEDIAN / RANK</code> などで集計します。' +
+            '月別売上に<b>カラースケール</b>、合計に<b>データバー</b>、達成率に<b>セル値ルール</b>(100%以上を緑)。' +
+            '判定はリスト検証、見出し行に<b>オートフィルタ</b>、上位3行を<b>枠固定</b>。',
+        options: {
+            rows: 200,
+            cols: 14,
+            height: 460,
+            data: [
+                ['2026年度 上期 支店別売上集計（単位: 千円）'],
+                [],
+                ['支店', '4月', '5月', '6月', '合計', '目標', '達成率', '判定'],
+                ['東京', '42500', '38900', '45100', '=SUM(B4:D4)', '120000', '=E4/F4', '=IF(G4>=100%,"達成","未達")'],
+                ['大阪', '28700', '31200', '29800', '=SUM(B5:D5)', '90000', '=E5/F5', '=IF(G5>=100%,"達成","未達")'],
+                ['名古屋', '19800', '18400', '21600', '=SUM(B6:D6)', '58000', '=E6/F6', '=IF(G6>=100%,"達成","未達")'],
+                ['福岡', '15200', '16800', '14900', '=SUM(B7:D7)', '48000', '=E7/F7', '=IF(G7>=100%,"達成","未達")'],
+                ['札幌', '9800', '11200', '10400', '=SUM(B8:D8)', '34000', '=E8/F8', '=IF(G8>=100%,"達成","未達")'],
+                [],
+                ['全社合計', '=SUM(B4:B8)', '=SUM(C4:C8)', '=SUM(D4:D8)', '=SUM(E4:E8)', '=SUM(F4:F8)', '=E10/F10', ''],
+                ['月平均', '=AVERAGE(B4:B8)', '=AVERAGE(C4:C8)', '=AVERAGE(D4:D8)', '=MEDIAN(E4:E8)', '', '', ''],
+                ['最高 / 順位', '=MAX(B4:B8)', '=MAX(C4:C8)', '=MAX(D4:D8)', '', '', '', ''],
+                [],
+                ['達成支店数', '=COUNTIFS(H4:H8,"達成")', '', '目標達成合計', '=SUMIFS(E4:E8,H4:H8,"達成")', '', '税込例', '=TAXINC(E4)'],
+            ],
+            columnWidths: { A: 96, B: 84, C: 84, D: 84, E: 96, F: 88, G: 72, H: 64 },
+            formats: {
+                'B4:F8': '#,##0',
+                'B10:F12': '#,##0',
+                'G4:G10': '0.0%',
+                E14: '#,##0',
+                H14: '#,##0',
+            },
+        },
+        after(sheet) {
+            sheet.setStyle('A1', { bold: true });
+            sheet.setStyle('A3:H3', { bold: true, bg: '#eef2f8' });
+            sheet.setStyle('A10:H10', { bold: true, bg: '#fbf6e9' });
+            sheet.setRowHeight(0, 34);
+            sheet.setFreeze(3, 0);                                                   // 見出しまで固定
+            sheet.addConditionalFormat('B4:D8', { type: 'colorScale', minColor: '#fdecec', midColor: '#fff6cc', maxColor: '#c6efce' });
+            sheet.addConditionalFormat('E4:E8', { type: 'dataBar', color: '#bcd8ff' });
+            sheet.addConditionalFormat('G4:G8', { type: 'cellValue', op: '>=', value: 1, style: { bg: '#c6efce', bold: true } });
+            sheet.setValidation('H4:H8', { type: 'list', values: ['達成', '未達'] });
+            sheet.setFilter('A3:H8');                                                // オートフィルタ
+            sheet.history.clear();
+            sheet.select('B4');
+        },
+    },
+    // ------------------------------------------------------------ シナリオ3: 複数シート（シート間参照・名前付き範囲）
+    workbook: {
+        desc: '<b>複数シート</b>のブック。「支店売上」タブに入力、「サマリ」タブが' +
+            '<b>シート間参照</b> <code>=MAX(支店売上!E3:E6)</code> と' +
+            '<b>名前付き範囲</b> <code>=SUM(全売上)</code>（全売上 = 支店売上!B3:D6）で集計します。' +
+            '支店売上の数値を書き換えるとサマリが自動再計算。下部タブの ＋ で追加・ダブルクリックで名前変更・右クリックで削除。' +
+            'ツールバーから <b>CSV出力 / 検索置換 / 印刷</b> も試せます。',
+        options: {
+            rows: 30,
+            cols: 8,
+            height: 420,
+            sheetName: '支店売上',
+            data: [
+                ['支店別 月次売上（単位: 千円）'],
+                ['支店', '4月', '5月', '6月', '合計'],
+                ['東京', '4200', '3900', '4500', '=SUM(B3:D3)'],
+                ['大阪', '2800', '3100', '2900', '=SUM(B4:D4)'],
+                ['名古屋', '1900', '1800', '2100', '=SUM(B5:D5)'],
+                ['福岡', '1500', '1600', '1400', '=SUM(B6:D6)'],
+            ],
+            columnWidths: { A: 80, B: 64, C: 64, D: 64, E: 76 },
+            formats: { 'B3:E6': '#,##0' },
+            sheets: [
+                {
+                    name: 'サマリ',
+                    rows: 20,
+                    cols: 6,
+                    data: [
+                        ['全社サマリ（他シートを参照）'],
+                        [],
+                        ['総売上', '=SUM(全売上)'],
+                        ['月平均（支店×月）', '=ROUND(AVERAGE(全売上),0)'],
+                        ['最高の支店合計', '=MAX(支店売上!E3:E6)'],
+                        ['東京の売上シェア', '=支店売上!E3/SUM(全売上)'],
+                    ],
+                    columnWidths: { A: 160, B: 100 },
+                    formats: { 'B3:B5': '#,##0', B6: '0.0%' },
+                },
+            ],
+            namedRanges: { 全売上: '支店売上!B3:D6' },
+        },
+        after(sheet) {
+            sheet.setStyle('A1', { bold: true });
+            sheet.setStyle('A2:E2', { bold: true, bg: '#eef2f8' });
+            sheet.history.clear();
+            sheet.select('B3');
+        },
+    },
+    // ------------------------------------------------------------ シナリオ4: タスク表（v0.4 カスタムセル部品 + チャート）
+    tasks: {
+        desc: 'v0.4 の<b>カスタムセル部品</b>デモ。優先度(G列)は<b>選択肢セル</b>（クリックでドロップダウン）、' +
+            '完了(H列)は<b>チェックボックスセル</b>（クリック / Space でトグル）。消化率は数式で自動計算。' +
+            '<b>予算×実績（B3:D8）を選択して「選択範囲をグラフ化」</b>を押すと rs-chart で棒グラフになります（opt-in 連携）。',
+        options: {
+            rows: 40,
+            cols: 10,
+            height: 340,
+            data: [
+                ['タスク進捗ダッシュボード'],
+                [],
+                ['No.', 'タスク', '予算(千円)', '実績(千円)', '消化率', '担当', '優先度', '完了'],
+                ['1', '要件定義', '300', '280', '=D4/C4', '佐藤', '高', 'TRUE'],
+                ['2', '基本設計', '500', '520', '=D5/C5', '鈴木', '高', 'TRUE'],
+                ['3', '実装', '1200', '800', '=D6/C6', '田中', '中', 'FALSE'],
+                ['4', 'テスト', '400', '120', '=D7/C7', '高橋', '中', 'FALSE'],
+                ['5', 'リリース', '200', '0', '=D8/C8', '伊藤', '低', 'FALSE'],
+                ['', '合計', '=SUM(C4:C8)', '=SUM(D4:D8)', '=D9/C9', '', '', '=COUNTIF(H4:H8,TRUE)'],
+            ],
+            columnWidths: { A: 40, B: 120, C: 96, D: 96, E: 72, F: 64, G: 68, H: 56 },
+            formats: { 'C4:D9': '#,##0', 'E4:E9': '0%' },
+        },
+        after(sheet) {
+            sheet.setStyle('A1', { bold: true });
+            sheet.setStyle('A3:H3', { bold: true, bg: '#eef2f8' });
+            sheet.setStyle('B9:E9', { bold: true, bg: '#fbf6e9' });
+            sheet.setRowHeight(0, 32);
+            sheet.setCellType('G4:G8', 'select', { values: ['高', '中', '低'] });   // 選択肢セル
+            sheet.setCellType('H4:H8', 'checkbox');                                  // チェックボックスセル
+            sheet.history.clear();
+            sheet.select('B3:D8');                                                   // グラフ化しやすい範囲を初期選択
+        },
+    },
+};
+
+let sheet = null;
+let current = 'estimate';
+let chart = null;
+let chartType = 'column';
+let auditOn = false;
+let readOnly = false;
+let opTotal = 0;
+const TABS = ['estimate', 'sales', 'workbook', 'tasks', 'big'];
+
+function setActiveTab(name) {
+    TABS.forEach((n) => document.getElementById(`tab-${n}`).classList.toggle('active', name === n));
+}
+
+// 変更イベントストリーム（共同編集の土台）を画面のログに流す
+function logOps(ops) {
+    const log = document.getElementById('op-log');
+    for (const op of ops) {
+        opTotal++;
+        const p = op.payload;
+        let cls = 'op-set';
+        let text;
+        if (op.type === 'set-cell') {
+            text = `set-cell   ${p.sheet}!${p.ref}  "${p.newRaw}"` + (p.value != null && p.value !== '' ? `  → ${p.value}` : '');
+        } else if (op.type === 'clear-cell') {
+            cls = 'op-clear';
+            text = `clear-cell ${p.sheet}!${p.ref}`;
+        } else {
+            cls = 'op-struct';
+            text = `${op.type}  ${p.sheet}  index=${p.index} count=${p.count}`;
+        }
+        const div = document.createElement('div');
+        div.innerHTML = `<span class="seq">#${op.seq}</span> <span class="${cls}"></span>`;
+        div.lastChild.textContent = text;
+        log.appendChild(div);
+    }
+    log.scrollTop = log.scrollHeight;
+    document.getElementById('op-count').textContent = `${opTotal} ops`;
+}
+
+function clearOps() {
+    document.getElementById('op-log').textContent = '';
+    opTotal = 0;
+    document.getElementById('op-count').textContent = '0 ops';
+}
+
+function syncToggles() {
+    document.getElementById('btn-audit').classList.toggle('on', auditOn);
+    document.getElementById('btn-readonly').classList.toggle('on', readOnly);
+}
+
+function closeChart() {
+    if (chart) { chart.destroy?.(); chart = null; }
+    document.getElementById('chart-box').classList.remove('show');
+}
+
+function load(name) {
+    current = name;
+    closeChart();
+    if (sheet) sheet.destroy();
+    document.getElementById('desc').innerHTML = scenarios[name].desc;
+    sheet = createRSSheet('#sheet', {
+        ...scenarios[name].options,
+        onChange: (changes) => { if (changes.length) console.log('change:', changes); },
+        onOps: logOps, // v0.5 変更イベントストリーム
+    });
+    scenarios[name].after(sheet);
+    auditOn = false;
+    readOnly = false;
+    syncToggles();
+    clearOps(); // 初期セットアップ分の op はログに残さない
+    setActiveTab(name);
+    window.sheet = sheet; // 検証・コンソール操作用
+}
+
+// 10万セル（2000行 × 50列）の性能デモ
+function loadBig() {
+    current = 'big';
+    closeChart();
+    if (sheet) sheet.destroy();
+    const ROWS = 2000;
+    const COLS = 50;
+    const cells = {};
+    const colLetter = (c) => { let s = ''; c += 1; while (c > 0) { const m = (c - 1) % 26; s = String.fromCharCode(65 + m) + s; c = (c - m - 1) / 26; } return s; };
+    for (let r = 0; r < ROWS; r++) {
+        cells[`A${r + 1}`] = String(r + 1);
+        cells[`B${r + 1}`] = `=A${r + 1}*2`;         // 数式列（依存差分再計算の対象）
+        for (let c = 2; c < COLS; c++) cells[`${colLetter(c)}${r + 1}`] = String((r + 1) * (c + 1) % 1000);
+    }
+    const t0 = performance.now();
+    sheet = createRSSheet('#sheet', { rows: ROWS, cols: COLS, height: 460, cells, onOps: logOps });
+    const dt = Math.round(performance.now() - t0);
+    auditOn = false;
+    readOnly = false;
+    syncToggles();
+    clearOps();
+    window._bigInitMs = dt;
+    document.getElementById('desc').innerHTML =
+        `<b>10万セル（${ROWS.toLocaleString()}行 × ${COLS}列 = ${(ROWS * COLS).toLocaleString()}セル）</b>の性能デモ。` +
+        `初期化 <b>${dt}ms</b>。スクロールは仮想化で常に一定数のセルだけを描画。B列は <code>=A×2</code> の数式で、` +
+        'A列を書き換えると差分再計算＋差分描画で該当セルだけ更新されます。多数セルの一括変更（ペースト等）は microtask で束ねて1回だけ再描画。';
+    setActiveTab('big');
+    window.sheet = sheet;
+}
+
+// 選択範囲を rs-chart でチャート化
+function showChart(ref) {
+    const box = document.getElementById('chart-box');
+    const target = document.getElementById('chart');
+    if (chart) { chart.destroy?.(); chart = null; }
+    target.innerHTML = '';
+    box.classList.add('show');
+    document.getElementById('chart-title').textContent = `${ref} のグラフ（${chartType}）`;
+    try {
+        chart = sheet.chartFromRange(ref, target, { type: chartType, legend: { show: true } });
+        window._chartError = null;
+    } catch (e) {
+        window._chartError = e.message;
+        target.innerHTML = `<div style="padding:16px;color:#c0392b;font-size:13px">${e.message}</div>`;
+    }
+}
+
+document.getElementById('tab-estimate').addEventListener('click', () => load('estimate'));
+document.getElementById('tab-sales').addEventListener('click', () => load('sales'));
+document.getElementById('tab-workbook').addEventListener('click', () => load('workbook'));
+document.getElementById('tab-tasks').addEventListener('click', () => load('tasks'));
+document.getElementById('tab-big').addEventListener('click', () => loadBig());
+document.getElementById('btn-chart').addEventListener('click', () => showChart(sheet.getSelection().ref));
+document.getElementById('chart-close').addEventListener('click', () => closeChart());
+document.getElementById('chart-type').addEventListener('click', () => {
+    const order = ['column', 'bar', 'line', 'pie'];
+    chartType = order[(order.indexOf(chartType) + 1) % order.length];
+    showChart(sheet.getSelection().ref);
+});
+document.getElementById('btn-audit').addEventListener('click', () => { auditOn = sheet.setAudit(); syncToggles(); });
+document.getElementById('btn-readonly').addEventListener('click', () => { readOnly = sheet.setReadOnly(!sheet.isReadOnly()); syncToggles(); });
+document.getElementById('op-clear').addEventListener('click', clearOps);
+document.getElementById('btn-undo').addEventListener('click', () => sheet.undo());
+document.getElementById('btn-redo').addEventListener('click', () => sheet.redo());
+document.getElementById('btn-addsheet').addEventListener('click', () => sheet.addSheet());
+document.getElementById('btn-replace').addEventListener('click', () => {
+    const q = window.prompt('検索する文字列');
+    if (!q) return;
+    const r = window.prompt(`「${q}」を置換する文字列`, '');
+    if (r == null) return;
+    const n = sheet.replaceAll(q, r);
+    window.alert(`${n} 件のセルを置換しました`);
+});
+document.getElementById('btn-csv').addEventListener('click', () => {
+    const out = document.getElementById('json-out');
+    out.classList.add('show');
+    out.value = sheet.exportCSV({ mode: 'value' });
+});
+document.getElementById('btn-print').addEventListener('click', () => sheet.print());
+document.getElementById('btn-json').addEventListener('click', () => {
+    const out = document.getElementById('json-out');
+    out.classList.toggle('show');
+    if (out.classList.contains('show')) out.value = JSON.stringify(sheet.toJSON(), null, 2);
+});
+
+window.createRSSheet = createRSSheet;
+window.defineFunction = defineFunction;
+load('estimate');
+</script>
+</body>
+</html>

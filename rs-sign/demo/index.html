@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>rs-sign デモ — 署名パッド＋電子印鑑＋契約書ワークフロー＋連携（v0.4）</title>
+<link rel="stylesheet" href="../dist/rs-sign.css">
+<style>
+    * { box-sizing: border-box; }
+    body {
+        font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", "Noto Sans CJK JP", sans-serif;
+        margin: 0; padding: 24px; background: #f1f4f8; color: #1f2937;
+    }
+    h1 { font-size: 22px; margin: 0 0 4px; }
+    .sub { color: #6b7280; font-size: 13px; margin-bottom: 20px; }
+    .cards { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; }
+    .card {
+        background: #fff; border-radius: 12px; padding: 20px;
+        box-shadow: 0 1px 4px rgba(15, 23, 42, .08); min-width: 340px; flex: 1;
+    }
+    .card h2 { font-size: 16px; margin: 0 0 12px; }
+    .toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 12px 0; }
+    .toolbar label { font-size: 12px; color: #4b5563; display: inline-flex; align-items: center; gap: 4px; }
+    button {
+        font: inherit; font-size: 13px; padding: 6px 12px; border-radius: 6px;
+        border: 1px solid #cbd5e1; background: #fff; cursor: pointer;
+    }
+    button:hover { background: #f3f6fa; }
+    button.primary { background: #1b2a5e; border-color: #1b2a5e; color: #fff; }
+    button.primary:hover { background: #27397a; }
+    button.danger { border-color: #d9534f; color: #d9534f; }
+    button.danger:hover { background: #fdf0f0; }
+    #pad { width: 480px; max-width: 100%; height: 220px; }
+    input[type="text"], input[type="number"], select {
+        font: inherit; font-size: 13px; padding: 5px 8px; border: 1px solid #cbd5e1; border-radius: 6px;
+    }
+    input[type="number"] { width: 72px; }
+    input[type="range"] { width: 90px; }
+    textarea {
+        width: 100%; height: 96px; font: 11px/1.4 ui-monospace, monospace;
+        border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px; color: #374151;
+    }
+    .field-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; }
+    .field-row label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: #4b5563; }
+    .type-switch { display: inline-flex; border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; }
+    .type-switch button { border: none; border-radius: 0; padding: 7px 14px; }
+    .type-switch button.active { background: #b3261e; color: #fff; }
+    #seal-preview {
+        min-height: 180px; display: flex; align-items: center; justify-content: center;
+        background: repeating-conic-gradient(#f8fafc 0 25%, #fff 0 50%) 0 0 / 20px 20px;
+        border: 1px dashed #cbd5e1; border-radius: 8px; padding: 16px; margin: 12px 0;
+    }
+    #hidden-value { font-size: 11px; color: #6b7280; word-break: break-all; }
+    .note { font-size: 12px; color: #6b7280; margin-top: 8px; }
+    .wide { width: 100%; margin-top: 20px; }
+    #viewer { height: 560px; }
+    .wf-controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 12px 0; }
+    .wf-out { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 12px; align-items: flex-start; }
+    .wf-composed { display: flex; flex-wrap: wrap; gap: 10px; }
+    .wf-composed img { width: 150px; border: 1px solid #cbd5e1; border-radius: 6px; box-shadow: 0 1px 4px rgba(0,0,0,.1); }
+    .wf-audit { flex: 1; min-width: 280px; }
+    .wf-audit textarea { height: 150px; }
+    .wf-badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+    .wf-badge.ok { background: #dcfce7; color: #166534; }
+    .wf-badge.ng { background: #fee2e2; color: #991b1b; }
+    .wf-status { font-size: 13px; color: #4b5563; }
+    /* v0.4 連携セクション */
+    .integ { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; }
+    .integ > div { flex: 1; min-width: 320px; }
+    #pdf-viewer { height: 420px; border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; }
+    #rsform-app { border: 1px solid #cbd5e1; border-radius: 8px; padding: 14px; background: #fff; }
+    .integ textarea { height: 150px; }
+    .integ .note code { background: #eef2f7; padding: 1px 5px; border-radius: 4px; }
+    .integ-fallback { color: #92400e; background: #fef3c7; border-radius: 6px; padding: 8px 10px; font-size: 12px; }
+</style>
+</head>
+<body>
+<h1>rs-sign <span style="font-weight:normal;font-size:14px">v0.4</span></h1>
+<div class="sub">依存ゼロの署名パッド＋電子印鑑＋契約書ワークフロー（MIT / ryusuke.sano）— v0.4: rs-pdf 連携（署名/印影をPDFページに配置し注釈として書き出し）・rs-form 連携（signature 質問へ署名パッドを差し込み）</div>
+
+<div class="cards">
+    <!-- ①署名パッド -->
+    <section class="card">
+        <h2>① 手書き署名パッド</h2>
+        <form id="sign-form">
+            <div id="pad"></div>
+            <input type="hidden" name="signature">
+        </form>
+        <div class="toolbar">
+            <label>ペン色 <input type="color" id="pen-color" value="#1b2a5e"></label>
+            <label>最小 <input type="range" id="min-width" min="0.5" max="4" step="0.5" value="1"><span id="min-width-v">1</span></label>
+            <label>最大 <input type="range" id="max-width" min="1" max="8" step="0.5" value="3.5"><span id="max-width-v">3.5</span></label>
+        </div>
+        <div class="toolbar">
+            <button id="btn-undo">元に戻す</button>
+            <button id="btn-clear">クリア</button>
+            <button id="btn-replay">再生</button>
+            <button id="btn-png" class="primary">PNG保存</button>
+            <button id="btn-svg">SVG保存</button>
+        </div>
+        <div class="toolbar">
+            <button id="btn-json-show">JSONを表示</button>
+            <button id="btn-json-load">JSONから復元</button>
+        </div>
+        <textarea id="json-area" placeholder="ストロークJSON（正のデータ）"></textarea>
+        <div class="note">hidden input（name=signature）: <span id="hidden-value">（未署名）</span></div>
+    </section>
+
+    <!-- ②電子印鑑ジェネレータ -->
+    <section class="card">
+        <h2>② 電子印鑑ジェネレータ</h2>
+        <div class="type-switch" id="type-switch">
+            <button data-type="mitome" class="active">認印</button>
+            <button data-type="kaku">角印</button>
+            <button data-type="data">データー印</button>
+            <button data-type="ginko">銀行印</button>
+            <button data-type="shoku">職印</button>
+        </div>
+        <div class="field-row" style="margin-top:12px">
+            <label>姓（1〜3字） <input type="text" id="seal-name" value="佐野"></label>
+            <label>社名（角印・データー印） <input type="text" id="seal-company" value="株式会社佐野商店"></label>
+            <label>役職（職印） <input type="text" id="seal-title" value="代表取締役"></label>
+        </div>
+        <div class="field-row">
+            <label>サイズ(mm) <input type="number" id="seal-size" value="10.5" step="0.5" min="9" max="30"></label>
+            <label>日付書式（データー印） <select id="date-format">
+                <option value="wareki">和暦（R8.7.7）</option>
+                <option value="seireki">西暦（26.7.7）</option>
+            </select></label>
+        </div>
+        <div class="field-row">
+            <label>かすれ <input type="range" id="seal-fade" min="0" max="0.7" step="0.05" value="0"><span id="seal-fade-v">0</span></label>
+            <label>にじみ <input type="range" id="seal-bleed" min="0" max="1" step="0.05" value="0"><span id="seal-bleed-v">0</span></label>
+            <label>シード <input type="number" id="seal-seed" value="1" min="0" step="1"></label>
+        </div>
+        <div id="seal-preview"></div>
+        <div class="toolbar">
+            <button id="seal-png" class="primary">PNGダウンロード</button>
+            <button id="seal-svg">SVGダウンロード</button>
+        </div>
+        <div class="note">既定はシステム明朝＋自前の字間/変形調整。印章風フォントは font オプション（font-family / FontFace）で差し替えできます。</div>
+    </section>
+</div>
+
+<!-- ③契約書ワークフロー（createRSSign / v0.2） -->
+<section class="card wide">
+    <h2>③ 契約書ワークフロー（createRSSign）</h2>
+    <div class="note">作成者がフィールドを配置（パレットから種類を選び、ページ上をドラッグ）→ 署名者が署名/押印で充足 → 全必須充足で完成合成PNG＋SHA-256チェーンの監査ログを出力します。</div>
+    <div class="wf-controls">
+        <span class="wf-status" id="wf-status">状態: draft（編集）</span>
+        <button id="wf-edit">編集に戻る</button>
+        <button id="wf-sign-a" class="primary">甲として署名/押印</button>
+        <button id="wf-sign-b">乙として押印</button>
+        <button id="wf-verify">監査ログを検証</button>
+        <button id="wf-tamper">改ざんして検証（false確認）</button>
+    </div>
+    <div class="wf-controls">
+        <label>署名順序 <select id="wf-ordermode">
+            <option value="parallel">並列（同時に押印可）</option>
+            <option value="serial">直列（甲→乙の順）</option>
+        </select></label>
+        <label>有効期限 <input type="date" id="wf-deadline"></label>
+        <button id="wf-expire">期限切れにする（昨日）</button>
+        <button id="wf-decline" class="danger">甲が辞退（差し戻し要求）</button>
+        <button id="wf-sendback">作成者が差し戻す（signingへ戻す）</button>
+    </div>
+    <div id="viewer"></div>
+    <div class="wf-out">
+        <div>
+            <div class="note">完成合成（PNG配列）:</div>
+            <div class="wf-composed" id="wf-composed"><span class="wf-status">（未完成）</span></div>
+            <div style="margin-top:8px">監査検証: <span id="wf-verify-badge" class="wf-badge">—</span></div>
+        </div>
+        <div class="wf-audit">
+            <div class="note">監査ログJSON（SHA-256ハッシュチェーン）:</div>
+            <textarea id="wf-audit" readonly placeholder="アクションが記録されると表示されます"></textarea>
+        </div>
+    </div>
+</section>
+
+<!-- ④ rs-pdf 連携（v0.4） -->
+<section class="card wide">
+    <h2>④ rs-pdf 連携 — 署名/印影をPDFページに配置し注釈として書き出し</h2>
+    <div class="note">
+        rs-sign の署名/印影（画像＋%座標＋ページ）を <code>createPdfSignAdapter(pdfViewer)</code> で rs-pdf の
+        画像スタンプ注釈に変換し、実際のPDFページ上へ配置します（rs-pdf のソースは変更せず公開契約 <code>annotations.add</code> を呼ぶだけ）。
+        ここではデモ用の合成ページを rs-pdf に読ませ、認印を押して <code>annotations.toJSON()</code> で書き出します。
+    </div>
+    <div class="toolbar">
+        <label>印面 <select id="pdf-seal-type">
+            <option value="mitome">認印</option>
+            <option value="data">データー印</option>
+            <option value="shoku">職印</option>
+        </select></label>
+        <button id="pdf-place" class="primary" disabled>ページに配置</button>
+        <button id="pdf-tool" disabled>スタンプツールで手押し</button>
+        <button id="pdf-export">注釈JSONを書き出し</button>
+    </div>
+    <div class="integ">
+        <div><div id="pdf-viewer"></div><div class="integ-fallback" id="pdf-fallback" hidden></div></div>
+        <div>
+            <div class="note">rs-pdf 注釈JSON（<code>stamp</code>：画像＋rect 0..1＋page 1始まり）:</div>
+            <textarea id="pdf-annot-json" readonly placeholder="配置すると書き出されます"></textarea>
+        </div>
+    </div>
+</section>
+
+<!-- ⑤ rs-form 連携（v0.4） -->
+<section class="card wide">
+    <h2>⑤ rs-form 連携 — signature 質問に rs-sign 署名パッドを差し込み</h2>
+    <div class="note">
+        <code>createRSForm(el, schema, { signaturePad: rsSignaturePad({...}) })</code> の1行で、rs-form の signature 質問の
+        既定 canvas を rs-sign の滑らかな署名パッドに置き換えます（rs-form のソースは変更せず公開アダプタ契約に沿うだけ）。
+        描くと回答JSONに PNG dataURL が載ります。
+    </div>
+    <div class="integ">
+        <div><div id="rsform-app"></div><div class="integ-fallback" id="rsform-fallback" hidden></div></div>
+        <div>
+            <div class="note">rs-form 回答JSON（署名は <code>data:image/png</code>）:</div>
+            <textarea id="rsform-values" readonly placeholder="署名すると回答が表示されます"></textarea>
+        </div>
+    </div>
+</section>
+
+<script type="module">
+    import * as rsSign from '../dist/rs-sign.esm.min.js';
+    const { createRSSignPad, createRSHanko } = rsSign;
+
+    /* ---------- ①署名パッド ---------- */
+    const pad = createRSSignPad('#pad', {
+        penColor: '#1b2a5e', minWidth: 1, maxWidth: 3.5,
+        pressure: true, hiddenInput: 'signature',
+    });
+    const $ = (sel) => document.querySelector(sel);
+
+    $('#pen-color').addEventListener('input', (e) => { pad.options.penColor = e.target.value; });
+    $('#min-width').addEventListener('input', (e) => {
+        pad.options.minWidth = Number(e.target.value);
+        $('#min-width-v').textContent = e.target.value;
+    });
+    $('#max-width').addEventListener('input', (e) => {
+        pad.options.maxWidth = Number(e.target.value);
+        $('#max-width-v').textContent = e.target.value;
+    });
+    $('#btn-undo').addEventListener('click', () => pad.undo());
+    $('#btn-clear').addEventListener('click', () => pad.clear());
+    $('#btn-replay').addEventListener('click', () => pad.replay({ speed: 1.5 }));
+
+    const download = (url, filename) => {
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        a.click();
+    };
+    $('#btn-png').addEventListener('click', () => download(pad.toPNG({ scale: 2 }), 'signature.png'));
+    $('#btn-svg').addEventListener('click', () => {
+        const blob = new Blob([pad.toSVG()], { type: 'image/svg+xml' });
+        download(URL.createObjectURL(blob), 'signature.svg');
+    });
+    $('#btn-json-show').addEventListener('click', () => {
+        $('#json-area').value = JSON.stringify(pad.toJSON());
+    });
+    $('#btn-json-load').addEventListener('click', () => {
+        try {
+            pad.fromJSON($('#json-area').value);
+        } catch (err) {
+            alert(err.message);
+        }
+    });
+    pad.on('change', () => {
+        const v = $('#sign-form').elements.signature.value;
+        $('#hidden-value').textContent = v ? `${v.slice(0, 48)}…（${v.length}文字）` : '（未署名）';
+    });
+
+    /* ---------- ②電子印鑑ジェネレータ ---------- */
+    const hanko = createRSHanko({ dpi: 350 });
+    const DEFAULT_SIZE = { mitome: 10.5, kaku: 21, data: 12, ginko: 12, shoku: 18 };
+    let sealType = 'mitome';
+
+    function sealOpts() {
+        return {
+            type: sealType,
+            name: sealType === 'kaku' ? $('#seal-company').value : $('#seal-name').value,
+            company: $('#seal-company').value,
+            title: $('#seal-title').value,
+            sizeMm: Number($('#seal-size').value) || DEFAULT_SIZE[sealType],
+            dateFormat: $('#date-format').value,
+            date: new Date(),
+            fade: Number($('#seal-fade').value) || 0,     // かすれ（v0.3・シード付き）
+            bleed: Number($('#seal-bleed').value) || 0,   // にじみ（v0.3）
+            seed: Number($('#seal-seed').value) || 0,
+        };
+    }
+
+    function renderSeal() {
+        const canvas = hanko.render(sealOpts());
+        canvas.style.width = `${Math.round(canvas.width / 2.2)}px`;   // 350dpi → 画面表示は縮小
+        const box = $('#seal-preview');
+        box.innerHTML = '';
+        box.appendChild(canvas);
+        window.sealCanvas = canvas;
+    }
+
+    document.querySelectorAll('#type-switch button').forEach((btn) => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('#type-switch button').forEach((b) => b.classList.remove('active'));
+            btn.classList.add('active');
+            sealType = btn.dataset.type;
+            $('#seal-size').value = DEFAULT_SIZE[sealType];
+            renderSeal();
+        });
+    });
+    for (const sel of ['#seal-name', '#seal-company', '#seal-title', '#seal-size', '#date-format', '#seal-seed']) {
+        $(sel).addEventListener('input', renderSeal);
+    }
+    for (const [sl, out] of [['#seal-fade', '#seal-fade-v'], ['#seal-bleed', '#seal-bleed-v']]) {
+        $(sl).addEventListener('input', (e) => { $(out).textContent = e.target.value; renderSeal(); });
+    }
+    $('#seal-png').addEventListener('click', () => download(hanko.toPNG(sealOpts()), `hanko-${sealType}.png`));
+    $('#seal-svg').addEventListener('click', () => {
+        const blob = new Blob([hanko.toSVG(sealOpts())], { type: 'image/svg+xml' });
+        download(URL.createObjectURL(blob), `hanko-${sealType}.svg`);
+    });
+    renderSeal();
+
+    /* ---------- ③契約書ワークフロー ---------- */
+    const { createRSSign, verifyAudit } = rsSign;
+
+    // ページ画像を canvas で合成（外部画像に依存しない・タイントも起きない）
+    function makeContractPage(no, title, lines) {
+        const c = document.createElement('canvas');
+        c.width = 800; c.height = 1131;                 // A4 比
+        const g = c.getContext('2d');
+        g.fillStyle = '#ffffff'; g.fillRect(0, 0, c.width, c.height);
+        g.strokeStyle = '#e2e8f0'; g.lineWidth = 2; g.strokeRect(40, 40, c.width - 80, c.height - 80);
+        g.fillStyle = '#1f2937';
+        g.font = 'bold 34px "Hiragino Mincho ProN", serif';
+        g.textAlign = 'center';
+        g.fillText(title, c.width / 2, 130);
+        g.textAlign = 'left';
+        g.font = '20px "Hiragino Mincho ProN", serif';
+        g.fillStyle = '#374151';
+        lines.forEach((ln, i) => g.fillText(ln, 80, 210 + i * 40));
+        g.fillStyle = '#9ca3af'; g.font = '16px sans-serif'; g.textAlign = 'right';
+        g.fillText(`- ${no} -`, c.width - 80, c.height - 60);
+        return c;
+    }
+    const page1 = makeContractPage(1, '業務委託契約書', [
+        '第1条（目的）本契約は、甲が乙に業務を委託し、乙が',
+        '　これを受託することについて定めるものである。',
+        '第2条（委託業務）乙は別紙に定める業務を遂行する。',
+        '第3条（対価）甲は乙に対し、月額金○○円を支払う。',
+        '',
+        '　甲（借主）署名：', '', '', '　押印：　　　　　　　　日付：',
+    ]);
+    const page2 = makeContractPage(2, '（第2ページ）確認事項', [
+        '第4条（秘密保持）両当事者は本契約に関して知り得た',
+        '　秘密を第三者に開示しない。',
+        '第5条（有効期間）本契約の有効期間は1年間とする。',
+        '',
+        '　□ 上記条項に同意します（甲）', '', '',
+        '　乙（貸主）押印：',
+    ]);
+
+    const sign = createRSSign('#viewer', { pages: [page1, page2] }, {
+        mode: 'edit',
+        signers: [{ id: 'party-a', name: '甲（借主）' }, { id: 'party-b', name: '乙（貸主）' }],
+        actor: 'creator',
+        orderMode: 'parallel',                          // v0.3: 直列/並列の順序制御（既定 parallel）
+        order: ['party-a', 'party-b'],
+    });
+
+    // 見本フィールドを配置（作成者はパレット＋ドラッグでも追加/移動/リサイズ可）
+    sign.ready.then(() => {
+        sign.addField({ type: 'signature', page: 0, x: 26, y: 62.5, w: 30, h: 5, signer: 'party-a', required: true });
+        sign.addField({ type: 'seal', page: 0, x: 20, y: 72, w: 9, h: 6.5, signer: 'party-a', required: true });
+        sign.addField({ type: 'date', page: 0, x: 52, y: 72, w: 22, h: 4, signer: 'party-a', required: true });
+        sign.addField({ type: 'checkbox', page: 1, x: 9.5, y: 38, w: 3.2, h: 2.4, signer: 'party-a', required: true });
+        sign.addField({ type: 'seal', page: 1, x: 30, y: 47, w: 9, h: 6.5, signer: 'party-b', required: true });
+        refreshAudit();
+    });
+
+    const $wf = (s) => document.querySelector(s);
+    const setStatus = (t) => { $wf('#wf-status').textContent = '状態: ' + t; };
+    function refreshAudit() {
+        $wf('#wf-audit').value = JSON.stringify(sign.getAudit(), null, 1);
+    }
+    async function showVerify() {
+        const ok = await verifyAudit(sign.getAudit());
+        const b = $wf('#wf-verify-badge');
+        b.textContent = ok ? 'true（正当）' : 'false（改ざん検出）';
+        b.className = 'wf-badge ' + (ok ? 'ok' : 'ng');
+    }
+
+    $wf('#wf-edit').addEventListener('click', () => { sign.setMode('edit'); setStatus('draft（編集）'); refreshAudit(); });
+    $wf('#wf-sign-a').addEventListener('click', () => { sign.setMode('sign', { signer: 'party-a' }); setStatus('signing（甲が充足）'); refreshAudit(); });
+    $wf('#wf-sign-b').addEventListener('click', () => { sign.setMode('sign', { signer: 'party-b' }); setStatus('signing（乙が充足）'); refreshAudit(); });
+    $wf('#wf-verify').addEventListener('click', showVerify);
+
+    // v0.3: 順序制御・有効期限・差し戻し
+    $wf('#wf-ordermode').addEventListener('change', (e) => {
+        sign.setOrder(undefined, e.target.value);
+        setStatus(`${sign.state}（署名順序: ${e.target.value === 'serial' ? '直列' : '並列'}）`);
+        refreshAudit();
+    });
+    $wf('#wf-deadline').addEventListener('change', (e) => {
+        sign.setDeadline(e.target.value ? new Date(e.target.value + 'T23:59:59') : null);
+        refreshAudit();
+    });
+    $wf('#wf-expire').addEventListener('click', () => {
+        const yst = new Date(Date.now() - 86400000);
+        sign.setDeadline(yst);
+        setStatus(`expired（期限切れ・押印不可）`);
+        refreshAudit();
+    });
+    $wf('#wf-decline').addEventListener('click', async () => {
+        sign.setMode('sign', { signer: 'party-a' });
+        await sign.decline('金額の記載を訂正してください');
+        setStatus('declined（甲が辞退・差し戻し要求）');
+        refreshAudit();
+    });
+    $wf('#wf-sendback').addEventListener('click', async () => {
+        await sign.sendBack('訂正版で再度ご確認ください', { reset: true, signer: 'party-a' });
+        setStatus('signing（差し戻し済み・甲が再入力）');
+        refreshAudit();
+    });
+    $wf('#wf-tamper').addEventListener('click', async () => {
+        const a = sign.getAudit();
+        if (a.entries.length > 1) a.entries[1].what = 'field.filled:TAMPERED';
+        const ok = await verifyAudit(a);
+        const b = $wf('#wf-verify-badge');
+        b.textContent = ok ? 'true' : 'false（改ざん検出）';
+        b.className = 'wf-badge ' + (ok ? 'ok' : 'ng');
+    });
+
+    sign.on('fieldFilled', () => refreshAudit());
+    sign.on('complete', (e) => {
+        setStatus('completed（完成）');
+        const box = $wf('#wf-composed');
+        box.innerHTML = '';
+        e.pngs.forEach((png) => { const img = new Image(); img.src = png; box.appendChild(img); });
+        refreshAudit();
+        showVerify();
+    });
+
+    // 検証用に公開
+    window.rsSign = rsSign;
+    window.pad = pad;
+    window.hanko = hanko;
+    window.sign = sign;
+    window.verifyAudit = verifyAudit;
+
+    /* ---------- ④ rs-pdf 連携（v0.4） ---------- */
+    const { createPdfSignAdapter, rsSignaturePad } = rsSign;
+
+    // rs-pdf のレンダラアダプタ契約に沿った「デモ用スタブ」。
+    // pdf.js 無しで rs-pdf の実物の注釈機構を動かすため、合成ページを契約へ写す。
+    function stubRenderer(pages) {
+        return {
+            name: 'rs-sign-demo-stub',
+            async open() {
+                return {
+                    numPages: pages.length,
+                    async getPage(n) {
+                        const p = pages[n - 1];
+                        return {
+                            size: { width: p.width, height: p.height },
+                            async render(canvas, scale) {
+                                canvas.width = Math.max(1, Math.round(p.width * scale));
+                                canvas.height = Math.max(1, Math.round(p.height * scale));
+                                const g = canvas.getContext('2d');
+                                g.setTransform(scale, 0, 0, scale, 0, 0);
+                                g.fillStyle = '#ffffff'; g.fillRect(0, 0, p.width, p.height);
+                                g.strokeStyle = '#e2e8f0'; g.lineWidth = 1; g.strokeRect(8, 8, p.width - 16, p.height - 16);
+                                g.fillStyle = '#334155'; g.font = 'bold 18px sans-serif';
+                                g.fillText(p.title || `Page ${n}`, 24, 40);
+                                g.font = '13px sans-serif'; g.fillStyle = '#64748b';
+                                g.fillText('署名/押印欄 →', 24, p.height - 90);
+                                g.strokeStyle = '#94a3b8'; g.strokeRect(p.width * 0.55, p.height - 130, p.width * 0.32, 70);
+                            },
+                            async getTextContent() { return []; },
+                        };
+                    },
+                    destroy() {},
+                };
+            },
+        };
+    }
+
+    (async () => {
+        try {
+            const { createRSPDF } = await import('../../rs-pdf/dist/rs-pdf.esm.min.js');
+            // rs-pdf.css を（存在するときだけ）読み込む
+            const link = document.createElement('link');
+            link.rel = 'stylesheet'; link.href = '../../rs-pdf/dist/rs-pdf.css';
+            document.head.appendChild(link);
+
+            const pdfPages = [{ width: 420, height: 594, title: '業務委託契約書（デモPDF）' }];
+            const pdf = createRSPDF('#pdf-viewer', { renderer: stubRenderer(pdfPages), zoom: 'fit-width', src: 'stub' });
+            const adapter = createPdfSignAdapter(pdf);
+
+            const exportJSON = () => { $('#pdf-annot-json').value = JSON.stringify(pdf.annotations.toJSON(), null, 1); };
+            const currentSeal = () => hanko.toPNG({ type: $('#pdf-seal-type').value, name: '佐野', company: '株式会社佐野商店', title: '代表取締役' });
+
+            pdf.on('load', () => {
+                $('#pdf-place').disabled = false;
+                $('#pdf-tool').disabled = false;
+            });
+            $('#pdf-place').addEventListener('click', () => {
+                // 署名/印影（画像＋%座標＋ページ0始まり）→ rs-pdf スタンプ注釈として配置
+                adapter.placeSignature({ image: currentSeal(), page: 0, x: 58, y: 78, w: 22, h: 16 });
+                exportJSON();
+            });
+            $('#pdf-tool').addEventListener('click', () => {
+                // インタラクティブ配置: rs-pdf のスタンプツールに印影をセット（ページクリックで押せる）
+                adapter.setStampImage(currentSeal(), { widthPt: 90 });
+            });
+            $('#pdf-export').addEventListener('click', exportJSON);
+
+            window.__pdfDemo = { pdf, adapter, exportJSON };
+        } catch (e) {
+            console.warn('rs-sign demo: rs-pdf 連携を初期化できませんでした（rs-pdf 未配置の可能性）', e);
+            const fb = $('#pdf-fallback');
+            fb.hidden = false;
+            fb.textContent = 'rs-pdf が見つからないため、連携デモは契約データのみ表示します。';
+            // rs-pdf が無くても、生成される注釈データ（契約）は見せる
+            const demoAnnot = rsSign.signatureAnnotation({ image: hanko.toPNG({ type: 'mitome', name: '佐野' }), page: 0, x: 58, y: 78, w: 22, h: 16 });
+            $('#pdf-annot-json').value = JSON.stringify({ version: 1, annotations: [demoAnnot] }, null, 1);
+        }
+    })();
+
+    /* ---------- ⑤ rs-form 連携（v0.4） ---------- */
+    (async () => {
+        try {
+            const { createRSForm } = await import('../../rs-form/dist/esm/index.js');
+            const link = document.createElement('link');
+            link.rel = 'stylesheet'; link.href = '../../rs-form/dist/rs-form.css';
+            document.head.appendChild(link);
+
+            const schema = {
+                title: '同意書（デモ）',
+                pages: [{
+                    questions: [
+                        { type: 'text', name: 'name', label: 'お名前', required: true },
+                        { type: 'signature', name: 'sign', label: 'ご署名', width: 440, height: 160, required: true },
+                    ],
+                }],
+            };
+            const form = createRSForm('#rsform-app', schema, {
+                // これ1行で signature 質問が rs-sign の署名パッドに置き換わる
+                signaturePad: rsSignaturePad({ penColor: '#1b2a5e', minWidth: 1, maxWidth: 3.2 }),
+            });
+            const showValues = () => { $('#rsform-values').value = JSON.stringify(form.getAnswers(), null, 1); };
+            form.on('change', showValues);
+            showValues();
+            window.__formDemo = { form, showValues };
+        } catch (e) {
+            console.warn('rs-sign demo: rs-form 連携を初期化できませんでした（rs-form 未配置の可能性）', e);
+            const fb = $('#rsform-fallback');
+            fb.hidden = false;
+            fb.textContent = 'rs-form が見つからないため、連携デモは省略しました（rsSignaturePad アダプタは rs-sign から提供されます）。';
+        }
+    })();
+</script>
+</body>
+</html>

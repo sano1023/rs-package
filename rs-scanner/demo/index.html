@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>rs-scanner デモ</title>
+<link rel="stylesheet" href="../dist/rs-scanner.css">
+<style>
+    body {
+        font-family: system-ui, -apple-system, "Segoe UI", "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+        margin: 0; background: #f1f5f9; color: #1e293b;
+    }
+    .page { max-width: 1000px; margin: 0 auto; padding: 32px 20px 120px; }
+    h1 { font-size: 24px; }
+    h1 small { font-size: 13px; color: #64748b; font-weight: 400; margin-left: 10px; }
+    .lead { color: #475569; font-size: 14px; margin-bottom: 20px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .card { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 18px; }
+    .card h2 { font-size: 14px; margin: 0 0 12px; }
+    .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin: 10px 0; }
+    button {
+        appearance: none; border: 1px solid #4e79a7; background: #4e79a7; color: #fff;
+        padding: 7px 14px; border-radius: 7px; font-size: 13px; cursor: pointer; font-family: inherit;
+    }
+    button.ghost { background: #fff; color: #334155; border-color: #cbd5e1; }
+    .results { font-size: 13px; max-height: 180px; overflow-y: auto; }
+    .results div { padding: 5px 8px; border-bottom: 1px solid #eef2f7; }
+    .results .fmt { color: #4e79a7; font-weight: 700; margin-right: 8px; font-size: 11px; }
+    .selftest { text-align: center; }
+    .selftest svg { max-width: 100%; }
+    .ok { color: #16a34a; font-weight: 700; }
+    .ng { color: #dc2626; font-weight: 700; }
+    @media (max-width: 760px) { .grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="page">
+    <h1>rs-scanner <small>v0.1 デモ — QR/バーコード読み取り（依存ゼロコア）</small></h1>
+    <p class="lead">
+        カメラをかざして読み取り（スマホ推奨・要HTTPS）。バーコード（CODE128/EAN-13）は<strong>内蔵デコーダ</strong>で全ブラウザ動作、
+        QRは BarcodeDetector 対応ブラウザで動作（jsQRアダプタ注入にも対応）。
+    </p>
+
+    <div class="grid">
+        <div class="card">
+            <h2>カメラスキャン</h2>
+            <div id="scanner"></div>
+            <div class="row">
+                <button id="btn-start">カメラ起動</button>
+                <button class="ghost" id="btn-stop">停止</button>
+                <label style="font-size:12px"><input type="checkbox" id="opt-continuous" checked> 連続スキャン</label>
+            </div>
+            <div class="results" id="results"></div>
+        </div>
+
+        <div class="card">
+            <h2>画像から読み取り（アップロード）</h2>
+            <input type="file" id="file" accept="image/*">
+            <div class="row" id="file-result" style="font-size:13px;color:#475569;"></div>
+
+            <h2 style="margin-top:20px;">セルフテスト: rs-qrcode で生成 → rs-scanner が読む</h2>
+            <div class="row">
+                <button class="ghost" id="btn-self-128">CODE128を生成→読取</button>
+                <button class="ghost" id="btn-self-ean">EAN-13を生成→読取</button>
+            </div>
+            <div class="selftest" id="selftest"></div>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { createRSScanner, jsQRAdapter, decode1D } from '../dist/rs-scanner.esm.min.js';
+    import * as qrmod from '../../rs-qrcode/dist/rs-qrcode.esm.min.js';
+    const { createRSBarcode } = qrmod;
+    window.__qr = qrmod;
+    window.__mod = { createRSScanner, jsQRAdapter, decode1D };
+
+    const $ = (id) => document.getElementById(id);
+
+    const adapters = [];
+    if (typeof window.jsQR === 'function') adapters.push(jsQRAdapter(window.jsQR));
+
+    window.scanner = createRSScanner('#scanner', {
+        adapters,
+        onScan: (r) => {
+            const div = document.createElement('div');
+            div.innerHTML = `<span class="fmt">${r.format}</span>${escapeHTML(r.text)} <small style="color:#94a3b8">(${r.engine})</small>`;
+            $('results').prepend(div);
+        },
+        onError: (e) => {
+            $('results').prepend(Object.assign(document.createElement('div'), { textContent: e.message }));
+        },
+    });
+
+    $('btn-start').addEventListener('click', () => {
+        window.scanner.options.continuous = $('opt-continuous').checked;
+        window.scanner.start().catch(() => {});
+    });
+    $('btn-stop').addEventListener('click', () => window.scanner.stop());
+
+    $('file').addEventListener('change', async (e) => {
+        const f = e.target.files[0];
+        if (!f) return;
+        const r = await window.scanner.scanImage(f);
+        $('file-result').innerHTML = r
+            ? `<span class="ok">読み取り成功:</span> <span class="fmt">${r.format}</span> ${escapeHTML(r.text)}`
+            : '<span class="ng">読み取れませんでした</span>';
+    });
+
+    // ---- セルフテスト（生成→読取のドッグフーディング）
+    async function selfTest(type, data) {
+        const bc = createRSBarcode(data, { type, barHeight: 70, scale: 3 });
+        const canvas = bc.toCanvas();
+        const r = await window.scanner.scanImage(canvas);
+        const el = $('selftest');
+        el.innerHTML = bc.toSVG({ scale: 2 });
+        const p = document.createElement('p');
+        const match = r && r.text === bc.text;
+        p.innerHTML = match
+            ? `<span class="ok">一致 ✓</span> ${escapeHTML(r.text)}（${r.engine}）`
+            : `<span class="ng">不一致</span> ${r ? escapeHTML(r.text) : 'null'}`;
+        el.appendChild(p);
+        return match;
+    }
+    $('btn-self-128').addEventListener('click', () => selfTest('code128', 'RS-2026/AB_01'));
+    $('btn-self-ean').addEventListener('click', () => selfTest('ean13', '490123456789'));
+
+    function escapeHTML(s) {
+        return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+</script>
+</body>
+</html>

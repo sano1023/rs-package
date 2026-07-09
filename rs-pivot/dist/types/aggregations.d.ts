@@ -27,6 +27,8 @@ export namespace count { }
 export namespace min { }
 export namespace max { }
 export namespace countDistinct { }
+export namespace median { }
+export namespace stdev { }
 /** 組み込み集計の一覧 */
 export const builtinAggregations: {
     label: any;

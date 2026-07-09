@@ -27,3 +27,199 @@
     border-radius: inherit;
     cursor: crosshair;
 }
+
+/* ============================================================
+   文書配置・締結ワークフロー（createRSSign / v0.2）
+   ============================================================ */
+:root {
+    --rss-doc-bg: #eceff3;
+    --rss-doc-page-shadow: 0 1px 6px rgba(15, 23, 42, .18);
+    --rss-field-color: #1b6fd6;
+    --rss-field-fill: rgba(27, 111, 214, .10);
+    --rss-field-required: #d9822b;
+    --rss-toolbar-bg: #fff;
+}
+
+.rss-doc {
+    display: flex;
+    flex-direction: column;
+    background: var(--rss-doc-bg);
+    border: 1px solid var(--rss-pad-border);
+    border-radius: var(--rss-pad-radius);
+    overflow: hidden;
+}
+
+.rss-doc-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    background: var(--rss-toolbar-bg);
+    border-bottom: 1px solid var(--rss-pad-border);
+    font: 13px/1.3 system-ui, sans-serif;
+}
+
+.rss-doc-toolbar button {
+    font: inherit;
+    padding: 5px 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    background: #fff;
+    cursor: pointer;
+}
+.rss-doc-toolbar button:hover { background: #f3f6fa; }
+.rss-doc-toolbar button.rss-armed { background: var(--rss-field-color); border-color: var(--rss-field-color); color: #fff; }
+.rss-doc-toolbar button.rss-btn-primary { background: #1b2a5e; border-color: #1b2a5e; color: #fff; }
+.rss-doc-toolbar button.rss-btn-danger { border-color: #d9534f; color: #d9534f; }
+
+.rss-tb-group { display: inline-flex; align-items: center; gap: 6px; }
+.rss-tb-group.rss-tb-props { gap: 8px; flex-wrap: wrap; }
+.rss-tb-zoom { min-width: 44px; text-align: center; color: #4b5563; }
+.rss-tb-progress { font-weight: 600; color: #1b2a5e; }
+.rss-tb-hint { color: #94a3b8; }
+.rss-tb-check { display: inline-flex; align-items: center; gap: 4px; color: #4b5563; }
+.rss-doc-toolbar select { font: inherit; padding: 4px 6px; border: 1px solid #cbd5e1; border-radius: 6px; }
+
+/* ワークフロー状態バッジ（v0.3: 順序・差し戻し・期限切れ） */
+.rss-wf-status { gap: 6px; }
+.rss-wf-badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+.rss-wf-badge.rss-wf-mode { background: #e0e7ff; color: #3730a3; }
+.rss-wf-badge.rss-wf-waiting { background: #f1f5f9; color: #64748b; }
+.rss-wf-badge.rss-wf-declined { background: #fee2e2; color: #991b1b; }
+.rss-wf-badge.rss-wf-expired { background: #fef3c7; color: #92400e; }
+
+.rss-doc-scroll {
+    overflow: auto;
+    padding: 16px;
+    max-height: 70vh;
+}
+
+.rss-doc-pages {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+.rss-doc-page {
+    position: relative;
+    background: #fff;
+    box-shadow: var(--rss-doc-page-shadow);
+}
+
+.rss-doc-img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    -webkit-user-select: none;
+    user-select: none;
+    pointer-events: none;
+}
+
+.rss-doc-fieldlayer {
+    position: absolute;
+    inset: 0;
+}
+
+/* フィールド */
+.rss-field {
+    position: absolute;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1.5px dashed var(--rss-field-color);
+    background: var(--rss-field-fill);
+    border-radius: 3px;
+    font: 12px/1.2 system-ui, sans-serif;
+    color: var(--rss-field-color);
+    overflow: hidden;
+}
+.rss-field-required { border-color: var(--rss-field-required); }
+.rss-field-filled { border-style: solid; border-color: rgba(27, 42, 94, .35); background: transparent; }
+
+.rss-doc[data-mode="edit"] .rss-field { cursor: move; }
+.rss-doc[data-mode="sign"] .rss-field-actionable { cursor: pointer; border-style: solid; background: rgba(27, 111, 214, .16); animation: rss-breathe 1.8s ease-in-out infinite; }
+.rss-field-selected { outline: 2px solid #1b2a5e; outline-offset: 1px; z-index: 3; }
+/* 直列順で手番待ち（前の署名者が未完了）のフィールドは淡く無効表示 */
+.rss-doc[data-mode="sign"] .rss-field-waiting {
+    cursor: not-allowed; border-style: dotted; border-color: #94a3b8;
+    background: rgba(148, 163, 184, .12); opacity: .6;
+}
+
+.rss-field-content { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; text-align: center; }
+.rss-field-label { padding: 0 2px; opacity: .85; }
+.rss-field-signer { position: absolute; top: 1px; right: 2px; font-size: 9px; background: var(--rss-field-color); color: #fff; padding: 0 4px; border-radius: 6px; }
+.rss-field-value-img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.rss-field-check { color: #1b2a5e; font-weight: 700; font-size: 140%; }
+.rss-field-text { color: #1b2a5e; padding: 0 3px; white-space: nowrap; }
+
+.rss-field-handle {
+    position: absolute;
+    right: -5px; bottom: -5px;
+    width: 12px; height: 12px;
+    background: #fff;
+    border: 1.5px solid var(--rss-field-color);
+    border-radius: 50%;
+    cursor: nwse-resize;
+    z-index: 4;
+}
+
+.rss-field-pulse { animation: rss-pulse 1s ease-out 2; }
+@keyframes rss-pulse { 0% { box-shadow: 0 0 0 0 rgba(217, 130, 43, .6); } 100% { box-shadow: 0 0 0 14px rgba(217, 130, 43, 0); } }
+@keyframes rss-breathe { 0%, 100% { box-shadow: 0 0 0 0 rgba(27, 111, 214, .0); } 50% { box-shadow: 0 0 0 4px rgba(27, 111, 214, .25); } }
+
+/* 充足モーダル */
+.rss-modal-overlay {
+    position: fixed; inset: 0; z-index: 9999;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(15, 23, 42, .5);
+    padding: 16px;
+}
+.rss-modal {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    max-width: min(92vw, 520px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, .3);
+    font: 14px/1.4 system-ui, sans-serif;
+}
+.rss-modal-title { margin: 0 0 12px; font-size: 16px; }
+.rss-modal-body { display: flex; flex-direction: column; gap: 10px; }
+.rss-modal-pad { width: 420px; max-width: 100%; height: 180px; border: 1px solid var(--rss-pad-border); border-radius: 8px; }
+.rss-modal-hint { font-size: 12px; color: #94a3b8; text-align: center; }
+.rss-modal-seal { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; }
+.rss-modal-field { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: #4b5563; }
+.rss-modal-field input, .rss-modal-seal select { font: inherit; padding: 5px 8px; border: 1px solid #cbd5e1; border-radius: 6px; }
+.rss-modal-preview { min-height: 120px; display: flex; align-items: center; justify-content: center; background: repeating-conic-gradient(#f8fafc 0 25%, #fff 0 50%) 0 0 / 16px 16px; border: 1px dashed #cbd5e1; border-radius: 8px; }
+.rss-modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+.rss-modal-actions button { font: inherit; padding: 7px 16px; border: 1px solid #cbd5e1; border-radius: 6px; background: #fff; cursor: pointer; }
+.rss-modal-actions button.rss-btn-primary { background: #1b2a5e; border-color: #1b2a5e; color: #fff; }
+.rss-modal button { font: inherit; padding: 5px 10px; border: 1px solid #cbd5e1; border-radius: 6px; background: #fff; cursor: pointer; }
+.rss-shake { animation: rss-shake .3s; }
+@keyframes rss-shake { 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+
+/* ============================================================
+   rs-form 連携（signature 質問へ差し込む署名パッド / v0.4）
+   ============================================================ */
+.rss-form-signpad {
+    display: inline-block;
+    max-width: 100%;
+    touch-action: none;
+}
+.rss-form-signbar {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+}
+.rss-form-signbtn {
+    font: 13px/1.2 system-ui, sans-serif;
+    padding: 5px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    background: #fff;
+    color: #374151;
+    cursor: pointer;
+}
+.rss-form-signbtn:hover { background: #f3f6fa; }

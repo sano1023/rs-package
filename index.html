@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ryusuke-packages — デモ一覧</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #f6f7f9; --card: #fff; --text: #1b1d21; --muted: #6b7280; --border: #e2e5ea; --accent: #1a73e8;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #16171a; --card: #1f2125; --text: #e6e8ea; --muted: #9aa1a9; --border: #2e3238; --accent: #7cb0ff; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif; }
+  .wrap { max-width: 1000px; margin: 0 auto; padding: 40px 20px 60px; }
+  h1 { font-size: 22px; margin: 0 0 6px; }
+  .lead { color: var(--muted); font-size: 14px; margin: 0 0 8px; line-height: 1.7; }
+  .lead a { color: var(--accent); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; margin-top: 28px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+  .card .head { display: block; text-decoration: none; color: inherit; }
+  .card .name { font-weight: 600; font-size: 15px; }
+  .card .ver { font-size: 11px; color: var(--muted); margin-left: 6px; padding: 1px 6px; border: 1px solid var(--border); border-radius: 20px; }
+  .card .desc { color: var(--muted); font-size: 13px; margin-top: 4px; line-height: 1.6; }
+  .card .extra { margin-top: 10px; font-size: 12px; }
+  .card .extra a { color: var(--accent); text-decoration: none; margin-right: 10px; }
+  .card .extra a:hover { text-decoration: underline; }
+  footer { margin-top: 40px; color: var(--muted); font-size: 12px; line-height: 1.8; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>ryusuke-packages — デモ一覧</h1>
+  <p class="lead">
+    依存ゼロの自作JSライブラリ集です。バニラJS / Vue 3 / React / <code>&lt;script&gt;</code>タグ の4形態で使えます。<br>
+    インストール方法は <a href="./README.md">README</a> を参照してください（<code>npm install @parelabo/&lt;パッケージ名&gt;</code>）。
+  </p>
+  <div class="grid">
+    <div class="card">
+      <a class="head" href="./rs-baslider/demo/index.html">
+        <span class="name">@parelabo/rs-baslider</span><span class="ver">v0.1.0</span>
+        <div class="desc">Before/After比較スライダー</div>
+      </a>
+      <div class="extra">
+        <a href="./rs-baslider/demo/index.html">デモ</a>
+      </div>
+    </div>
+    <div class="card">
+      <a class="head" href="./rs-chart/demo/index.html">
+        <span class="name">@parelabo/rs-chart</span><span class="ver">v0.5.0</span>
+        <div class="desc">依存ゼロのSVG/Canvasチャートライブラリ</div>
+      </a>
+      <div class="extra">
+        <a href="./rs-chart/demo/index.html">デモ</a>
+      </div>
+    </div>
+    <div class="card">
+      <a class="head" href="./rs-datepicker/demo/index.html">
+        <span class="name">@parelabo/rs-datepicker</span><span class="ver">v0.3.0</span>
+        <div class="desc">日本語ファースト・依存ゼロの日付ピッカー</div>
+      </a>
+      <div class="extra">
+        <a href="./rs-datepicker/demo/index.html">デモ</a>
+      </div>
+    </div>
+    <div class="card">
+      <a class="head" href="./rs-diagram/demo/index.html">
+        <span class="name">@parelabo/rs-diagram</span><span class="ver">v0.5.0</span>
+        <div class="desc">依存ゼロのSVG作図・ダイアグラムライブラリ</div>
+      </a>
+      <div class="extra">
+        <a href="./rs-diagram/demo/ecosystem.html">ecosystem</a>
+        <a href="./rs-diagram/demo/index.html">デモ</a>
+      </div>
+    </div>
+    <div class="card">
+      <a class="head" href="./rs-editor/demo/index.html">
+        <span class="name">@parelabo/rs-editor</span><span class="ver">v0.5.0</span>
+        <div class="desc">プラグインアーキテクチャを持つ、依存ゼロのWYSIWYGエディタライブラリ</div>
+      </a>
+      <div class="extra">
+        <a href="./rs-editor/demo/index.html">デモ</a>
+        <a href="./rs-editor/demo/react.html">React</a>
+        <a href="./rs-editor/demo/vue.html">Vue</a>
+      </div>
+    </div>
+    <div class="card">
+      <a class="head" href="./rs-form/demo/index.html">
+        <span class="name">@parelabo/rs-form</span><span class="ver">v0.5.0</span>
+        <div class="desc">依存ゼロのスキーマ駆動フォームビルダー</div>
+      </a>
+      <div class="extra">
+        <a href="./rs-form/demo/index.html">デモ</a>
+      </div>
+    </div>
+    <div class="card">
+      <a class="head" href="./rs-gantt/demo/index.html">
+        <span class="name">@parelabo/rs-gantt</span><span class="ver">v0.5.0</span>
+        <div class="desc">依存ゼロの対話型プロジェクトガントチャート</div>
+      </a>
+      <div class="extra">
+        <a href="./rs-gantt/demo/index.html">デモ</a>
+      </div>
+    </div>
+    <div class="card">
+      <a class="head" href="./rs-grid/demo/index.html">
+        <span class="name">@parelabo/rs-grid</span><span class="ver">v0.4.1</span>
+        <div class="desc">Excel風データグリッド</div>
+      </a>
+      <div class="extra">
+        <a href="./rs-grid/demo/index.html">デモ</a>
+      </div>
+    </div>
+    <div class="card">
+      <a class="head" href="./rs-image/demo/index.html">
+        <span class="name">@parelabo/rs-image</span><span class="ver">v0.6.0</span>
+        <div class="desc">依存ゼロの画像処理＆合成エディタ</div>
+      </a>
+      <div class="extra">
+        <a href="./rs-image/demo/index.html">デモ</a>
+        <a href="./rs-image/demo/react.html">React</a>
+        <a href="./rs-image/demo/vue.html">Vue</a>
+      </div>
+    </div>
+    <div class="card">
+      <a class="head" href="./rs-livecam/demo/index.html">
+        <span class="name">@parelabo/rs-livecam</span><span class="ver">v0.2.0</span>
+        <div class="desc">リアルタイムカメラ加工</div>
+      </a>
+      <div class="extra">
+        <a href="./rs-livecam/demo/index.html">デモ</a>
+      </div>
+    </div>
+    <div class="card">
+      <a class="head" href="./rs-pdf/demo/index.html">
+        <span class="name">@parelabo/rs-pdf</span><span class="ver">v0.5.0</span>
+        <div class="desc">依存ゼロのPDFビューア＆注釈ライブラリ</div>
+      </a>
+      <div class="extra">
+        <a href="./rs-pdf/demo/index.html">デモ</a>
+      </div>
+    </div>
+    <div class="card">
+      <a class="head" href="./rs-pivot/demo/index.html">
+        <span class="name">@parelabo/rs-pivot</span><span class="ver">v0.4.0</span>
+        <div class="desc">依存ゼロのピボットテーブルライブラリ</div>
+      </a>
+      <div class="extra">
+        <a href="./rs-pivot/demo/index.html">デモ</a>
+      </div>
+    </div>
+    <div class="card">
+      <a class="head" href="./rs-player/demo/index.html">
+        <span class="name">@parelabo/rs-player</span><span class="ver">v0.5.0</span>
+        <div class="desc">依存ゼロのHTML5動画プレイヤー</div>
+      </a>
+      <div class="extra">
+        <a href="./rs-player/demo/index.html">デモ</a>
+      </div>
+    </div>
+    <div class="card">
+      <a class="head" href="./rs-qrcode/demo/index.html">
+        <span class="name">@parelabo/rs-qrcode</span><span class="ver">v0.1.2</span>
+        <div class="desc">QRコード/バーコード生成</div>
+      </a>
+      <div class="extra">
+        <a href="./rs-qrcode/demo/index.html">デモ</a>
+      </div>
+    </div>
+    <div class="card">
+      <a class="head" href="./rs-replay/demo/index.html">
+        <span class="name">@parelabo/rs-replay</span><span class="ver">v0.4.0</span>
+        <div class="desc">完全セルフホスト・依存ゼロのセッション記録/再生ライブラリ</div>
+      </a>
+      <div class="extra">
+        <a href="./rs-replay/demo/index.html">デモ</a>
+      </div>
+    </div>
+    <div class="card">
+      <a class="head" href="./rs-scanner/demo/index.html">
+        <span class="name">@parelabo/rs-scanner</span><span class="ver">v0.1.0</span>
+        <div class="desc">QR/バーコード読み取り</div>
+      </a>
+      <div class="extra">
+        <a href="./rs-scanner/demo/index.html">デモ</a>
+      </div>
+    </div>
+    <div class="card">
+      <a class="head" href="./rs-sheet/demo/index.html">
+        <span class="name">@parelabo/rs-sheet</span><span class="ver">v0.5.0</span>
+        <div class="desc">本格数式エンジン内蔵・依存ゼロのセル指向スプレッドシートライブラリ</div>
+      </a>
+      <div class="extra">
+        <a href="./rs-sheet/demo/index.html">デモ</a>
+      </div>
+    </div>
+    <div class="card">
+      <a class="head" href="./rs-sign/demo/index.html">
+        <span class="name">@parelabo/rs-sign</span><span class="ver">v0.4.0</span>
+        <div class="desc">電子署名SaaSの画面部品網羅を目指す、依存ゼロの署名パッド＋電子印鑑ライブラリ</div>
+      </a>
+      <div class="extra">
+        <a href="./rs-sign/demo/index.html">デモ</a>
+      </div>
+    </div>
+    <div class="card">
+      <a class="head" href="./rs-slider/demo/index.html">
+        <span class="name">@parelabo/rs-slider</span><span class="ver">v0.1.0</span>
+        <div class="desc">依存ゼロの画像スライダーコレクション</div>
+      </a>
+      <div class="extra">
+        <a href="./rs-slider/demo/basic.html">basic</a>
+        <a href="./rs-slider/demo/cards.html">cards</a>
+        <a href="./rs-slider/demo/coverflow.html">coverflow</a>
+        <a href="./rs-slider/demo/fade.html">fade</a>
+        <a href="./rs-slider/demo/fullscreen.html">fullscreen</a>
+        <a href="./rs-slider/demo/hero.html">hero</a>
+        <a href="./rs-slider/demo/index.html">デモ</a>
+        <a href="./rs-slider/demo/marquee.html">marquee</a>
+        <a href="./rs-slider/demo/masonry.html">masonry</a>
+        <a href="./rs-slider/demo/multirow.html">multirow</a>
+        <a href="./rs-slider/demo/product.html">product</a>
+        <a href="./rs-slider/demo/stories.html">stories</a>
+        <a href="./rs-slider/demo/thumbnail.html">thumbnail</a>
+      </div>
+    </div>
+    <div class="card">
+      <a class="head" href="./rs-tour/demo/index.html">
+        <span class="name">@parelabo/rs-tour</span><span class="ver">v0.1.0</span>
+        <div class="desc">依存ゼロ・フレームワーク非依存のスポットライト型ガイドツアーライブラリ</div>
+      </a>
+      <div class="extra">
+        <a href="./rs-tour/demo/index.html">デモ</a>
+      </div>
+    </div>
+    <div class="card">
+      <a class="head" href="./rs-upload/demo/index.html">
+        <span class="name">@parelabo/rs-upload</span><span class="ver">v0.4.0</span>
+        <div class="desc">依存ゼロのファイルアップロードUI＋転送エンジン</div>
+      </a>
+      <div class="extra">
+        <a href="./rs-upload/demo/index.html">デモ</a>
+      </div>
+    </div>
+  </div>
+  <footer>
+    利用は無償（商用可）。改変・再配布は禁止です（各パッケージの LICENSE.txt）。<br>
+    機能追加・改修のご依頼は有償で承ります → <a href="https://parelabo.com">https://parelabo.com</a> / contact@parelabo.com
+  </footer>
+</div>
+</body>
+</html>

@@ -13,6 +13,8 @@ export class SVGRenderer {
     container: any;
     svg: SVGSVGElement;
     _measurer: any;
+    /** 要素を生成する（親に追加しない・デタッチ）。差分描画で <g> を組み立ててから挿入する用 */
+    create(tag: any, attrs?: {}): any;
     el(tag: any, attrs?: {}, parent?: SVGSVGElement): any;
     attr(node: any, attrs: any): any;
     /** 子要素をすべて取り除く */

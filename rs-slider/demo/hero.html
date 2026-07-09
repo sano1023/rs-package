@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>rs-slider デモ — 3. ヒーロー画像スライダー</title>
+<link rel="stylesheet" href="../dist/rs-slider.css">
+<link rel="stylesheet" href="demo.css">
+<style>
+    .hero-wrap { margin: 0 0 26px; }
+</style>
+</head>
+<body>
+<div class="hero-wrap">
+    <div id="s-hero"></div>
+</div>
+<div class="page" style="padding-top: 0;">
+    <p class="back"><a href="./">← デモ一覧へ</a></p>
+    <h1>3. ヒーロー画像スライダー <small>createRSSlider (variant: 'hero')</small></h1>
+    <p class="lead">
+        大きな背景画像・キャッチコピー・説明文・CTAボタン・グラデーションオーバーレイ・テキストアニメーション。
+        768px未満ではスマホ用の縦構図画像に切り替わります。
+    </p>
+    <div class="card">
+        <h2>エフェクト切替</h2>
+        <p class="note">フェード/スライドを切り替えて再生成します。テキストは <code>contentAnimation: 'fade-up'</code> で順番に浮き上がります。</p>
+        <div class="controls">
+            <button class="ctl is-on" id="b-fade">フェード</button>
+            <button class="ctl" id="b-slide">スライド</button>
+        </div>
+        <div class="value" id="v-hero"></div>
+    </div>
+</div>
+
+<script type="module">
+    import { createRSSlider } from '../dist/rs-slider.esm.min.js';
+    import { photo } from './assets.js';
+
+    const slides = [
+        {
+            title: '想像を、かたちに。',
+            text: 'rs-slider はビルド不要・依存ゼロのESモジュール。ヒーローエリアも1つの関数呼び出しで構築できます。',
+            button: { label: '詳しく見る', href: '#feature' },
+            align: 'left',
+        },
+        {
+            title: '中央寄せレイアウトにも対応',
+            text: 'スライドごとに align: "center" を指定するだけでキャッチコピーの配置を変えられます。',
+            button: { label: '資料ダウンロード', href: '#download' },
+            align: 'center',
+        },
+        {
+            title: 'テキストはフェードアップ',
+            text: 'タグ・見出し・本文・ボタンが時間差で表示されます。',
+            button: { label: 'お問い合わせ', href: '#contact' },
+            align: 'left',
+        },
+    ].map((s, i) => ({
+        ...s,
+        tags: ['NEW', 'rs-slider v0.1'],
+        image: photo(i + 100, { w: 1800, h: 900, label: '' }),
+        mobileImage: photo(i + 100, { w: 750, h: 1000, label: 'スマホ用画像' }),
+        alt: s.title,
+    }));
+
+    let hero = null;
+    function build(mode) {
+        hero?.destroy();
+        hero = createRSSlider('#s-hero', {
+            mode,
+            variant: 'hero',
+            slides,
+            autoplay: 5000,
+            speed: mode === 'fade' ? 1000 : 650,
+            overlay: 'gradient',
+            contentAnimation: 'fade-up',
+            aspectRatio: false,
+            onChange: (i) => {
+                document.getElementById('v-hero').textContent = `change: ${i + 1} / ${hero.getCount()}（mode: ${mode}）`;
+            },
+        });
+    }
+    build('fade');
+
+    const bFade = document.getElementById('b-fade');
+    const bSlide = document.getElementById('b-slide');
+    bFade.addEventListener('click', () => {
+        bFade.classList.add('is-on'); bSlide.classList.remove('is-on');
+        build('fade');
+    });
+    bSlide.addEventListener('click', () => {
+        bSlide.classList.add('is-on'); bFade.classList.remove('is-on');
+        build('slide');
+    });
+</script>
+</body>
+</html>

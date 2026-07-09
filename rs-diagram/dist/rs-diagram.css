@@ -245,6 +245,29 @@
 }
 .rsd-stylebar-btn:hover { background: #f1f5f9; }
 
+/* ============================================================ v0.3 追加分 */
+
+/* ポート（明示的な接続点）: ホバー/選択で表示 */
+.rsd-ports { opacity: 0; transition: opacity 0.12s; }
+.rsd-node:hover .rsd-ports, .rsd-node.rsd-selected .rsd-ports, .rsd-ports:hover { opacity: 1; }
+.rsd-port-hit { cursor: crosshair; }
+.rsd-port-hit:hover + .rsd-port-dot { r: 6; }
+.rsd-readonly .rsd-ports { display: none; }
+
+/* グループ */
+.rsd-group .rsd-collapse-toggle { cursor: pointer; }
+.rsd-group { cursor: move; }
+
+/* スイムレーン */
+.rsd-lane { cursor: move; }
+.rsd-lane-label { cursor: move; }
+.rsd-lane-handle { cursor: nwse-resize; }
+.rsd-readonly .rsd-lane { cursor: default; }
+
+/* リンクラベルのドラッグハンドル */
+.rsd-labelhandle { cursor: move; }
+.rsd-link-label { cursor: move; }
+
 /* ラベルエディタ */
 .rsd-label-editor {
     position: absolute;
@@ -259,3 +282,64 @@
     box-shadow: 0 6px 20px rgba(15, 23, 42, 0.15);
     text-align: center;
 }
+
+/* ============================================================
+   v0.5 エコシステム連携（rs-chart 内包ノード・rs-image 編集モーダル）
+   ============================================================ */
+
+/* チャート内包ノード: foreignObject 埋め込みはノードのサムネイル。
+   ドラッグ/選択はノード側の透明ヒット面で拾うので、埋め込み自体はイベントを取らない。 */
+.rsd-embed-chart { pointer-events: none; overflow: visible; }
+.rsd-embed-host { pointer-events: none; }
+.rsd-embed-fallback { pointer-events: none; }
+
+/* rs-image 編集モーダル */
+.rsd-image-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(15, 23, 42, 0.55);
+}
+.rsd-image-modal-panel {
+    display: flex;
+    flex-direction: column;
+    width: min(940px, 94vw);
+    max-height: 92vh;
+    overflow: hidden;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 24px 70px rgba(15, 23, 42, 0.35);
+}
+.rsd-image-modal-head {
+    padding: 10px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #334155;
+    border-bottom: 1px solid #e2e8f0;
+}
+.rsd-image-modal-body { flex: 1; min-height: 0; overflow: auto; }
+.rsd-image-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 10px 14px;
+    border-top: 1px solid #e2e8f0;
+}
+.rsd-image-modal-actions button {
+    padding: 6px 16px;
+    font-size: 13px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    background: #fff;
+    cursor: pointer;
+}
+.rsd-image-modal-actions button:hover { background: #f1f5f9; }
+.rsd-image-modal-actions .rsd-image-apply {
+    background: var(--rsd-selection, #2563eb);
+    border-color: var(--rsd-selection, #2563eb);
+    color: #fff;
+}
+.rsd-image-modal-actions .rsd-image-apply:hover { filter: brightness(1.05); }

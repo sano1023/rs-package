@@ -49,57 +49,90 @@ export namespace date {
     export { defaults_6 as defaults };
     export function render(ctx: any): any;
 }
-export namespace radio {
+export namespace calc {
     let name_7: string;
     export { name_7 as name };
     let defaults_7: {};
     export { defaults_7 as defaults };
-    export let group: boolean;
     export function render(ctx: any): any;
 }
-export namespace checkbox {
+export namespace radio {
     let name_8: string;
     export { name_8 as name };
     let defaults_8: {};
     export { defaults_8 as defaults };
+    export let group: boolean;
+    export function render(ctx: any): any;
+}
+export namespace checkbox {
+    let name_9: string;
+    export { name_9 as name };
+    let defaults_9: {};
+    export { defaults_9 as defaults };
     let group_1: boolean;
     export { group_1 as group };
     export function render(ctx: any): any;
 }
 export namespace select {
-    let name_9: string;
-    export { name_9 as name };
-    export namespace defaults_9 {
-        let placeholder_1: string;
-        export { placeholder_1 as placeholder };
-    }
-    export { defaults_9 as defaults };
-    export function render(ctx: any): any;
-}
-export namespace rating {
     let name_10: string;
     export { name_10 as name };
     export namespace defaults_10 {
-        let max: number;
+        let placeholder_1: string;
+        export { placeholder_1 as placeholder };
     }
     export { defaults_10 as defaults };
+    export function render(ctx: any): any;
+}
+export namespace rating {
+    let name_11: string;
+    export { name_11 as name };
+    export namespace defaults_11 {
+        let max: number;
+    }
+    export { defaults_11 as defaults };
     let group_2: boolean;
     export { group_2 as group };
     export function render(ctx: any): any;
 }
 export namespace nps {
-    let name_11: string;
-    export { name_11 as name };
-    export namespace defaults_11 {
+    let name_12: string;
+    export { name_12 as name };
+    export namespace defaults_12 {
         let minLabel: string;
         let maxLabel: string;
     }
-    export { defaults_11 as defaults };
+    export { defaults_12 as defaults };
     let group_3: boolean;
     export { group_3 as group };
     export function render(ctx: any): any;
 }
-/** 組み込み12タイプ */
+export namespace matrix {
+    let name_13: string;
+    export { name_13 as name };
+    let defaults_13: {};
+    export { defaults_13 as defaults };
+    let group_4: boolean;
+    export { group_4 as group };
+    export function render(ctx: any): any;
+}
+export namespace file {
+    let name_14: string;
+    export { name_14 as name };
+    let defaults_14: {};
+    export { defaults_14 as defaults };
+    export function render(ctx: any): any;
+}
+export namespace signature {
+    let name_15: string;
+    export { name_15 as name };
+    export namespace defaults_15 {
+        let width: number;
+        let height: number;
+    }
+    export { defaults_15 as defaults };
+    export function render(ctx: any): any;
+}
+/** 組み込みタイプ（v0.1 の12種 + v0.2 の matrix / file / signature + v0.4 の calc） */
 export const builtinTypes: {
     name: string;
     defaults: {};

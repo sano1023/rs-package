@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>rs-chart デモ</title>
+<link rel="stylesheet" href="../dist/rs-chart.css">
+<style>
+    body {
+        font-family: system-ui, -apple-system, "Segoe UI", "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+        margin: 0;
+        background: #f1f5f9;
+        color: #1e293b;
+    }
+    .page { max-width: 1100px; margin: 0 auto; padding: 32px 20px 80px; }
+    h1 { font-size: 24px; }
+    h1 small { font-size: 13px; color: #64748b; font-weight: 400; margin-left: 10px; }
+    .lead { color: #475569; font-size: 14px; margin-bottom: 20px; }
+    .controls { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+    .controls button {
+        appearance: none; border: 1px solid #cbd5e1; background: #fff;
+        border-radius: 6px; padding: 7px 14px; font-size: 13px; cursor: pointer;
+    }
+    .controls button:hover { background: #e2e8f0; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .card {
+        background: #fff; border: 1px solid #e2e8f0; border-radius: 10px;
+        padding: 10px; height: 320px;
+    }
+    .card.wide { grid-column: 1 / -1; height: 340px; }
+    .card > div { height: 100%; }
+    #resize-target { transition: none; }
+    @media (max-width: 800px) { .grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="page">
+    <h1>rs-chart <small>v0.5 デモ — 依存ゼロ・プラグイン式SVGチャート</small></h1>
+    <p class="lead">
+        Maps・Gantt・Dashboards（連動）・Turbo mode（Canvas・10万点）・Stock（レンジセレクタ・ナビゲータ・リアルタイム）・ズーム/パン・クロスヘア・第2Y軸・データラベル・アノテーション ＋ 16タイプ: line / area / column / bar / pie / donut / scatter / gauge / radar / heatmap / candlestick / ohlc / funnel / treemap / gantt / map ＋ 積み上げ・100%積み上げ・タイプ混在・時間軸・凡例トグル・共有ツールチップ・レスポンシブ・アニメーション・SVG/PNGエクスポート。
+        最後の「ロリポップ」は defineChartType で数行追加したカスタムタイプです。
+    </p>
+    <div class="controls">
+        <button id="btn-random">データをランダム更新</button>
+        <button id="btn-resize">コンテナ幅を切替</button>
+        <button id="btn-svg">SVGエクスポート（先頭チャート）</button>
+        <button id="btn-png">PNGダウンロード（先頭チャート）</button>
+        <button id="btn-realtime">リアルタイム開始</button>
+        <span id="status" style="font-size:12px;color:#64748b;align-self:center"></span>
+    </div>
+
+    <div class="grid">
+        <div class="card wide" id="resize-target"><div id="c-line"></div></div>
+        <div class="card"><div id="c-column"></div></div>
+        <div class="card"><div id="c-bar"></div></div>
+        <div class="card"><div id="c-pie"></div></div>
+        <div class="card"><div id="c-donut"></div></div>
+        <div class="card"><div id="c-scatter"></div></div>
+        <div class="card"><div id="c-mixed"></div></div>
+        <div class="card wide"><div id="c-custom"></div></div>
+        <div class="card"><div id="c-stacked"></div></div>
+        <div class="card"><div id="c-stacked100"></div></div>
+        <div class="card"><div id="c-gauge"></div></div>
+        <div class="card"><div id="c-radar"></div></div>
+        <div class="card"><div id="c-heatmap"></div></div>
+        <div class="card wide" style="height:380px"><div id="c-candle"></div></div>
+        <div class="card wide"><div id="c-realtime"></div></div>
+        <div class="card wide"><div id="c-turbo"></div></div>
+        <div class="card wide"><div id="c-gantt"></div></div>
+        <div class="card" style="height:380px"><div id="c-map"></div></div>
+        <div class="card"><div id="c-funnel"></div></div>
+        <div class="card"><div id="c-treemap"></div></div>
+    </div>
+
+    <h2 style="font-size:18px;margin:28px 0 10px">ダッシュボード（ズーム・ホバー連動 + KPI）</h2>
+    <p class="lead">下の3チャートはドラッグズーム・ホバーが連動します（createRSDashboard）。</p>
+    <div id="dashboard"></div>
+</div>
+
+<script type="module">
+    import { createRSChart, defineChartType, createRSDashboard } from '../dist/rs-chart.esm.min.js';
+    window.__mod = { createRSChart, defineChartType, createRSDashboard }; // 検証用
+
+    const MONTHS = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
+    const rand = (n, base = 50, spread = 150) => Array.from({ length: n }, () => Math.round(base + Math.random() * spread));
+
+    window.charts = {};
+
+    // ---- 時間軸の折れ線 + エリア
+    const days = Array.from({ length: 30 }, (_, i) => new Date(2026, 5, i + 1));
+    window.charts.line = createRSChart('#c-line', {
+        type: 'line',
+        title: 'アクセス数の推移（ドラッグでズーム / Shift+ドラッグでパン）',
+        zoom: true,
+        crosshair: true,
+        annotations: [
+            { type: 'lineY', value: 1500, label: '目標 1,500', color: '#e15759' },
+            { type: 'bandY', from: 0, to: 500, color: '#94a3b8', opacity: 0.1 },
+        ],
+        series: [
+            { name: 'PV', type: 'area', data: days.map((d, i) => [d, 800 + Math.round(Math.sin(i / 4) * 300 + i * 25 + Math.random() * 120)]) },
+            { name: 'UU', data: days.map((d, i) => [d, 400 + Math.round(Math.sin(i / 4 + 1) * 150 + i * 12 + Math.random() * 60)]) },
+        ],
+        yAxis: { title: '件数' },
+    });
+
+    // ---- グループ縦棒（負値あり）
+    window.charts.column = createRSChart('#c-column', {
+        type: 'column',
+        title: '部門別 損益（縦棒・負値あり）',
+        series: [
+            { name: '今期', data: [120, 95, -30, 180, 60] },
+            { name: '前期', data: [100, 110, 20, 150, -10] },
+        ],
+        xAxis: { categories: ['営業', '開発', '新規', 'サポート', '管理'] },
+        yAxis: { title: '損益（百万円）' },
+    });
+
+    // ---- 横棒
+    window.charts.bar = createRSChart('#c-bar', {
+        type: 'bar',
+        title: '製品別 売上（横棒）',
+        series: [{ name: '売上', data: [420, 380, 310, 260, 150] }],
+        xAxis: { categories: ['りんご', 'みかん', 'ぶどう', 'メロン', 'いちご'] },
+        legend: { show: false },
+    });
+
+    // ---- 円グラフ
+    window.charts.pie = createRSChart('#c-pie', {
+        type: 'pie',
+        title: 'ブラウザシェア（円）',
+        series: [{
+            name: 'シェア',
+            data: [
+                { name: 'Chrome', y: 64 }, { name: 'Safari', y: 19 },
+                { name: 'Edge', y: 9 }, { name: 'Firefox', y: 5 }, { name: 'その他', y: 3 },
+            ],
+        }],
+    });
+
+    // ---- ドーナツ
+    window.charts.donut = createRSChart('#c-donut', {
+        type: 'donut',
+        title: '契約プラン内訳（ドーナツ）',
+        series: [{
+            name: '契約数',
+            data: [
+                { name: 'Free', y: 5200 }, { name: 'Pro', y: 2100 },
+                { name: 'Team', y: 860 }, { name: 'Enterprise', y: 140 },
+            ],
+        }],
+    });
+
+    // ---- 散布図
+    window.charts.scatter = createRSChart('#c-scatter', {
+        type: 'scatter',
+        title: '身長と体重（散布図）',
+        series: [
+            { name: '男性', data: Array.from({ length: 40 }, () => [162 + Math.random() * 25, 55 + Math.random() * 30]) },
+            { name: '女性', data: Array.from({ length: 40 }, () => [148 + Math.random() * 22, 42 + Math.random() * 22]) },
+        ],
+        xAxis: { type: 'linear', title: '身長(cm)' },
+        yAxis: { title: '体重(kg)' },
+    });
+
+    // ---- タイプ混在（column + line）
+    window.charts.mixed = createRSChart('#c-mixed', {
+        type: 'column',
+        title: '売上と利益率（第2軸・データラベル）',
+        series: [
+            { name: '売上', data: rand(6, 200, 300), dataLabels: true },
+            { name: '利益率', type: 'line', yAxis: 1, data: rand(6, 8, 18) },
+        ],
+        xAxis: { categories: MONTHS.slice(0, 6) },
+        yAxis: [{ title: '売上（万円）' }, { title: '利益率', suffix: '%' }],
+    });
+
+    // ---- カスタムチャートタイプ（ロリポップ）: defineChartType の実演
+    const lollipop = defineChartType({
+        name: 'lollipop',
+        axes: true,
+        needsBand: true,
+        zeroBased: true,
+        draw(ctx) {
+            const { renderer, group, xScale, yScale, progress } = ctx;
+            const zeroY = yScale.scale(Math.max(yScale.min, Math.min(yScale.max, 0)));
+            for (const s of ctx.series) {
+                s.points.forEach((p, i) => {
+                    if (p.y == null) return;
+                    const x = xScale.scale(i);
+                    const y = zeroY + (yScale.scale(p.y) - zeroY) * progress;
+                    renderer.line({ x1: x, y1: zeroY, x2: x, y2: y, stroke: s.color, 'stroke-width': 2 }, group);
+                    renderer.circle({ cx: x, cy: y, r: 6, fill: s.color }, group);
+                    ctx.hits.push({
+                        mode: 'x', px: x, py: y, xKey: i,
+                        xLabel: xScale.format(i), xValue: p.x, yValue: p.y,
+                        seriesIndex: s.index, seriesName: s.name, pointIndex: i, color: s.color,
+                    });
+                });
+            }
+        },
+    });
+    window.charts.custom = createRSChart('#c-custom', {
+        type: 'lollipop',
+        chartTypes: [lollipop],
+        title: 'カスタムタイプ: ロリポップチャート',
+        series: [{ name: 'スコア', data: [72, 85, 64, 91, 58, 77, 88] }],
+        xAxis: { categories: ['A', 'B', 'C', 'D', 'E', 'F', 'G'] },
+        legend: { show: false },
+    });
+
+    // ---- v0.2: 積み上げ縦棒
+    window.charts.stacked = createRSChart('#c-stacked', {
+        type: 'column',
+        stacked: true,
+        title: 'チャネル別売上（積み上げ）',
+        series: [
+            { name: '店舗', data: [120, 140, 135, 160] },
+            { name: 'EC', data: [80, 95, 120, 150] },
+            { name: '卸', data: [40, 42, 38, 45] },
+        ],
+        xAxis: { categories: ['Q1', 'Q2', 'Q3', 'Q4'] },
+    });
+
+    // ---- v0.2: 100%積み上げエリア
+    window.charts.stacked100 = createRSChart('#c-stacked100', {
+        type: 'area',
+        stacked: 'percent',
+        title: 'OSシェア推移（100%積み上げ）',
+        series: [
+            { name: 'iOS', data: [45, 47, 49, 50, 52] },
+            { name: 'Android', data: [50, 49, 47, 46, 44] },
+            { name: 'その他', data: [5, 4, 4, 4, 4] },
+        ],
+        xAxis: { categories: ['2022', '2023', '2024', '2025', '2026'] },
+    });
+
+    // ---- v0.2: ゲージ
+    window.charts.gauge = createRSChart('#c-gauge', {
+        type: 'gauge',
+        title: '目標達成率',
+        gauge: { min: 0, max: 100, suffix: '%', bands: [
+            { from: 0, to: 60, color: '#e15759' },
+            { from: 60, to: 85, color: '#edc949' },
+            { from: 85, to: 100, color: '#59a14f' },
+        ] },
+        series: [{ name: '売上目標', data: [78] }],
+    });
+
+    // ---- v0.2: レーダー
+    window.charts.radar = createRSChart('#c-radar', {
+        type: 'radar',
+        title: 'スキル評価（レーダー）',
+        series: [
+            { name: '田中', data: [85, 70, 90, 60, 75, 80] },
+            { name: '鈴木', data: [65, 88, 70, 85, 60, 72] },
+        ],
+        xAxis: { categories: ['設計', '実装', 'テスト', '運用', '折衝', 'ドキュメント'] },
+    });
+
+    // ---- v0.2: ヒートマップ（曜日×時間帯）
+    const heatData = [];
+    for (let d = 0; d < 7; d++) {
+        for (let h = 0; h < 6; h++) {
+            heatData.push({ x: h, y: d, value: Math.round(20 + Math.random() * 80 * ((d < 5 && h > 1 && h < 5) ? 1 : 0.3)) });
+        }
+    }
+    window.charts.heatmap = createRSChart('#c-heatmap', {
+        type: 'heatmap',
+        title: 'アクセス数ヒートマップ',
+        series: [{ name: 'アクセス', data: heatData }],
+        xAxis: { categories: ['0時', '4時', '8時', '12時', '16時', '20時'] },
+        yAxis: { categories: ['月', '火', '水', '木', '金', '土', '日'] },
+    });
+
+    // ---- v0.2: ローソク足
+    const candles = [];
+    let price = 1000;
+    for (let i = 0; i < 90; i++) {
+        const open = price;
+        const close = open + (Math.random() - 0.48) * 60;
+        const high = Math.max(open, close) + Math.random() * 25;
+        const low = Math.min(open, close) - Math.random() * 25;
+        const cd = new Date(2026, 3, 1 + i);
+        candles.push({ name: `${cd.getMonth() + 1}/${cd.getDate()}`, open: Math.round(open), high: Math.round(high), low: Math.round(low), close: Math.round(close) });
+        price = close;
+    }
+    window.charts.candle = createRSChart('#c-candle', {
+        type: 'candlestick',
+        title: '株価と出来高（Stock: レンジセレクタ + ナビゲータ）',
+        zoom: true,
+        crosshair: true,
+        rangeSelector: true,
+        navigator: true,
+        series: [
+            { name: 'RS株', data: candles },
+            { name: '出来高', type: 'column', yAxis: 1, color: '#bab0ab', data: candles.map((c) => ({ name: c.name, y: Math.round(500 + Math.random() * 2500) })) },
+        ],
+        yAxis: [{ title: '株価（円）' }, { max: 12000 }],
+        legend: { show: false },
+    });
+
+    // ---- v0.2: ファネル
+    window.charts.funnel = createRSChart('#c-funnel', {
+        type: 'funnel',
+        title: 'コンバージョンファネル',
+        series: [{
+            name: 'ユーザー数',
+            data: [
+                { name: '訪問', y: 12000 }, { name: '会員登録', y: 4200 },
+                { name: 'カート投入', y: 1800 }, { name: '購入', y: 760 },
+            ],
+        }],
+        legend: { show: false },
+    });
+
+    // ---- v0.2: ツリーマップ
+    window.charts.treemap = createRSChart('#c-treemap', {
+        type: 'treemap',
+        title: 'カテゴリ別売上構成（ツリーマップ）',
+        series: [{
+            name: '売上',
+            data: [
+                { name: '食品', y: 4200 }, { name: '日用品', y: 2800 }, { name: '家電', y: 2100 },
+                { name: '衣料', y: 1500 }, { name: '書籍', y: 900 }, { name: '玩具', y: 600 },
+                { name: 'その他', y: 400 },
+            ],
+        }],
+        legend: { show: false },
+    });
+
+    // ---- v0.3: リアルタイム追記（append + shift）
+    const rtStart = Date.now() - 60 * 1000;
+    let rtValue = 100;
+    const rtData = Array.from({ length: 60 }, (_, i) => {
+        rtValue += (Math.random() - 0.5) * 6;
+        return [rtStart + i * 1000, Math.round(rtValue * 10) / 10];
+    });
+    window.charts.realtime = createRSChart('#c-realtime', {
+        type: 'area',
+        title: 'リアルタイム監視（1秒ごとに append / 固定60点）',
+        series: [{ name: 'CPU使用率', data: rtData }],
+        xAxis: { type: 'time' },
+        yAxis: { title: '%' },
+        legend: { show: false },
+        animation: false,
+    });
+    let rtTimer = 0;
+    window.startRealtime = () => {
+        if (rtTimer) return;
+        rtTimer = setInterval(() => {
+            rtValue = Math.max(5, Math.min(100, rtValue + (Math.random() - 0.5) * 8));
+            window.charts.realtime.append(0, [Date.now(), Math.round(rtValue * 10) / 10], { shift: true });
+        }, 1000);
+    };
+    window.stopRealtime = () => {
+        clearInterval(rtTimer);
+        rtTimer = 0;
+    };
+    document.getElementById('btn-realtime').addEventListener('click', (e) => {
+        if (rtTimer) { window.stopRealtime(); e.target.textContent = 'リアルタイム開始'; }
+        else { window.startRealtime(); e.target.textContent = 'リアルタイム停止'; }
+    });
+
+    // ---- v0.4: Turbo mode（Canvasレンダラ + LTTB間引きで10万点×2）
+    const turboData = (n, phase) => {
+        const out = new Array(n);
+        let v = 500;
+        for (let i = 0; i < n; i++) {
+            v += Math.sin(i / 800 + phase) * 2 + (Math.random() - 0.5) * 8;
+            out[i] = [i, Math.round(v * 10) / 10];
+        }
+        return out;
+    };
+    const t0 = performance.now();
+    window.charts.turbo = createRSChart('#c-turbo', {
+        type: 'line',
+        renderer: 'canvas',
+        title: 'Turbo mode: 10万点 × 2シリーズ（Canvas + LTTB間引き・ドラッグでズーム）',
+        zoom: true,
+        crosshair: true,
+        animation: false,
+        series: [
+            { name: 'センサーA', data: turboData(100000, 0) },
+            { name: 'センサーB', data: turboData(100000, 2) },
+        ],
+        xAxis: { type: 'linear' },
+        legend: { show: true },
+    });
+    window.__turboMs = Math.round(performance.now() - t0);
+    document.getElementById('status').textContent = `Turbo初期描画: ${window.__turboMs}ms（20万点）`;
+
+    // ---- v0.5: ガントチャート
+    window.charts.gantt = createRSChart('#c-gantt', {
+        type: 'gantt',
+        title: 'プロジェクト計画（ガント・進捗つき）',
+        gantt: { today: new Date(2026, 6, 5) },
+        series: [{
+            name: '工程',
+            data: [
+                { name: '要件定義', start: new Date(2026, 5, 20), end: new Date(2026, 6, 1), progress: 100 },
+                { name: '設計', start: new Date(2026, 5, 28), end: new Date(2026, 6, 8), progress: 80 },
+                { name: '実装', start: new Date(2026, 6, 3), end: new Date(2026, 6, 22), progress: 35 },
+                { name: 'テスト', start: new Date(2026, 6, 18), end: new Date(2026, 6, 30), progress: 0 },
+                { name: 'リリース準備', start: new Date(2026, 6, 28), end: new Date(2026, 7, 5), progress: 0 },
+            ],
+        }],
+        legend: { show: false },
+    });
+
+    // ---- v0.5: コロプレス地図（簡略化した日本8地方のGeoJSON）
+    const box = (name, lon0, lat0, lon1, lat1) => ({
+        type: 'Feature', properties: { name },
+        geometry: { type: 'Polygon', coordinates: [[[lon0, lat0], [lon1, lat0], [lon1, lat1], [lon0, lat1], [lon0, lat0]]] },
+    });
+    const japanRegions = { type: 'FeatureCollection', features: [
+        box('北海道', 139.5, 41.6, 145.8, 45.5),
+        box('東北', 139.4, 37.0, 141.9, 41.4),
+        box('関東', 138.6, 34.9, 140.9, 36.9),
+        box('中部', 136.0, 34.6, 138.5, 37.5),
+        box('近畿', 134.6, 33.4, 135.9, 35.6),
+        box('中国', 131.2, 34.2, 134.5, 35.5),
+        box('四国', 132.4, 32.6, 134.5, 34.1),
+        box('九州', 129.3, 30.9, 132.1, 34.0),
+    ] };
+    window.charts.map = createRSChart('#c-map', {
+        type: 'map',
+        title: '地方別 売上（コロプレス）',
+        map: { geo: japanRegions, key: 'name' },
+        series: [{
+            name: '売上',
+            data: [
+                { name: '関東', value: 4200 }, { name: '近畿', value: 2800 }, { name: '中部', value: 1900 },
+                { name: '九州', value: 1200 }, { name: '北海道', value: 800 }, { name: '東北', value: 700 },
+                { name: '中国', value: 650 }, { name: '四国', value: 380 },
+            ],
+        }],
+        legend: { show: false },
+    });
+
+    // ---- v0.5: 連動ダッシュボード
+    const dashDays = Array.from({ length: 60 }, (_, i) => new Date(2026, 4, 8 + i).getTime());
+    const mk = (base, amp) => dashDays.map((d, i) => [d, Math.round(base + Math.sin(i / 6) * amp + i * base * 0.004 + Math.random() * amp * 0.4)]);
+    window.dashboard = createRSDashboard('#dashboard', {
+        columns: 12,
+        sync: { zoom: true, hover: true },
+        items: [
+            { w: 12, kpi: [
+                { label: '今月の売上', value: '1.28億円', delta: '+8.2%' },
+                { label: '新規契約', value: '164件', delta: '+12件' },
+                { label: '解約率', value: '1.9%', delta: '-0.3pt' },
+                { label: 'NPS', value: '42', delta: '+5' },
+            ] },
+            { w: 6, h: 240, options: { type: 'line', title: '売上', zoom: true, xAxis: { type: 'time' }, series: [{ name: '売上', data: mk(400, 60) }], legend: { show: false } } },
+            { w: 6, h: 240, options: { type: 'area', title: 'アクティブユーザー', zoom: true, xAxis: { type: 'time' }, series: [{ name: 'MAU', data: mk(900, 120) }], legend: { show: false } } },
+            { w: 12, h: 220, options: { type: 'line', title: '問い合わせ件数', zoom: true, xAxis: { type: 'time' }, series: [{ name: '件数', data: mk(60, 18) }], legend: { show: false } } },
+        ],
+    });
+
+    // ---- 操作
+    document.getElementById('btn-random').addEventListener('click', () => {
+        window.charts.column.setSeries([
+            { name: '今期', data: rand(5, -50, 250) },
+            { name: '前期', data: rand(5, -50, 250) },
+        ]);
+        window.charts.mixed.setSeries([
+            { name: '売上', data: rand(6, 200, 300) },
+            { name: '利益率', type: 'line', yAxis: 1, data: rand(6, 8, 18) },
+        ]);
+        window.charts.custom.setSeries([{ name: 'スコア', data: rand(7, 40, 60) }]);
+    });
+
+    document.getElementById('btn-resize').addEventListener('click', () => {
+        const card = document.getElementById('resize-target');
+        card.style.width = card.style.width === '60%' ? '' : '60%';
+    });
+
+    document.getElementById('btn-svg').addEventListener('click', () => {
+        const svg = window.charts.line.getSVG();
+        document.getElementById('status').textContent = `getSVG(): ${svg.length}文字`;
+        console.log(svg.slice(0, 200));
+    });
+
+    document.getElementById('btn-png').addEventListener('click', async () => {
+        await window.charts.line.exportPNG('access.png');
+        document.getElementById('status').textContent = 'PNGをダウンロードしました';
+    });
+</script>
+</body>
+</html>

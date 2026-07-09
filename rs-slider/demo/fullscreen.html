@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>rs-slider デモ — 8. フルスクリーン画像スライダー</title>
+<link rel="stylesheet" href="../dist/rs-slider.css">
+<link rel="stylesheet" href="demo.css">
+<style>
+    html, body { height: 100%; overflow: hidden; }
+    #fs { height: 100dvh; }
+    .fs-ui {
+        position: fixed; top: 14px; left: 14px; z-index: 20;
+        display: flex; gap: 8px; align-items: center;
+    }
+    .fs-ui a, .fs-ui button {
+        display: inline-block; padding: 8px 16px; border-radius: 999px; border: 0;
+        background: rgba(2, 6, 23, .5); color: #fff; font-size: 13px; font-family: inherit;
+        text-decoration: none; cursor: pointer; backdrop-filter: blur(6px);
+    }
+    .fs-ui a:hover, .fs-ui button:hover { background: rgba(2, 6, 23, .75); }
+</style>
+</head>
+<body>
+<div class="fs-ui">
+    <a href="./">← デモ一覧へ</a>
+    <button type="button" id="b-fsapi">ブラウザ全画面表示</button>
+</div>
+<div id="fs"></div>
+
+<script type="module">
+    import { createRSFullscreen } from '../dist/rs-slider.esm.min.js';
+    import { photo } from './assets.js';
+
+    const fs = createRSFullscreen('#fs', {
+        effect: 'slide',
+        globalKeys: true,
+        slides: [
+            {
+                title: 'フルスクリーンスライダー',
+                text: 'マウスホイール / ↑↓・PageUp/PageDown キー / 上下スワイプで移動できます。',
+                align: 'center',
+            },
+            {
+                title: '背景画像切替',
+                text: 'セクションごとに背景画像とテキストを設定。表示時に背景がゆっくりズームします。',
+            },
+            {
+                title: 'スマホ対応',
+                text: '768px未満では縦構図のスマホ用画像に切り替わります。',
+            },
+            {
+                title: '最後のセクション',
+                text: '右のドットで直接移動、左下はページカウンターです。',
+                button: { label: '先頭に戻る', onClick: () => fs.goTo(0) },
+            },
+        ].map((s, i) => ({
+            ...s,
+            image: photo(i + 500, { w: 1900, h: 1080, label: '' }),
+            mobileImage: photo(i + 500, { w: 750, h: 1400, label: 'スマホ用' }),
+        })),
+    });
+
+    document.getElementById('b-fsapi').addEventListener('click', () => fs.enterFullscreen());
+</script>
+</body>
+</html>

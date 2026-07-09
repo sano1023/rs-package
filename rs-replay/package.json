@@ -1,7 +1,7 @@
 {
-    "name": "rs-replay",
-    "version": "0.1.0",
-    "description": "有料セッションリプレイSaaSの機能網羅を目指す、完全セルフホスト・依存ゼロのセッション記録/再生ライブラリ",
+    "name": "@parelabo/rs-replay",
+    "version": "0.4.0",
+    "description": "完全セルフホスト・依存ゼロのセッション記録/再生ライブラリ",
     "type": "module",
     "main": "./dist/rs-replay.esm.min.js",
     "module": "./dist/rs-replay.esm.min.js",
@@ -14,7 +14,15 @@
             "default": "./dist/rs-replay.esm.min.js"
         },
         "./dist/*": "./dist/*",
-        "./rs-replay.css": "./dist/rs-replay.css"
+        "./rs-replay.css": "./dist/rs-replay.css",
+        "./vue": {
+            "types": "./dist/types/vue.d.ts",
+            "import": "./dist/rs-replay.vue.esm.min.js"
+        },
+        "./react": {
+            "types": "./dist/types/react.d.ts",
+            "import": "./dist/rs-replay.react.esm.min.js"
+        }
     },
     "files": [
         "dist"
@@ -24,11 +32,35 @@
         "recording",
         "heatmap",
         "analytics",
-        "privacy",
-        "rrweb-alternative"
+        "privacy"
     ],
     "author": "ryusuke.sano <ryusuke.sano@parelabo.com>",
     "license": "SEE LICENSE IN LICENSE.txt",
+    "homepage": "https://github.com/sano1023/rs-package/tree/main/rs-replay#readme",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/sano1023/rs-package.git",
+        "directory": "rs-replay"
+    },
+    "bugs": {
+        "url": "https://parelabo.com",
+        "email": "contact@parelabo.com"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
     "types": "./dist/types/index.d.ts",
-    "style": "./dist/rs-replay.css"
+    "style": "./dist/rs-replay.css",
+    "peerDependencies": {
+        "vue": "^3.0.0",
+        "react": ">=18"
+    },
+    "peerDependenciesMeta": {
+        "vue": {
+            "optional": true
+        },
+        "react": {
+            "optional": true
+        }
+    }
 }

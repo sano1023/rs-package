@@ -47,6 +47,13 @@ export const stamp: {
     shape: string;
     labelPosition: string;
 };
+/** グループ（子ノードを囲むコンテナ。見出し＋折りたたみトグル） */
+export const group: {
+    defaults: any;
+    anchors: string[];
+    shape: string;
+    labelPosition: string;
+};
 /** 標準ノードタイプ一式 */
 export const builtinNodeTypes: {
     defaults: any;

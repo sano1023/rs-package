@@ -177,6 +177,46 @@
     display: none;
 }
 
+/* 動画/PDF プレビューのバッジ（v0.4）。サムネ生成前は種別ラベル、生成後は再生アイコン等を重ねる */
+.rsu-thumb-video::after,
+.rsu-thumb-pdf::after {
+    content: "";
+    position: absolute;
+    pointer-events: none;
+}
+
+.rsu-thumb {
+    position: relative;
+}
+
+/* 動画: 中央に半透明の再生三角 */
+.rsu-thumb-video.rsu-thumb-has-img::after {
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 8px 0 8px 13px;
+    border-color: transparent transparent transparent rgba(255, 255, 255, 0.92);
+    transform: translate(-40%, -50%);
+    filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.55));
+}
+
+/* PDF: 右下に PDF バッジ */
+.rsu-thumb-pdf.rsu-thumb-has-img::after {
+    content: "PDF";
+    right: 3px;
+    bottom: 3px;
+    padding: 1px 4px;
+    font-size: 9px;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: 0.03em;
+    color: #fff;
+    background: var(--rsu-error);
+    border-radius: 3px;
+}
+
 .rsu-body {
     flex: 1;
     min-width: 0;
@@ -331,6 +371,206 @@
     flex-shrink: 0;
     font-size: 12px;
     color: var(--rsu-muted);
+}
+
+/* ---------------------------------------------------------------- グリッドビュー（v0.2） */
+
+.rsu-list.rsu-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 12px;
+}
+
+.rsu-list.rsu-grid .rsu-item {
+    position: relative;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    padding: 10px;
+}
+
+.rsu-list.rsu-grid .rsu-thumb {
+    flex: none;
+    width: 100%;
+    height: 96px;
+}
+
+.rsu-list.rsu-grid .rsu-body {
+    width: 100%;
+}
+
+.rsu-list.rsu-grid .rsu-name {
+    font-size: 13px;
+}
+
+/* グリッドでは操作ボタンをサムネイル右上に重ねる */
+.rsu-list.rsu-grid .rsu-actions {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: color-mix(in srgb, var(--rsu-bg) 82%, transparent);
+    border-radius: 8px;
+    padding: 2px;
+    backdrop-filter: blur(2px);
+}
+
+.rsu-list.rsu-grid .rsu-btn {
+    width: 26px;
+    height: 26px;
+}
+
+/* ---------------------------------------------------------------- カメラ撮影（v0.2） */
+
+.rsu-camera-btn {
+    appearance: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 10px;
+    padding: 8px 14px;
+    border: 1px solid var(--rsu-border);
+    border-radius: 8px;
+    background: var(--rsu-bg);
+    color: var(--rsu-text);
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s, background-color 0.15s;
+}
+
+.rsu-camera-btn:hover,
+.rsu-camera-btn:focus-visible {
+    color: var(--rsu-accent);
+    border-color: var(--rsu-accent);
+    outline: none;
+}
+
+.rsu-camera-btn svg {
+    width: 18px;
+    height: 18px;
+}
+
+.rsu-camera-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(15, 23, 42, 0.72);
+}
+
+.rsu-camera-box {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-width: min(92vw, 720px);
+    width: 100%;
+    padding: 14px;
+    background: var(--rsu-bg);
+    border-radius: var(--rsu-radius);
+}
+
+.rsu-camera-video {
+    width: 100%;
+    max-height: 60vh;
+    background: #000;
+    border-radius: 8px;
+    object-fit: contain;
+}
+
+.rsu-camera-bar {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.rsu-camera-shoot,
+.rsu-camera-close {
+    appearance: none;
+    font: inherit;
+    font-size: 14px;
+    padding: 9px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 1px solid var(--rsu-border);
+    background: var(--rsu-bg);
+    color: var(--rsu-text);
+}
+
+.rsu-camera-shoot {
+    background: var(--rsu-accent);
+    border-color: var(--rsu-accent);
+    color: #fff;
+    font-weight: 600;
+}
+
+/* ---------------------------------------------------------------- 簡易編集モーダル（v0.3） */
+
+.rsu-edit-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(15, 23, 42, 0.72);
+    font-family: var(--rsu-font);
+}
+
+.rsu-edit-box {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-width: min(94vw, 900px);
+    width: 100%;
+    max-height: 92vh;
+    padding: 14px 16px 16px;
+    background: var(--rsu-bg);
+    color: var(--rsu-text);
+    border-radius: var(--rsu-radius);
+    overflow: auto;
+}
+
+.rsu-edit-title {
+    font-weight: 700;
+    font-size: 15px;
+}
+
+.rsu-edit-host {
+    min-height: 200px;
+}
+
+.rsu-edit-bar {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.rsu-edit-btn {
+    appearance: none;
+    font: inherit;
+    font-size: 14px;
+    padding: 9px 22px;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 1px solid var(--rsu-border);
+    background: var(--rsu-bg);
+    color: var(--rsu-text);
+}
+
+.rsu-edit-btn:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+.rsu-edit-apply {
+    background: var(--rsu-accent);
+    border-color: var(--rsu-accent);
+    color: #fff;
+    font-weight: 600;
 }
 
 /* ---------------------------------------------------------------- ユーティリティ */

@@ -2,34 +2,73 @@
 > 利用は無償（商用可）ですが、**改変・再配布はできません**（LICENSE.txt 参照）。
 > 機能追加・改修のご依頼は有償で承ります → https://parelabo.com （contact@parelabo.com）
 
-## インストール / 読み込み
+## インストール
 
 ```bash
-# npm（GitHubのtarball指定）
-npm install https://github.com/sano1023/ryusuke-packages-dist/raw/main/tarballs/rs-image-0.6.0.tgz
+npm install @parelabo/rs-image
 ```
 
-```html
-<!-- CDN（jsDelivr・scriptタグ直読み） -->
-<script src="https://cdn.jsdelivr.net/gh/sano1023/ryusuke-packages-dist@main/rs-image/dist/rs-image.min.js"></script>
+<details>
+<summary>npm レジストリを使わない場合（GitHub tarball 直指定）</summary>
+
+```bash
+npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-image-0.6.0.tgz
 ```
+</details>
+
+## 使い方
+
+### バニラ JS（ESM・バンドラあり）
 
 ```js
-// ESM import（npmインストール後）
-import { /* 公開API */ } from 'rs-image';
-// Vue 3
-import { RsImageEditor } from 'rs-image/vue';
-// React 18
-import { RsImageEditor } from 'rs-image/react';
+import { createRSImageEditor } from '@parelabo/rs-image';
+import '@parelabo/rs-image/rs-image.css';   // スタイル（バンドラ経由）
+
+createRSImageEditor(document.querySelector('#app'), { /* オプション */ });
 ```
 
-CSSが必要なパッケージは `dist/rs-image.css` を link してください。
+### `<script>` タグ（CDN・ビルド環境不要）
+
+```html
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@parelabo/rs-image@0.6.0/dist/rs-image.css">
+<script src="https://cdn.jsdelivr.net/npm/@parelabo/rs-image@0.6.0/dist/rs-image.min.js"></script>
+<script>
+  // 公開APIはグローバル RSImage に載る
+  RSImage.createRSImageEditor(document.querySelector('#app'), { /* オプション */ });
+</script>
+```
+
+### Vue 3
+
+```js
+import { RsImageEditor } from '@parelabo/rs-image/vue';
+import '@parelabo/rs-image/rs-image.css';   // スタイル（バンドラ経由）
+```
+
+```vue
+<template>
+  <RsImageEditor />
+</template>
+```
+
+### React 18 / 19
+
+```jsx
+import { RsImageEditor } from '@parelabo/rs-image/react';
+import '@parelabo/rs-image/rs-image.css';   // スタイル（バンドラ経由）
+
+export default function App() {
+  return <RsImageEditor />;
+}
+```
+
+> `vue` / `react` は peerDependency です（バンドルには含みません）。アプリ側のものが使われます。
 
 ---
 
 # rs-image
 
-依存ゼロの画像処理＆合成エディタライブラリ。**Photoshop / Illustrator の主要機能を網羅していくインタラクティブエディタ**（トリミング・ペン切り抜き・マジックワンド・自動切り抜き（MLアダプタ注入）・消しゴム・回転/反転・色調整・**トーンカーブ/レベル補正・色域別HSL調整・コピースタンプ・覆い焼き/焼き込み/ぼかしブラシ**・フィルタ・文字・スタンプ・図形（**ブレンドモード・影/縁取り/グロー・グラデ塗り・破線**対応）・ペン・スポイト・モザイク・フレーム、すべてリアルタイム反映）と、リサイズ・圧縮・WebP変換の処理エンジンをブラウザ完結で提供します。表示する機能は tools オプションで自由に構成できます。ビルド不要・ESモジュール。
+依存ゼロの画像処理＆合成エディタライブラリ。**多機能なインタラクティブ画像エディタ**（トリミング・ペン切り抜き・マジックワンド・自動切り抜き（MLアダプタ注入）・消しゴム・回転/反転・色調整・**トーンカーブ/レベル補正・色域別HSL調整・コピースタンプ・覆い焼き/焼き込み/ぼかしブラシ**・フィルタ・文字・スタンプ・図形（**ブレンドモード・影/縁取り/グロー・グラデ塗り・破線**対応）・ペン・スポイト・モザイク・フレーム、すべてリアルタイム反映）と、リサイズ・圧縮・WebP変換の処理エンジンをブラウザ完結で提供します。表示する機能は tools オプションで自由に構成できます。ビルド不要・ESモジュール。
 
 - **高品質縮小**: 段階縮小（半分ずつ）＋ `imageSmoothingQuality:'high'` で大縮小でもジャギらない
 - **EXIF正立**: スマホ写真の Orientation を読み込み時に自動補正
@@ -112,12 +151,12 @@ const { blob } = await editor.export({ format: 'webp', quality: 0.9 });
 | --- | --- |
 | 選択 | レイヤークリックで選択。ドラッグ移動・四隅ハンドルで拡縮・上部ハンドルで回転・Delete削除。**Shift+クリックで複数選択**（整列・分布・一括移動/削除）、**Alt+ドラッグで複製**、**Shift+ドラッグで水平/垂直拘束**、**移動中はベース/他レイヤーの端・中央にスナップ**（ガイド線表示・Ctrlで無効）、矢印キー微調整（Shiftで10px）・Ctrl+Z/Y |
 | トリミング | ドラッグ枠・8ハンドル・暗転＋三分割グリッド。比率プリセット（`crop.ratios` で構成可）・円形 |
-| ペン切り抜き | Photoshopのペンツール型。クリックでアンカーを置いて囲み、始点クリックで閉じて**内側を残す/消す**。なめらか補間（Catmull-Rom）・境界ぼかし・余白の切り詰め・アンカーのドラッグ調整 |
+| ペン切り抜き | ベジェのペンツール型。クリックでアンカーを置いて囲み、始点クリックで閉じて**内側を残す/消す**。なめらか補間（Catmull-Rom）・境界ぼかし・余白の切り詰め・アンカーのドラッグ調整 |
 | マジックワンド | クリックした場所と**近い色で繋がっている範囲**を透過（許容度スライダ・ソフト境界・1クリック=1履歴） |
 | 自動切り抜き | セグメンテーションアダプタ（ML）で被写体を自動検出して背景を透過。**反転**（被写体を消す）・境界ぼかし。アダプタは注入式でコアは依存ゼロのまま |
 | 回転 | 90°左右・自由角度スライダ（劣化しない）・**左右/上下反転** |
 | 調整 | **明るさ・コントラスト・彩度・色相・ぼかし・ビネット**のスライダ（非破壊・`adjust.sliders` で構成可） |
-| トーン補正 | Photoshop型の**レベル補正**（黒点/白点/ガンマ）＋**トーンカーブ**（ヒストグラム表示・RGB/R/G/Bチャンネル別・点をクリック追加/ドラッグ/ダブルクリック削除）＋**オートコントラスト・ホワイトバランス**＋**シャープ（アンシャープマスク）**。全部ライブプレビュー→適用で焼き込み |
+| トーン補正 | **レベル補正**（黒点/白点/ガンマ）＋**トーンカーブ**（ヒストグラム表示・RGB/R/G/Bチャンネル別・点をクリック追加/ドラッグ/ダブルクリック削除）＋**オートコントラスト・ホワイトバランス**＋**シャープ（アンシャープマスク）**。全部ライブプレビュー→適用で焼き込み |
 | 色域調整 | **8色域別のHSL調整**（レッド〜マゼンタの色域を選んで色相±60/彩度/明度。「赤だけ彩度を下げる」等。無彩色は巻き込まない） |
 | フィルタ | **モノクロ/セピア/フェード/ウォーム/クール/ビビッド/反転**のプリセット（`filter.presets` で絞り込み・独自CSS filterの追加可） |
 | 文字追加 | 内容・色・サイズ・フォントをタイプした瞬間に反映 |
@@ -232,7 +271,7 @@ const url = await toDataURL(file, { circle: true, format: 'png' });
 
 ## 検証
 
-Playwright（Chromium）による45項目（エンジン12 + エディタ19 + Pintura機能14）の自動テストで確認済み。エディタ側は実際のマウスドラッグで枠リサイズ・レイヤー移動・拡縮・回転・スタンプ挿入・undo/redo・平坦化エクスポートを検証。
+Playwright（Chromium）による45項目（エンジン12 + エディタ19 + 高度な編集機能14）の自動テストで確認済み。エディタ側は実際のマウスドラッグで枠リサイズ・レイヤー移動・拡縮・回転・スタンプ挿入・undo/redo・平坦化エクスポートを検証。
 
 ## ライセンス
 

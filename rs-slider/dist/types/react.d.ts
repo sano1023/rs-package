@@ -1,0 +1,10 @@
+export const RsSlider: React.ForwardRefExoticComponent<React.RefAttributes<any>>;
+export const RsGallery: React.ForwardRefExoticComponent<React.RefAttributes<any>>;
+export const RsMarquee: React.ForwardRefExoticComponent<React.RefAttributes<any>>;
+export const RsMasonry: React.ForwardRefExoticComponent<React.RefAttributes<any>>;
+export const RsCoverflow: React.ForwardRefExoticComponent<React.RefAttributes<any>>;
+export const RsStories: React.ForwardRefExoticComponent<React.RefAttributes<any>>;
+export { createRSFullscreen };
+export default RsSlider;
+import React from 'react';
+import { createRSFullscreen } from './index.js';

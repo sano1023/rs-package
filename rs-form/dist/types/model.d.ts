@@ -38,6 +38,15 @@ export class FormModel {
         visible: any;
     }[];
     isVisible(name: any): boolean;
+    /** 計算フィールド（q.expression / q.calc）をコンパイルし、依存インデックスを作る */
+    _buildCalc(): void;
+    _calcIndex: Map<any, any> | undefined;
+    _calcQuestions: any[] | undefined;
+    _evalCalc(q: any): any;
+    /** 全計算フィールドを収束するまで再計算（初期化・復元・setAnswers 用） */
+    _recomputeAllCalcs(): void;
+    /** name の変更に依存する計算フィールドだけ再計算（change 発火・カスケードあり） */
+    _recomputeCalcs(startName: any): void;
     getValue(name: any): any;
     /** 値を設定し、依存する visibleIf を再評価。イベント発火と自動保存も行う */
     setValue(name: any, value: any, opts?: {}): void;

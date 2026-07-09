@@ -1,6 +1,12 @@
 export { createRSSignPad, SignPad } from "./signpad.js";
 export { createRSHanko, Hanko } from "./hanko.js";
 export { defineStamp, builtinStamps, mulberry32 } from "./stamps.js";
+export { createRSSign, Sign } from "./sign.js";
+export { verifyAudit, AuditChain, createAuditChain, sha256, AUDIT_JSON_VERSION, GENESIS_HASH } from "./audit.js";
+export { signatureAnnotation, fieldToAnnotation, fieldsToAnnotations, signToAnnotations, placeAnnotations, createPdfSignAdapter, PDF_STAMP_TYPE } from "./pdf-adapter.js";
+export { rsSignaturePad, mountFormSignPad } from "./form-adapter.js";
 export { catmullRomToBezier, resamplePoints, computeWidths, hasMeaningfulPressure, sampleStroke, outlinePath, strokePathData, dotPath } from "./geometry.js";
 export { encodeStrokes, decodeStrokes, normalizePoint, STROKE_JSON_VERSION } from "./strokes.js";
-export { mitomeLayout, kakuLayout, dataLayout, formatSealDate, mmToPx, SEAL_COLOR } from "./seal-layout.js";
+export { mitomeLayout, kakuLayout, dataLayout, ginkoLayout, shokuLayout, formatSealDate, mmToPx, SEAL_COLOR, fadeNoise } from "./seal-layout.js";
+export { normalizeField, isFilled, matchesSigner, fieldProgress, isComplete, serializeDoc, deserializeDoc, fieldKind, nextFieldId, FIELD_TYPES, FIELD_JSON_VERSION } from "./fields.js";
+export { canSignerAct, activeSigners, signerDone, normalizeOrder, normalizeMode, isExpired, resolveState, workflowStatus, ORDER_MODES } from "./workflow.js";

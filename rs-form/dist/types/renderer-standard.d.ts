@@ -28,8 +28,8 @@ export class StandardRenderer {
     _onPrimaryAction(): void;
     _renderPage(): void;
     _updateProgress(): void;
-    /** 1質問の描画（ラベル・必須・説明・エラー領域・aria をコアで配線） */
-    _renderQuestion(q: any): HTMLDivElement | null;
+    /** 1質問の描画（配線は共有モジュール render-question.js に委譲） */
+    _renderQuestion(q: any): any;
     _applyReadonly(): void;
     _applyVisibility(changes: any): void;
     /** モデル値の変更を入力欄の表示へ反映（住所補完・setValue API 等。編集中の欄には触れない） */
@@ -42,5 +42,6 @@ export class StandardRenderer {
     _scrollTop(): void;
     _renderCompleted(): void;
     completedEl: HTMLDivElement | undefined;
+    resultEl: HTMLElement | undefined;
     destroy(): void;
 }

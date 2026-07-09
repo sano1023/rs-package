@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>rs-slider デモ — 13. 画像カードスライダー</title>
+<link rel="stylesheet" href="../dist/rs-slider.css">
+<link rel="stylesheet" href="demo.css">
+</head>
+<body>
+<div class="page">
+    <p class="back"><a href="./">← デモ一覧へ</a></p>
+    <h1>13. 画像カードスライダー <small>createRSSlider (variant: 'cards')</small></h1>
+    <p class="lead">
+        画像・タイトル・説明文・タグ・ボタンを持つカードのスライダー。
+        PCでは3枚 → タブレット2枚 → スマホ1枚のレスポンシブ表示。
+    </p>
+
+    <div class="card">
+        <h2>記事カード（3 → 2 → 1枚）</h2>
+        <p class="note"><code>responsive: {0:{perView:1}, 640:{perView:2}, 1000:{perView:3}}</code>。スワイプ・矢印・ドット対応。</p>
+        <div id="c-articles"></div>
+        <div class="value" id="v-cards"></div>
+    </div>
+
+    <div class="card">
+        <h2>自動再生付き（2枚表示）</h2>
+        <p class="note">ホバーで一時停止します。ボタンの <code>onClick</code> も設定可能。</p>
+        <div id="c-auto"></div>
+    </div>
+</div>
+
+<script type="module">
+    import { createRSSlider } from '../dist/rs-slider.esm.min.js';
+    import { photo } from './assets.js';
+
+    const TOPICS = [
+        { title: '依存ゼロで動くスライダー', tags: ['JavaScript', '軽量'], text: 'ビルド不要のESモジュール。CSSファイル1枚とセットで導入できます。' },
+        { title: 'レスポンシブ表示枚数', tags: ['CSS', 'レスポンシブ'], text: 'コンテナ幅に応じて表示枚数が自動で切り替わります。' },
+        { title: 'タッチ操作に対応', tags: ['UX', 'モバイル'], text: 'Pointer Eventsベースのスワイプで、スマホでも自然に操作できます。' },
+        { title: 'アクセシビリティ', tags: ['a11y'], text: 'aria属性・キーボード操作・reduced-motion に配慮しています。' },
+        { title: 'カードのカスタマイズ', tags: ['デザイン'], text: 'CSS変数とクラスでテーマを調整できます。' },
+        { title: '自動再生と一時停止', tags: ['機能'], text: 'ホバー・タブ非表示・ドラッグ中は自動的に停止します。' },
+    ];
+
+    const cardSlides = (base) => TOPICS.map((t, i) => ({
+        ...t,
+        image: photo(base + i, { w: 800, h: 534, label: '' }),
+        alt: t.title,
+        button: { label: '続きを読む', href: `#article-${i + 1}` },
+    }));
+
+    const cards = createRSSlider('#c-articles', {
+        variant: 'cards',
+        slides: cardSlides(1100),
+        gap: 16,
+        loop: true,
+        responsive: { 0: { perView: 1 }, 640: { perView: 2 }, 1000: { perView: 3 } },
+        onChange: (i) => {
+            document.getElementById('v-cards').textContent = `change: index = ${i + 1}`;
+        },
+    });
+    void cards;
+
+    createRSSlider('#c-auto', {
+        variant: 'cards',
+        slides: TOPICS.slice(0, 5).map((t, i) => ({
+            ...t,
+            image: photo(1200 + i, { w: 800, h: 534, label: '' }),
+            button: { label: 'アラートを表示', onClick: () => alert(`「${t.title}」がクリックされました`) },
+        })),
+        gap: 16,
+        loop: true,
+        autoplay: 3200,
+        dots: false,
+        responsive: { 0: { perView: 1 }, 700: { perView: 2 } },
+    });
+</script>
+</body>
+</html>

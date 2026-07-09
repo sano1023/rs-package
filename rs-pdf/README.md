@@ -2,30 +2,73 @@
 > 利用は無償（商用可）ですが、**改変・再配布はできません**（LICENSE.txt 参照）。
 > 機能追加・改修のご依頼は有償で承ります → https://parelabo.com （contact@parelabo.com）
 
-## インストール / 読み込み
+## インストール
 
 ```bash
-# npm（GitHubのtarball指定）
-npm install https://github.com/sano1023/ryusuke-packages-dist/raw/main/tarballs/rs-pdf-0.5.0.tgz
+npm install @parelabo/rs-pdf
 ```
 
-```html
-<!-- CDN（jsDelivr・scriptタグ直読み） -->
-<script src="https://cdn.jsdelivr.net/gh/sano1023/ryusuke-packages-dist@main/rs-pdf/dist/rs-pdf.min.js"></script>
+<details>
+<summary>npm レジストリを使わない場合（GitHub tarball 直指定）</summary>
+
+```bash
+npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-pdf-0.5.0.tgz
 ```
+</details>
+
+## 使い方
+
+### バニラ JS（ESM・バンドラあり）
 
 ```js
-// ESM import（npmインストール後）
-import { /* 公開API */ } from 'rs-pdf';
+import { createRSPDF } from '@parelabo/rs-pdf';
+import '@parelabo/rs-pdf/rs-pdf.css';   // スタイル（バンドラ経由）
+
+createRSPDF(document.querySelector('#app'), { /* オプション */ });
 ```
 
-CSSが必要なパッケージは `dist/rs-pdf.css` を link してください。
+### `<script>` タグ（CDN・ビルド環境不要）
+
+```html
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@parelabo/rs-pdf@0.5.0/dist/rs-pdf.css">
+<script src="https://cdn.jsdelivr.net/npm/@parelabo/rs-pdf@0.5.0/dist/rs-pdf.min.js"></script>
+<script>
+  // 公開APIはグローバル RSPDF に載る
+  RSPDF.createRSPDF(document.querySelector('#app'), { /* オプション */ });
+</script>
+```
+
+### Vue 3
+
+```js
+import { RsPdfViewer } from '@parelabo/rs-pdf/vue';
+import '@parelabo/rs-pdf/rs-pdf.css';   // スタイル（バンドラ経由）
+```
+
+```vue
+<template>
+  <RsPdfViewer />
+</template>
+```
+
+### React 18 / 19
+
+```jsx
+import { RsPdfViewer } from '@parelabo/rs-pdf/react';
+import '@parelabo/rs-pdf/rs-pdf.css';   // スタイル（バンドラ経由）
+
+export default function App() {
+  return <RsPdfViewer />;
+}
+```
+
+> `vue` / `react` は peerDependency です（バンドルには含みません）。アプリ側のものが使われます。
 
 ---
 
 # rs-pdf
 
-有料PDF SDK（PSPDFKit / Apryse / Adobe PDF Embed API）の機能網羅を目指す、依存ゼロのPDFビューア＆注釈ライブラリです（現在 v0.1 = ビューア）。
+依存ゼロのPDFビューア＆注釈ライブラリです（現在 v0.1 = ビューア）。
 
 - **依存ゼロコア**: ランタイム依存なし。ビルド不要で `src/` から直接 import できる ESモジュール
 - **レンダラアダプタ注入**: PDFのラスタライズはアダプタ契約に切り出し、コアは永久にこの契約だけに依存する（rs-scanner のデコーダ注入と同じ流儀）。**pdf.js マッパー `pdfjsAdapter(pdfjsLib)` を同梱**（コアからは import しない。利用側が pdf.js を読み込んで渡す）
@@ -115,7 +158,7 @@ AcroForm付きPDFを開くと、テキスト / チェック / ラジオ / コン
 | 方式 | API | 特徴 |
 | --- | --- | --- |
 | 注釈JSON | `annotations.toJSON()` | アプリDB保存用・完全ラウンドトリップ |
-| XFDF | `pdf.exportXFDF() / importXFDF()` | Adobe/有料SDKとの相互運用（highlight/square/ink/line/freetext等にマップ・座標は左下原点PDF空間へ変換） |
+| XFDF | `pdf.exportXFDF() / importXFDF()` | 他のPDFツールとの相互運用（highlight/square/ink/line/freetext等にマップ・座標は左下原点PDF空間へ変換） |
 | **PDF追記（増分更新）** | `pdf.saveAnnotated()` | **元PDFのバイト列を一切変えず、末尾に本物のPDF注釈オブジェクト＋新xrefを追記**。Acrobat等でそのまま開けて注釈も編集できる |
 
 増分更新の対応範囲: 従来型xrefテーブル / xrefストリーム（PNG predictor・ObjStm内オブジェクト解決込み）。追記xrefは元PDFと同形式を自動選択。暗号化PDFは明確なエラー。FreeText/スタンプ/日付印の見た目は /AP 画像（JPEG+SMask透過）で埋め込み、日本語もフォント埋め込みなしで確実に表示される（検索可能テキストにはならない割り切り。/Contents にはUTF-16BEで原文が入る）。

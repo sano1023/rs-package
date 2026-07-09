@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>rs-slider デモ — 11. Masonry風画像ギャラリー</title>
+<link rel="stylesheet" href="../dist/rs-slider.css">
+<link rel="stylesheet" href="demo.css">
+</head>
+<body>
+<div class="page">
+    <p class="back"><a href="./">← デモ一覧へ</a></p>
+    <h1>11. Masonry風画像ギャラリー <small>createRSMasonry</small></h1>
+    <p class="lead">画像比率を維持した不規則配置・カテゴリフィルター・クリックで拡大（ライトボックス）・横スクロールモード。</p>
+
+    <div class="card">
+        <h2>Masonry配置 + フィルター + ライトボックス</h2>
+        <p class="note">
+            画像をクリックすると拡大表示（<kbd>Esc</kbd>で閉じる・<kbd>←</kbd><kbd>→</kbd>で移動）。
+            フィルターはフェードで切り替わり、レイアウトが自動で詰め直されます。
+        </p>
+        <div id="ms-grid"></div>
+        <div class="value" id="v-filter"></div>
+    </div>
+
+    <div class="card">
+        <h2>横スクロールモード（layout: 'horizontal'）</h2>
+        <p class="note">高さ固定の2行構成。マウスドラッグ / タッチで横スクロールできます。フィルター・ライトボックスも共通。</p>
+        <div id="ms-h"></div>
+    </div>
+</div>
+
+<script type="module">
+    import { createRSMasonry } from '../dist/rs-slider.esm.min.js';
+    import { photo } from './assets.js';
+
+    const CATS = ['風景', '都市', '抽象'];
+    const SIZES = [
+        [800, 600], [600, 800], [800, 800], [900, 500],
+        [700, 900], [800, 530], [640, 800], [900, 700],
+    ];
+    const makeItems = (base, n) => Array.from({ length: n }, (_, i) => {
+        const [w, h] = SIZES[i % SIZES.length];
+        const category = CATS[i % CATS.length];
+        return {
+            image: photo(base + i, { w, h, label: `${category} ${i + 1}` }),
+            large: photo(base + i, { w: w * 2, h: h * 2, label: `${category} ${i + 1}` }),
+            w, h,
+            category,
+            caption: `${category}のサンプル ${i + 1}（${w}×${h}）`,
+            alt: `${category} ${i + 1}`,
+        };
+    });
+
+    const ms = createRSMasonry('#ms-grid', {
+        items: makeItems(800, 15),
+        columnWidth: 230,
+        gap: 12,
+        onFilter: (cat) => {
+            document.getElementById('v-filter').textContent = `filter: ${cat || 'すべて'}`;
+        },
+    });
+    void ms;
+
+    createRSMasonry('#ms-h', {
+        items: makeItems(900, 14),
+        layout: 'horizontal',
+        rows: 2,
+        rowHeight: 170,
+        gap: 10,
+    });
+</script>
+</body>
+</html>

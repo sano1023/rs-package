@@ -2,24 +2,63 @@
 > 利用は無償（商用可）ですが、**改変・再配布はできません**（LICENSE.txt 参照）。
 > 機能追加・改修のご依頼は有償で承ります → https://parelabo.com （contact@parelabo.com）
 
-## インストール / 読み込み
+## インストール
 
 ```bash
-# npm（GitHubのtarball指定）
-npm install https://github.com/sano1023/ryusuke-packages-dist/raw/main/tarballs/rs-qrcode-0.1.2.tgz
+npm install @parelabo/rs-qrcode
 ```
 
-```html
-<!-- CDN（jsDelivr・scriptタグ直読み） -->
-<script src="https://cdn.jsdelivr.net/gh/sano1023/ryusuke-packages-dist@main/rs-qrcode/dist/rs-qrcode.min.js"></script>
+<details>
+<summary>npm レジストリを使わない場合（GitHub tarball 直指定）</summary>
+
+```bash
+npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-qrcode-0.1.2.tgz
 ```
+</details>
+
+## 使い方
+
+### バニラ JS（ESM・バンドラあり）
 
 ```js
-// ESM import（npmインストール後）
-import { /* 公開API */ } from 'rs-qrcode';
+import { createRSQR } from '@parelabo/rs-qrcode';
+
+createRSQR('https://example.com', { /* オプション */ });
 ```
 
-CSSが必要なパッケージは `dist/rs-qrcode.css` を link してください。
+### `<script>` タグ（CDN・ビルド環境不要）
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/@parelabo/rs-qrcode@0.1.2/dist/rs-qrcode.min.js"></script>
+<script>
+  // 公開APIはグローバル RSQrcode に載る
+  RSQrcode.createRSQR('https://example.com', { /* オプション */ });
+</script>
+```
+
+### Vue 3
+
+```js
+import { RsQrCode, RsBarcode } from '@parelabo/rs-qrcode/vue';
+```
+
+```vue
+<template>
+  <RsQrCode />
+</template>
+```
+
+### React 18 / 19
+
+```jsx
+import { RsQrCode, RsBarcode } from '@parelabo/rs-qrcode/react';
+
+export default function App() {
+  return <RsQrCode />;
+}
+```
+
+> `vue` / `react` は peerDependency です（バンドルには含みません）。アプリ側のものが使われます。
 
 ---
 

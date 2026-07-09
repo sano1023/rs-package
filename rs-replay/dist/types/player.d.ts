@@ -7,6 +7,9 @@ export class Player {
     o: {
         speed: number;
         autoplay: boolean;
+        skipInactive: boolean;
+        inactiveThreshold: number;
+        analyze: boolean;
     };
     speed: number;
     playing: boolean;
@@ -15,6 +18,17 @@ export class Player {
     time: number;
     idx: number;
     viewport: any;
+    skips: {
+        start: number;
+        end: number;
+    }[];
+    markers: {
+        t: number;
+        type: string;
+        label: string;
+    }[];
+    rageClicks: any[];
+    deadClicks: any[];
     _buildUI(): void;
     root: any;
     stage: any;
@@ -29,6 +43,8 @@ export class Player {
     timelineFill: any;
     timelineHandle: any;
     speedSel: any;
+    skipBtn: any;
+    _onSkipBtn: (() => this) | undefined;
     _onPlayBtn: (() => this) | undefined;
     _onSpeedSel: (() => this) | undefined;
     _onTimelineDown: ((e: any) => void) | undefined;
@@ -38,6 +54,11 @@ export class Player {
     _onKeydown: ((e: any) => void) | undefined;
     _ro: ResizeObserver | null | undefined;
     _seekToPointer(e: any): void;
+    /** タイムライン上に無操作スキップ区間とマーカー（ルート/エラー/カスタム）を描く（v0.2） */
+    _buildTimelineDecorations(make: any): void;
+    _syncSkipBtn(): void;
+    /** 無操作スキップの有効/無効を切り替える（v0.2） */
+    setSkipInactive(on: any): this;
     _rescale(): void;
     _reset(): void;
     map: Map<number, Node> | null | undefined;
@@ -56,6 +77,11 @@ export class Player {
     _moveCursor(x: any, y: any, instant: any): void;
     _ripple(x: any, y: any): void;
     _updateUI(): void;
+    /** v0.4: レイジ/デッドクリックの検出結果を返す（マーカーとして表示済み） */
+    getAnalysis(): {
+        rage: any[];
+        dead: any[];
+    };
     on(name: any, fn: any): this;
     off(name: any, fn: any): this;
     emit(name: any, ...args: any[]): void;

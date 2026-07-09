@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>rs-diagram v0.5 — エコシステム連携（rs-chart 内包ノード / rs-image 編集）</title>
+<link rel="stylesheet" href="../dist/rs-diagram.css">
+<!-- 連携先の見た目（機能はSVGなのでCSS無しでも動く。相対パスは features 配下でも解決する） -->
+<link rel="stylesheet" href="../../rs-chart/dist/rs-chart.css">
+<link rel="stylesheet" href="../../rs-image/dist/rs-image.css">
+<style>
+    * { box-sizing: border-box; }
+    body {
+        margin: 0;
+        font-family: system-ui, -apple-system, "Segoe UI", "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+        background: #f1f5f9;
+        color: #1e293b;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+    }
+    header {
+        display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+        padding: 10px 16px; background: #fff; border-bottom: 1px solid #e2e8f0;
+    }
+    header h1 { font-size: 15px; margin: 0; }
+    header h1 small { color: #64748b; font-weight: normal; margin-left: 8px; }
+    header a { font-size: 12.5px; color: #2563eb; }
+    header .status { font-size: 12px; color: #475569; margin-left: auto; }
+    header .status b { color: #16a34a; }
+    header .status b.off { color: #dc2626; }
+    .toolbar { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+    .toolbar button { padding: 5px 11px; border: 1px solid #cbd5e1; border-radius: 6px; background: #fff; font-size: 12.5px; cursor: pointer; }
+    .toolbar button:hover { background: #f1f5f9; }
+    .layout { display: grid; grid-template-columns: 180px 1fr; gap: 10px; flex: 1; min-height: 0; padding: 12px; }
+    .panel { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; overflow: auto; min-height: 0; }
+    .panel h2 { font-size: 12px; color: #64748b; margin: 0; padding: 10px 12px 4px; }
+    #eco-canvas { padding: 0; overflow: hidden; }
+    #eco-canvas .rsd { border-radius: 10px; }
+    .hint { font-size: 12px; color: #475569; padding: 0 16px 8px; line-height: 1.7; }
+</style>
+</head>
+<body>
+<header>
+    <h1>rs-diagram<small>v0.5 エコシステム連携（同リポジトリ rs-chart / rs-image と相互運用）</small></h1>
+    <a href="./index.html">← エディタのデモへ</a>
+    <div class="status" id="status">連携先を読み込み中…</div>
+</header>
+<div class="hint">
+    ノード内の<b>チャートは rs-chart 実体</b>（<code>defineNodeType</code> の draw で <code>createRSChart</code> を呼ぶだけ）。
+    データを更新すると図の中のチャートが追従します。<b>画像ノードをダブルクリック</b>すると <b>rs-image エディタ</b>が起動し、
+    トリミング/回転/文字入れ等の結果を dataURL でノードへ書き戻します。連携先が未ロードのときは簡易サムネイル/ファイル選択へ自動フォールバックします。
+</div>
+<div class="toolbar" style="padding:0 16px 8px">
+    <button id="btn-grow">売上データを1つ追加（チャート追従）</button>
+    <button id="btn-shuffle">データをランダム更新</button>
+    <button id="btn-edit-image">画像ノードを rs-image で編集</button>
+</div>
+<div class="layout">
+    <aside class="panel">
+        <h2>パレット</h2>
+        <div id="eco-palette"></div>
+    </aside>
+    <main class="panel" id="eco-canvas"></main>
+</div>
+
+<script type="module">
+    import {
+        createRSDiagram, defineNodeType, defineLinkType,
+        defineChartNode, makeRSImagePicker, resolveImageEditFlow,
+    } from '../dist/rs-diagram.esm.min.js';
+
+    // 連携先（同リポジトリの別パッケージ）は import のみ・ソース非改変。
+    // 動的 import + try/catch で「未ロード時フォールバック」を成立させる（読めなくても図は動く）。
+    let createRSChart = null;
+    let createRSImageEditor = null;
+    try { ({ createRSChart } = await import('../../rs-chart/dist/rs-chart.esm.min.js')); } catch (e) { createRSChart = null; }
+    try { ({ createRSImageEditor } = await import('../../rs-image/dist/rs-image.esm.min.js')); } catch (e) { createRSImageEditor = null; }
+
+    const status = document.getElementById('status');
+    status.innerHTML = `rs-chart: <b class="${createRSChart ? '' : 'off'}">${createRSChart ? '連携ON' : '未ロード→フォールバック'}</b>`
+        + ` ／ rs-image: <b class="${createRSImageEditor ? '' : 'off'}">${createRSImageEditor ? '連携ON' : '未ロード→フォールバック'}</b>`;
+
+    // サンプル画像（外部リクエストなしのデータURI）
+    const SAMPLE_IMAGE = 'data:image/svg+xml;base64,' + btoa(
+        '<svg xmlns="http://www.w3.org/2000/svg" width="120" height="90">'
+        + '<rect width="120" height="90" fill="#dbeafe"/>'
+        + '<circle cx="86" cy="26" r="12" fill="#f59e0b"/>'
+        + '<path d="M0 90L42 38L70 70L90 50L120 90Z" fill="#3b82f6"/></svg>');
+
+    const salesChart = () => ({
+        type: 'column',
+        series: [{ name: '売上', data: [120, 200, 150, 80, 170] }],
+        xAxis: { categories: ['1月', '2月', '3月', '4月', '5月'] },
+        colors: ['#2563eb'],
+    });
+    const trafficChart = () => ({
+        type: 'line',
+        series: [{ name: '訪問', data: [30, 45, 40, 60, 75, 70] }],
+        xAxis: { categories: ['月', '火', '水', '木', '金', '土'] },
+        colors: ['#16a34a'],
+    });
+
+    // チャート内包ノード = defineNodeType で createRSChart を draw 内に埋め込むだけ
+    const chartNode = defineChartNode({ createRSChart, defaults: { width: 250, height: 170 } });
+
+    const options = {
+        nodeTypes: [chartNode],
+        nodes: [
+            { id: 'sales', type: 'chart', x: 40, y: 40, chartTitle: '月次売上（rs-chart）', chart: salesChart() },
+            { id: 'traffic', type: 'chart', x: 40, y: 260, chartTitle: '曜日別訪問（rs-chart）', chart: trafficChart() },
+            { id: 'pic', type: 'image', x: 360, y: 60, label: 'ダブルクリックで rs-image 編集', image: SAMPLE_IMAGE },
+            { id: 'report', type: 'rounded', x: 380, y: 240, label: '月次レポート', style: { fill: '#e3f2fd' } },
+        ],
+        links: [
+            { id: 'l1', from: 'sales', to: 'report', router: 'orthogonal' },
+            { id: 'l2', from: 'traffic', to: 'report', router: 'orthogonal' },
+            { id: 'l3', from: 'report', to: 'pic', router: 'orthogonal', arrow: 'open' },
+        ],
+        grid: { size: 8, snap: true, show: true },
+        palette: '#eco-palette',
+        paletteItems: [
+            { type: 'chart', label: 'チャート', defaults: { chart: salesChart(), chartTitle: 'サンプル' } },
+            { type: 'image', label: '画像' },
+            { type: 'rounded', label: 'ノード' },
+        ],
+        // 連携先が未ロードなら imagePicker を設定しない＝既定のファイル選択に自然フォールバック
+        contextMenu: false,
+        ariaLabel: 'エコシステム連携のデモキャンバス',
+    };
+    if (createRSImageEditor) {
+        options.imagePicker = makeRSImagePicker({
+            createRSImageEditor,
+            title: '画像ノードを rs-image で編集',
+            editorOptions: { height: 440 },
+        });
+    }
+
+    const eco = createRSDiagram('#eco-canvas', options);
+
+    // ------------------------------------------------------------ ツールバー
+    document.getElementById('btn-grow').onclick = () => {
+        const n = eco.getNode('sales');
+        const c = n.chart;
+        const data = [...c.series[0].data, 60 + Math.round(Math.random() * 180)];
+        const cats = [...(c.xAxis?.categories || []), `${(c.xAxis?.categories?.length || 0) + 1}月`];
+        eco.updateNode('sales', { chart: { ...c, series: [{ ...c.series[0], data }], xAxis: { categories: cats } } });
+    };
+    document.getElementById('btn-shuffle').onclick = () => {
+        const n = eco.getNode('sales');
+        const c = n.chart;
+        const data = c.series[0].data.map(() => 40 + Math.round(Math.random() * 200));
+        eco.updateNode('sales', { chart: { ...c, series: [{ ...c.series[0], data }] } });
+    };
+    document.getElementById('btn-edit-image').onclick = () => {
+        // 画像ノードのその場編集を起動（ダブルクリックと同経路）
+        eco.select(['pic']);
+        if (eco.options.imagePicker) eco.options.imagePicker(eco, eco.getNode('pic'));
+    };
+
+    // ------------------------------------------------------------ 自動テスト用に公開
+    window.ecoDiagram = eco;
+    window.ecoChartNodeId = 'sales';
+    window.ecoImageNodeId = 'pic';
+    window.createRSDiagram = createRSDiagram;
+    window.defineNodeType = defineNodeType;
+    window.defineLinkType = defineLinkType;
+    window.defineChartNode = defineChartNode;
+    window.makeRSImagePicker = makeRSImagePicker;
+    window.resolveImageEditFlow = resolveImageEditFlow;
+    window.loadedCreateRSChart = createRSChart;
+    window.loadedCreateRSImageEditor = createRSImageEditor;
+    window.RSCHART_OK = !!createRSChart;
+    window.RSIMAGE_OK = !!createRSImageEditor;
+    window.SAMPLE_IMAGE = SAMPLE_IMAGE;
+</script>
+</body>
+</html>

@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>rs-livecam デモ</title>
+<style>
+    body {
+        font-family: system-ui, -apple-system, "Segoe UI", "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+        margin: 0; background: #f1f5f9; color: #1e293b;
+    }
+    .page { max-width: 1050px; margin: 0 auto; padding: 32px 20px 120px; }
+    h1 { font-size: 24px; }
+    h1 small { font-size: 13px; color: #64748b; font-weight: 400; margin-left: 10px; }
+    .lead { color: #475569; font-size: 14px; margin-bottom: 20px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .card { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 18px; }
+    .card h2 { font-size: 14px; margin: 0 0 12px; }
+    .view { border-radius: 10px; overflow: hidden; background: #0f172a; }
+    .view canvas, .view video { display: block; width: 100%; height: auto; }
+    .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin: 10px 0; font-size: 12px; }
+    button {
+        appearance: none; border: 1px solid #4e79a7; background: #4e79a7; color: #fff;
+        padding: 7px 14px; border-radius: 7px; font-size: 13px; cursor: pointer; font-family: inherit;
+    }
+    button.ghost { background: #fff; color: #334155; border-color: #cbd5e1; }
+    button.active { background: #16a34a; border-color: #16a34a; }
+    label { display: inline-flex; align-items: center; gap: 5px; }
+    .note { font-size: 12px; color: #64748b; }
+    @media (max-width: 760px) { .grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="page">
+    <h1>rs-livecam <small>v0.2 デモ — リアルタイムカメラ加工（美肌・背景・全体モザイク・アバター・P2P）</small></h1>
+    <p class="lead">
+        カメラなしでも試せます:「デモ映像で開始」は合成映像＋フェイクアダプタで全モードを体験。
+        <strong>加工が外れると人が消える</strong>のが仕様（生映像が漏れない安全設計）。
+    </p>
+
+    <div class="grid">
+        <div class="card">
+            <h2>送信側（自分のプレビュー = 加工済み）</h2>
+            <div class="view" id="local-view"></div>
+            <div class="row">
+                <button id="btn-camera">カメラで開始</button>
+                <button class="ghost" id="btn-fake">デモ映像で開始</button>
+                <button class="ghost" id="btn-stop">停止</button>
+            </div>
+            <div class="row">
+                モード:
+                <button class="ghost mode" data-mode="camera">フィルタ</button>
+                <button class="ghost mode" data-mode="background">背景加工</button>
+                <button class="ghost mode" data-mode="mosaic">全体モザイク</button>
+                <button class="ghost mode" data-mode="blur">全体ぼかし</button>
+                <button class="ghost mode" data-mode="avatar">アバター</button>
+            </div>
+            <div class="row">
+                <label>美肌 <input type="range" id="p-smooth" min="0" max="1" step="0.05" value="0.5"></label>
+                <label>明るさ <input type="range" id="p-brightness" min="0.7" max="1.4" step="0.05" value="1.05"></label>
+            </div>
+            <div class="row">
+                背景:
+                <button class="ghost bg" data-bg="mosaic">モザイク</button>
+                <button class="ghost bg" data-bg="blur">ぼかし</button>
+                <button class="ghost bg" data-bg="image">画像</button>
+                <label><input type="checkbox" id="opt-lost"> 加工を外す（人が消えるデモ）</label>
+            </div>
+            <div class="row">
+                アバター:
+                <select id="avatar-preset"><option value="neutral">ニュートラル</option><option value="female">女性</option><option value="male">男性</option></select>
+                <label><input type="checkbox" id="opt-mouth"> 口を開く（開閉テスト）</label>
+            </div>
+            <p class="note">背景加工/アバターの実運用は MediaPipe を <code>selfieSegAdapter</code> / <code>faceMeshAdapter</code> で注入。デモはフェイクアダプタで動作。</p>
+        </div>
+
+        <div class="card">
+            <h2>受信側（WebRTCループバックで届いた映像）</h2>
+            <div class="view"><video id="remote" autoplay playsinline muted></video></div>
+            <div class="row">
+                <button class="ghost" id="btn-p2p">P2P接続（ループバック）</button>
+                <span class="note" id="p2p-state">未接続</span>
+            </div>
+            <p class="note">同一ページ内で RTCPeerConnection を2つ直結。実際のWebRTC経路を通るので、届くのは加工済み映像だけです。</p>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { createRSLiveCam } from '../dist/rs-livecam.esm.min.js';
+    window.__mod = { createRSLiveCam };
+
+    const $ = (id) => document.getElementById(id);
+
+    // ---- フェイクアダプタ（カメラ・MLなしでデモ/テストするため）----
+    // 楕円マスク: 中央に「人がいる」ことにする
+    window.fakeSeg = {
+        name: 'fake-ellipse',
+        lost: false,
+        segment(frame) {
+            if (this.lost) return null;   // ← 加工が外れた状態
+            const m = document.createElement('canvas');
+            m.width = frame.width;
+            m.height = frame.height;
+            const x = m.getContext('2d');
+            x.fillStyle = '#fff';
+            x.beginPath();
+            x.ellipse(m.width / 2, m.height * 0.62, m.width * 0.22, m.height * 0.4, 0, 0, Math.PI * 2);
+            x.fill();
+            return m;
+        },
+    };
+    // サイン波リグ: まばたき・口パク・頭の揺れ
+    window.fakeTrack = {
+        name: 'fake-rig',
+        lost: false,
+        track() {
+            if (this.lost) return { present: false };
+            const t = performance.now() / 1000;
+            const blink = (Math.sin(t * 2.2) > 0.92) ? 0 : 1;
+            return {
+                present: true,
+                eyeL: blink,
+                eyeR: blink,
+                mouth: this.forceMouth != null ? this.forceMouth : Math.max(0, Math.sin(t * 5)) * 0.8,
+                headX: Math.sin(t * 0.7) * 0.25,
+                headY: Math.sin(t * 0.9) * 0.1,
+                roll: Math.sin(t * 0.5) * 0.3,
+            };
+        },
+    };
+
+    // 仮想背景のサンプル画像
+    function makeBgImage() {
+        const c = document.createElement('canvas');
+        c.width = 640; c.height = 480;
+        const x = c.getContext('2d');
+        const g = x.createLinearGradient(0, 0, 640, 480);
+        g.addColorStop(0, '#0ea5e9'); g.addColorStop(1, '#164e63');
+        x.fillStyle = g; x.fillRect(0, 0, 640, 480);
+        x.fillStyle = 'rgba(255,255,255,0.15)';
+        for (let i = 0; i < 24; i++) {
+            x.beginPath();
+            x.arc((i * 97) % 640, (i * 131) % 480, 20 + (i % 5) * 8, 0, Math.PI * 2);
+            x.fill();
+        }
+        x.fillStyle = '#fff'; x.font = 'bold 28px sans-serif';
+        x.fillText('RS OFFICE', 24, 448);
+        return c;
+    }
+    const bgImage = makeBgImage();
+
+    // ---- デモ映像（カメラの代わり: 動く「人」を描いた canvas）----
+    function makeFakeCameraStream() {
+        const c = document.createElement('canvas');
+        c.width = 640; c.height = 480;
+        const x = c.getContext('2d');
+        const draw = () => {
+            const t = performance.now() / 1000;
+            // 背景（散らかった部屋のつもり）
+            x.fillStyle = '#c8b89a';
+            x.fillRect(0, 0, 640, 480);
+            x.fillStyle = '#8a7a5c';
+            for (let i = 0; i < 8; i++) x.fillRect(40 + i * 75, 40 + (i % 3) * 30, 50, 90);
+            // 「人」: 中央の楕円 + 顔
+            const px = 320 + Math.sin(t) * 18;
+            x.fillStyle = '#3b4b63';
+            x.beginPath();
+            x.ellipse(px, 330, 110, 160, 0, 0, Math.PI * 2);
+            x.fill();
+            x.fillStyle = '#f0c8a0';
+            x.beginPath();
+            x.arc(px, 180, 62, 0, Math.PI * 2);
+            x.fill();
+            // 肌テクスチャ（美肌デモ用のノイズ）
+            x.fillStyle = 'rgba(120,80,60,0.25)';
+            for (let i = 0; i < 60; i++) {
+                x.fillRect(px - 55 + ((i * 37) % 110), 130 + ((i * 53) % 100), 2, 2);
+            }
+            window.__fakeRaf = requestAnimationFrame(draw);
+        };
+        draw();
+        window.__fakeCanvas = c;
+        return c.captureStream(30);
+    }
+
+    // ---- 本体 ----
+    window.cam = createRSLiveCam({
+        mode: 'camera',
+        smooth: 0.5,
+        brightness: 1.05,
+        segmentation: window.fakeSeg,
+        tracking: window.fakeTrack,
+        background: 'mosaic',
+        onError: () => {},
+    });
+    $('local-view').appendChild(window.cam.canvas);
+
+    $('btn-camera').addEventListener('click', () => window.cam.start().catch(() => {}));
+    $('btn-fake').addEventListener('click', () => window.cam.start(makeFakeCameraStream()));
+    $('btn-stop').addEventListener('click', () => window.cam.stop());
+
+    for (const b of document.querySelectorAll('.mode')) {
+        b.addEventListener('click', () => {
+            window.cam.setMode(b.dataset.mode);
+            document.querySelectorAll('.mode').forEach((x) => x.classList.remove('active'));
+            b.classList.add('active');
+        });
+    }
+    for (const b of document.querySelectorAll('.bg')) {
+        b.addEventListener('click', () => {
+            window.cam.setBackground(b.dataset.bg === 'image' ? bgImage : b.dataset.bg);
+        });
+    }
+    $('p-smooth').addEventListener('input', (e) => window.cam.set('smooth', Number(e.target.value)));
+    $('p-brightness').addEventListener('input', (e) => window.cam.set('brightness', Number(e.target.value)));
+    $('avatar-preset').addEventListener('change', (e) => {
+        window.cam.setAvatar({ preset: e.target.value, hair: null, skin: null, accent: null });
+    });
+    $('opt-mouth').addEventListener('change', (e) => {
+        window.fakeTrack.forceMouth = e.target.checked ? 1 : null;
+    });
+    $('opt-lost').addEventListener('change', (e) => {
+        window.fakeSeg.lost = e.target.checked;
+        window.fakeTrack.lost = e.target.checked;
+    });
+
+    // ---- P2P ループバック ----
+    $('btn-p2p').addEventListener('click', async () => {
+        const a = new RTCPeerConnection();
+        const b = new RTCPeerConnection();
+        window.__pc = { a, b };
+        a.onicecandidate = (e) => e.candidate && b.addIceCandidate(e.candidate);
+        b.onicecandidate = (e) => e.candidate && a.addIceCandidate(e.candidate);
+        b.ontrack = (e) => {
+            $('remote').srcObject = e.streams[0];
+        };
+        b.onconnectionstatechange = () => {
+            $('p2p-state').textContent = `接続状態: ${b.connectionState}`;
+        };
+        for (const track of window.cam.stream.getVideoTracks()) {
+            a.addTrack(track, window.cam.stream);
+        }
+        const offer = await a.createOffer();
+        await a.setLocalDescription(offer);
+        await b.setRemoteDescription(offer);
+        const answer = await b.createAnswer();
+        await b.setLocalDescription(answer);
+        await a.setRemoteDescription(answer);
+    });
+</script>
+</body>
+</html>

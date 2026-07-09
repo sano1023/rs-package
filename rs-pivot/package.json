@@ -1,7 +1,7 @@
 {
-    "name": "rs-pivot",
-    "version": "0.1.0",
-    "description": "有料ピボットテーブルライブラリの機能網羅を目指す、依存ゼロのピボットテーブルライブラリ",
+    "name": "@parelabo/rs-pivot",
+    "version": "0.4.0",
+    "description": "依存ゼロのピボットテーブルライブラリ",
     "type": "module",
     "main": "./dist/rs-pivot.esm.min.js",
     "module": "./dist/rs-pivot.esm.min.js",
@@ -14,7 +14,15 @@
             "default": "./dist/rs-pivot.esm.min.js"
         },
         "./dist/*": "./dist/*",
-        "./rs-pivot.css": "./dist/rs-pivot.css"
+        "./rs-pivot.css": "./dist/rs-pivot.css",
+        "./vue": {
+            "types": "./dist/types/vue.d.ts",
+            "import": "./dist/rs-pivot.vue.esm.min.js"
+        },
+        "./react": {
+            "types": "./dist/types/react.d.ts",
+            "import": "./dist/rs-pivot.react.esm.min.js"
+        }
     },
     "files": [
         "dist"
@@ -29,6 +37,31 @@
     ],
     "author": "ryusuke.sano <ryusuke.sano@parelabo.com>",
     "license": "SEE LICENSE IN LICENSE.txt",
+    "homepage": "https://github.com/sano1023/rs-package/tree/main/rs-pivot#readme",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/sano1023/rs-package.git",
+        "directory": "rs-pivot"
+    },
+    "bugs": {
+        "url": "https://parelabo.com",
+        "email": "contact@parelabo.com"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
     "types": "./dist/types/index.d.ts",
-    "style": "./dist/rs-pivot.css"
+    "style": "./dist/rs-pivot.css",
+    "peerDependencies": {
+        "vue": "^3.0.0",
+        "react": ">=18"
+    },
+    "peerDependenciesMeta": {
+        "vue": {
+            "optional": true
+        },
+        "react": {
+            "optional": true
+        }
+    }
 }

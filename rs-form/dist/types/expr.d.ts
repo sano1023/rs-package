@@ -15,7 +15,10 @@ export function tokenize(src: any): ({
  *   or     := and ( '||' and )*
  *   and    := unary ( '&&' unary )*
  *   unary  := '!' unary | compare
- *   compare:= primary ( (==|!=|>|>=|<|<=|contains) primary | empty | notempty )?
+ *   compare:= add ( (==|!=|>|>=|<|<=|contains) add | empty | notempty )?
+ *   add    := mul ( ('+'|'-') mul )*
+ *   mul    := neg ( ('*'|'/'|'%') neg )*
+ *   neg    := '-' neg | primary
  *   primary:= '(' or ')' | 数値 | 文字列 | 真偽 | 識別子
  */
 export function parseExpr(src: any): any;
@@ -36,4 +39,13 @@ export function collectRefs(ast: any, out?: Set<any>): Set<any>;
 export function compileExpr(src: any): {
     deps: Set<any>;
     eval: (getValue: any) => boolean;
+};
+/**
+ * 計算フィールド用に式をコンパイルして { eval(getValue), deps } を返す（v0.4）。
+ * compileExpr と違い、評価結果を真偽に丸めず生の値（数値/文字列）で返す。
+ * 例: compileCalc('price * qty').eval(name => answers[name])
+ */
+export function compileCalc(src: any): {
+    deps: Set<any>;
+    eval: (getValue: any) => any;
 };

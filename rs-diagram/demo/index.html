@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>rs-diagram デモ — フローチャートエディタ</title>
+<link rel="stylesheet" href="../dist/rs-diagram.css">
+<style>
+    * { box-sizing: border-box; }
+    body {
+        margin: 0;
+        font-family: system-ui, -apple-system, "Segoe UI", "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+        background: #f1f5f9;
+        color: #1e293b;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+    }
+    header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 8px 14px;
+        background: #fff;
+        border-bottom: 1px solid #e2e8f0;
+        flex-wrap: wrap;
+    }
+    header h1 { font-size: 15px; margin: 0 8px 0 0; }
+    header h1 small { color: #64748b; font-weight: normal; margin-left: 6px; }
+    .toolbar { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+    .toolbar button {
+        padding: 5px 11px;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        background: #fff;
+        font-size: 12.5px;
+        cursor: pointer;
+    }
+    .toolbar button:hover { background: #f1f5f9; }
+    .toolbar button:disabled { opacity: .45; cursor: default; }
+    .toolbar .sep { width: 1px; height: 20px; background: #e2e8f0; margin: 0 4px; }
+    .toolbar label { font-size: 12.5px; display: flex; align-items: center; gap: 4px; cursor: pointer; }
+    .layout {
+        display: grid;
+        grid-template-columns: 200px 1fr 260px;
+        gap: 10px;
+        flex: 1;
+        min-height: 0;
+        padding: 10px;
+    }
+    .panel {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        overflow: auto;
+        min-height: 0;
+    }
+    .panel h2 {
+        font-size: 12px;
+        color: #64748b;
+        margin: 0;
+        padding: 10px 12px 4px;
+    }
+    #canvas { padding: 0; overflow: hidden; }
+    #canvas .rsd { border-radius: 10px; }
+    #log-list {
+        list-style: none;
+        margin: 0;
+        padding: 4px 12px 12px;
+        font-size: 11.5px;
+        font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+        color: #475569;
+    }
+    #log-list li { padding: 2px 0; border-bottom: 1px dashed #f1f5f9; word-break: break-all; }
+    #scratch, #scratch-palette {
+        position: absolute;
+        left: -10000px;
+        top: 0;
+        width: 900px;
+        height: 600px;
+    }
+    @media (max-width: 900px) {
+        .layout { grid-template-columns: 1fr; grid-template-rows: auto 60vh auto; }
+    }
+</style>
+</head>
+<body>
+<header>
+    <h1>rs-diagram<small>v0.5 — エコシステム連携（<a href="./ecosystem.html">チャート内包ノード / rs-image 編集のデモ →</a>）</small></h1>
+    <div class="toolbar">
+        <button id="btn-undo" title="Ctrl+Z">↩ 元に戻す</button>
+        <button id="btn-redo" title="Ctrl+Y">↪ やり直す</button>
+        <span class="sep"></span>
+        <button id="btn-dup" title="Ctrl+D">複製</button>
+        <button id="btn-del" title="Delete">削除</button>
+        <span class="sep"></span>
+        <button id="btn-save">保存</button>
+        <button id="btn-load">読込</button>
+        <button id="btn-json-out">JSON書出</button>
+        <button id="btn-json-in">JSON読込</button>
+        <input type="file" id="file-json" accept=".json,application/json" hidden>
+        <span class="sep"></span>
+        <button id="btn-fit">全体表示</button>
+        <button id="btn-100">100%</button>
+        <span class="sep"></span>
+        <input type="text" id="api-url" placeholder="APIのURL (例: https://httpbin.org/post)" style="width:210px;padding:5px 8px;border:1px solid #cbd5e1;border-radius:6px;font-size:12px;">
+        <button id="btn-api-send">API送信</button>
+        <button id="btn-api-load">API読込</button>
+        <span class="sep"></span>
+        <button id="btn-svg">SVG出力</button>
+        <button id="btn-png">PNG出力</button>
+        <span class="sep"></span>
+        <label><input type="checkbox" id="chk-readonly"> 読み取り専用</label>
+    </div>
+    <div class="toolbar" style="margin-top:4px">
+        <label>テンプレ:
+            <select id="tpl" style="padding:4px 6px;border:1px solid #cbd5e1;border-radius:6px;font-size:12px">
+                <option value="flow">稟議フロー(初期)</option>
+                <option value="orgchart">組織図</option>
+                <option value="approval">承認フロー</option>
+                <option value="er">ER図</option>
+                <option value="network">ネットワーク構成図</option>
+                <option value="seating">座席表</option>
+            </select>
+        </label>
+        <span class="sep"></span>
+        <span style="font-size:12px;color:#64748b">レイアウト:</span>
+        <button data-layout="tree">tree</button>
+        <button data-layout="layered">layered</button>
+        <button data-layout="grid">grid</button>
+        <button data-layout="radial">radial</button>
+        <span class="sep"></span>
+        <button id="btn-group" title="Ctrl+G">グループ化</button>
+        <button id="btn-ungroup" title="Ctrl+Shift+G">解除</button>
+        <button id="btn-collapse">畳む/開く</button>
+        <span class="sep"></span>
+        <button id="btn-lane">レーン追加</button>
+        <button id="btn-ports">ポート付き追加</button>
+        <span class="sep"></span>
+        <button id="btn-bezier">曲線を引く</button>
+        <button id="btn-avoid">回避配線</button>
+    </div>
+    <div class="toolbar" style="margin-top:4px">
+        <span style="font-size:12px;color:#7c3aed;font-weight:600">v0.4 大規模図:</span>
+        <button id="btn-large" title="1,000ノードの図を生成">大規模図(1000)</button>
+        <label><input type="checkbox" id="chk-virt" checked> 仮想化描画</label>
+        <button id="btn-fps" title="パン/ズームのフレーム時間を計測">FPS計測</button>
+        <span class="sep"></span>
+        <span id="stats" style="font-size:11.5px;color:#475569"></span>
+        <span id="fps" style="font-size:11.5px;color:#7c3aed;font-weight:600"></span>
+    </div>
+</header>
+<div class="layout">
+    <aside class="panel">
+        <h2>パレット（図形はドラッグ / 線・矢印はクリック→キャンバスをドラッグ）</h2>
+        <div id="palette"></div>
+    </aside>
+    <main class="panel" id="canvas"></main>
+    <aside class="panel">
+        <h2>操作</h2>
+        <ul style="font-size:11.5px;color:#475569;margin:4px 0 8px;padding:2px 12px 0 26px;line-height:1.7">
+            <li>スペース or 中ボタンドラッグでカメラ移動</li>
+            <li>Ctrl+ホイールでズーム / ホイールでスクロール</li>
+            <li>「線を引く」クリック→ドラッグ（Escで解除）</li>
+            <li>線をクリック→端点◯ドラッグで付け替え</li>
+            <li>ダブルクリックでラベル編集（画像は画像選択）</li>
+            <li>選択すると上部にスタイルバー（色変更）</li>
+            <li>テンプレ選択で組織図/ER図等が一発生成</li>
+            <li>レイアウトボタンで自動整列（tree/layered/grid/radial）</li>
+            <li>複数選択→グループ化→見出し▶で折りたたみ</li>
+            <li>ポート付きノードの●からドラッグで接続</li>
+            <li>Tab巡回 / 矢印移動 / Enter編集 / Esc解除</li>
+        </ul>
+        <h2>イベントログ</h2>
+        <ul id="log-list"></ul>
+    </aside>
+</div>
+
+<!-- 自動テスト用の作業領域（画面外） -->
+<div id="scratch"></div>
+<div id="scratch-palette"></div>
+
+<script type="module">
+    import { createRSDiagram, defineNodeType, defineLinkType } from '../dist/rs-diagram.esm.min.js';
+
+    // サンプル画像（外部リクエストなしのデータURI）
+    const SAMPLE_IMAGE = 'data:image/svg+xml;base64,' + btoa(
+        '<svg xmlns="http://www.w3.org/2000/svg" width="96" height="72">'
+        + '<rect width="96" height="72" fill="#dbeafe"/>'
+        + '<circle cx="66" cy="20" r="9" fill="#f59e0b"/>'
+        + '<path d="M0 72L34 30L56 56L72 40L96 72Z" fill="#3b82f6"/>'
+        + '</svg>');
+
+    // 稟議・承認フローのサンプル（v0.1 の全形状を含む）
+    const initial = {
+        nodes: [
+            { id: 'start', type: 'rounded', label: '申請', x: 320, y: 32 },
+            { id: 'input', type: 'rect', label: '見積書を添付', x: 320, y: 128 },
+            { id: 'check', type: 'diamond', label: '課長承認?', x: 310, y: 224 },
+            { id: 'order', type: 'rect', label: '発注処理', x: 320, y: 344, style: { fill: '#e3f2fd' } },
+            { id: 'done', type: 'ellipse', label: '完了', x: 320, y: 440 },
+            { id: 'note', type: 'text', label: '10万円以上は\n部長決裁', x: 528, y: 240 },
+            { id: 'photo', type: 'image', label: '添付イメージ', x: 96, y: 120, image: SAMPLE_IMAGE },
+        ],
+        links: [
+            { from: 'start', to: 'input' },
+            { from: 'input', to: 'check' },
+            { from: 'check', to: 'order', label: 'はい' },
+            { from: 'check', to: 'start', label: 'いいえ', router: 'orthogonal', fromAnchor: 'left', toAnchor: 'left' },
+            { from: 'order', to: 'done', arrow: 'open' },
+            { from: 'photo', to: 'input', router: 'orthogonal', arrow: 'none', style: { dash: '5 4' } },
+        ],
+    };
+
+    const $ = (s) => document.querySelector(s);
+    const baseOptions = {
+        grid: { size: 8, snap: true, show: true },
+        palette: '#palette',
+        contextMenu: true,
+        ariaLabel: '稟議フローの編集キャンバス',
+    };
+
+    let diagram;
+
+    // ------------------------------------------------------------ イベントログ
+    const list = $('#log-list');
+    function log(type, detail) {
+        const li = document.createElement('li');
+        li.textContent = `${type}: ${detail}`;
+        list.prepend(li);
+        while (list.children.length > 40) list.lastChild.remove();
+    }
+    function syncButtons() {
+        $('#btn-undo').disabled = !diagram.canUndo;
+        $('#btn-redo').disabled = !diagram.canRedo;
+    }
+    // v0.4: 差分描画・仮想化の効き具合を表示（DOMにある<g>数 / 総ノード数）
+    function updateStats() {
+        if (!diagram || !diagram.getRenderStats) return;
+        const s = diagram.getRenderStats();
+        $('#stats').textContent = `DOM描画: ノード ${s.renderedNodes}/${s.totalNodes}・リンク ${s.renderedLinks}/${s.totalLinks}（仮想化${s.virtualize ? 'ON' : 'OFF'}）`;
+    }
+    // 1,000ノードの大規模図を生成する（グリッド配置＋横/縦リンク）
+    function makeLargeModel(count) {
+        const cols = Math.ceil(Math.sqrt(count));
+        const gap = 150;
+        const nodes = [];
+        const links = [];
+        for (let i = 0; i < count; i++) {
+            const c = i % cols;
+            const rrow = Math.floor(i / cols);
+            nodes.push({ id: 'n' + i, type: i % 9 === 0 ? 'rounded' : 'rect', label: 'N' + i, x: c * gap, y: rrow * 90 });
+            if (c > 0) links.push({ from: 'n' + (i - 1), to: 'n' + i });
+            if (rrow > 0 && i % 4 === 0) links.push({ from: 'n' + (i - cols), to: 'n' + i, router: 'orthogonal' });
+        }
+        return { nodes, links };
+    }
+
+    // 各インスタンスごとのイベント購読（テンプレ切替で作り直すため）
+    function attachEvents() {
+        diagram.on('nodeMove', (e) => log('nodeMove', `${e.node.id} → (${e.node.x}, ${e.node.y})`));
+        diagram.on('nodeResize', (e) => log('nodeResize', `${e.node.id} ${e.node.width}×${e.node.height}`));
+        diagram.on('nodeAdd', (e) => log('nodeAdd', `${e.node.id} (${e.node.type})`));
+        diagram.on('nodeRemove', (e) => log('nodeRemove', e.nodes.map((n) => n.id).join(', ')));
+        diagram.on('nodeClick', (e) => log('nodeClick', e.node.id));
+        diagram.on('linkConnect', (e) => log('linkConnect', `${JSON.stringify(e.link.from)} → ${JSON.stringify(e.link.to)}`));
+        diagram.on('selectionChange', (e) => log('selectionChange', `[${e.selection.join(', ')}]`));
+        diagram.on('modelChange', (e) => { log('modelChange', `${e.type}${e.ops ? ` (${e.ops.length}op)` : ''}`); syncButtons(); updateStats(); });
+        // v0.4: op 粒度の変更イベントストリーム（コラボ同期はこの列をサーバへ送るだけ）
+        diagram.on('op', (op) => {
+            const p = op.payload || {};
+            const ref = p.id || (p.node && p.node.id) || (p.link && p.link.id) || (p.item && p.item.id) || '';
+            log('op', `${op.type} ${ref}`);
+        });
+        diagram.on('linkDraw', (e) => log('linkDraw', `${JSON.stringify(e.link.from)} → ${JSON.stringify(e.link.to)}`));
+        diagram.on('imageSet', (e) => log('imageSet', e.node.id));
+        diagram.on('viewChange', (v) => log('viewChange', `x=${Math.round(v.x)} y=${Math.round(v.y)} scale=${v.scale.toFixed(2)}`));
+        diagram.on('layout', (e) => log('layout', `${e.name} (${e.moved})`));
+        diagram.on('groupCollapse', (e) => log('groupCollapse', `${e.node.id}: ${e.collapsed}`));
+        diagram.on('laneAdd', (e) => log('laneAdd', e.lane.id));
+    }
+
+    function build(opts) {
+        if (diagram) diagram.destroy();
+        diagram = createRSDiagram('#canvas', opts);
+        window.diagram = diagram;
+        attachEvents();
+        diagram.on('viewChange', updateStats);
+        syncButtons();
+        updateStats();
+    }
+
+    build({ ...initial, ...baseOptions });
+
+    // ------------------------------------------------------------ ツールバー
+    $('#btn-undo').onclick = () => diagram.undo();
+    $('#btn-redo').onclick = () => diagram.redo();
+    $('#btn-dup').onclick = () => diagram.duplicateSelection();
+    $('#btn-del').onclick = () => diagram.deleteSelection();
+    $('#btn-save').onclick = () => {
+        localStorage.setItem('rsd-demo', JSON.stringify(diagram.toJSON()));
+        log('save', 'localStorage へ保存しました');
+    };
+    $('#btn-load').onclick = () => {
+        const json = localStorage.getItem('rsd-demo');
+        if (json) { diagram.fromJSON(json); log('load', 'localStorage から復元しました'); }
+        else log('load', '保存データがありません');
+    };
+    $('#btn-svg').onclick = () => {
+        const svg = diagram.exportSVG();
+        const url = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' }));
+        const a = document.createElement('a');
+        a.href = url; a.download = 'diagram.svg'; a.click();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+    };
+    $('#btn-png').onclick = () => diagram.exportPNG();
+    $('#btn-json-out').onclick = () => {
+        diagram.exportJSON({ download: true, filename: 'diagram.json' });
+        log('export', 'diagram.json をダウンロードしました');
+    };
+    $('#btn-json-in').onclick = () => $('#file-json').click();
+    $('#file-json').onchange = async (e) => {
+        const f = e.target.files[0];
+        e.target.value = '';
+        if (!f) return;
+        try {
+            await diagram.importJSONFile(f);
+            log('import', `${f.name} を読み込みました`);
+        } catch (err) {
+            log('import', `失敗: ${err.message}`);
+        }
+    };
+    $('#btn-fit').onclick = () => diagram.zoomToFit();
+    $('#btn-100').onclick = () => diagram.resetView();
+    $('#btn-api-send').onclick = async () => {
+        const url = $('#api-url').value.trim();
+        if (!url) { log('api', 'URLを入力してください'); return; }
+        try {
+            const res = await diagram.saveTo(url);
+            log('api', `送信しました (${res.status})`);
+        } catch (err) {
+            log('api', `送信失敗: ${err.message}`);
+        }
+    };
+    $('#btn-api-load').onclick = async () => {
+        const url = $('#api-url').value.trim();
+        if (!url) { log('api', 'URLを入力してください'); return; }
+        try {
+            await diagram.loadFrom(url);
+            log('api', '読み込みました');
+        } catch (err) {
+            log('api', `読込失敗: ${err.message}`);
+        }
+    };
+    $('#chk-readonly').onchange = (e) => diagram.setReadOnly(e.target.checked);
+
+    // ------------------------------------------------------------ v0.3 コントロール
+    $('#tpl').onchange = (e) => {
+        const name = e.target.value;
+        if (name === 'flow') build({ ...initial, ...baseOptions });
+        else build({ template: name, ...baseOptions });
+        $('#chk-readonly').checked = false;
+        log('template', name);
+    };
+    document.querySelectorAll('[data-layout]').forEach((b) => {
+        b.onclick = () => { diagram.layout(b.dataset.layout); };
+    });
+    $('#btn-group').onclick = () => {
+        const g = diagram.group();
+        if (g) log('group', `${g.id} ← [${g.children.join(', ')}]`);
+        else log('group', 'ノードを選択してください');
+    };
+    $('#btn-ungroup').onclick = () => {
+        for (const id of diagram.getSelection()) diagram.ungroup(id);
+    };
+    $('#btn-collapse').onclick = () => {
+        for (const id of diagram.getSelection()) diagram.toggleCollapse(id);
+    };
+    $('#btn-lane').onclick = () => {
+        const n = diagram.model.lanes.length;
+        const lane = diagram.addLane({ label: `レーン${n + 1}`, x: 24 + n * 24, y: 24 + n * 24, width: 280, height: 360 });
+        diagram.selectLane(lane.id);
+    };
+    $('#btn-ports').onclick = () => {
+        const node = diagram.addNode({
+            type: 'rect', label: 'ポート付き', x: 560, y: 380,
+            ports: [
+                { id: 'in', position: 'left' },
+                { id: 'out', position: 'right' },
+                { id: 'top', position: 'top' },
+                { id: 'bottom', position: 'bottom' },
+            ],
+        });
+        diagram.select([node.id]);
+        log('ports', `${node.id} に4ポート`);
+    };
+    $('#btn-bezier').onclick = () => {
+        const on = diagram.getDrawMode();
+        diagram.setDrawMode(on && on.router === 'bezier' ? null : { arrow: 'triangle', router: 'bezier' });
+    };
+    $('#btn-avoid').onclick = () => {
+        const on = diagram.getDrawMode();
+        diagram.setDrawMode(on && on.router === 'avoid' ? null : { arrow: 'triangle', router: 'avoid' });
+    };
+
+    // ------------------------------------------------------------ v0.4 大規模図
+    $('#btn-large').onclick = () => {
+        build({
+            ...makeLargeModel(1000), ...baseOptions,
+            grid: { size: 10, snap: true, show: false },
+            virtualize: $('#chk-virt').checked,
+        });
+        $('#chk-readonly').checked = false;
+        diagram.resetView(); // 100%表示にして仮想化を効かせる（全体表示だと縮小されて全ノードが可視域に入る）
+        log('large', '1,000ノードの大規模図を生成（パンして仮想化を確認）');
+        updateStats();
+    };
+    $('#chk-virt').onchange = (e) => { diagram.setVirtualize(e.target.checked); updateStats(); };
+    // パン相当のビュー移動を連続させ、1フレームあたりの render 時間を実測する
+    $('#btn-fps').onclick = () => {
+        const base = diagram.getView();
+        diagram.render(); // ウォームアップ
+        const times = [];
+        for (let i = 0; i < 40; i++) {
+            diagram.view.x = base.x - i * 26;
+            diagram.view.y = base.y - i * 9;
+            const t0 = performance.now();
+            diagram.render();
+            times.push(performance.now() - t0);
+        }
+        diagram.setView(base);
+        times.sort((a, b) => a - b);
+        const med = times[times.length >> 1];
+        const stats = diagram.getRenderStats();
+        $('#fps').textContent = `パン中央値 ${med.toFixed(2)}ms → ${Math.round(1000 / med)}fps（描画${stats.renderedNodes}/${stats.totalNodes}）`;
+        log('fps', `median ${med.toFixed(2)}ms ≈ ${Math.round(1000 / med)}fps`);
+    };
+
+    // 自動テスト用に公開
+    window.createRSDiagram = createRSDiagram;
+    window.defineNodeType = defineNodeType;
+    window.defineLinkType = defineLinkType;
+    window.SAMPLE_IMAGE = SAMPLE_IMAGE;
+</script>
+</body>
+</html>

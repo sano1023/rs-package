@@ -1,7 +1,7 @@
 {
-    "name": "rs-gantt",
-    "version": "0.1.0",
-    "description": "有料ガントチャートライブラリの機能網羅を目指す、依存ゼロの対話型プロジェクトガント（日本の祝日・営業日カレンダー内蔵）",
+    "name": "@parelabo/rs-gantt",
+    "version": "0.5.0",
+    "description": "依存ゼロの対話型プロジェクトガントチャート（日本の祝日・営業日カレンダー内蔵）",
     "type": "module",
     "main": "./dist/rs-gantt.esm.min.js",
     "module": "./dist/rs-gantt.esm.min.js",
@@ -14,7 +14,15 @@
             "default": "./dist/rs-gantt.esm.min.js"
         },
         "./dist/*": "./dist/*",
-        "./rs-gantt.css": "./dist/rs-gantt.css"
+        "./rs-gantt.css": "./dist/rs-gantt.css",
+        "./vue": {
+            "types": "./dist/types/vue.d.ts",
+            "import": "./dist/rs-gantt.vue.esm.min.js"
+        },
+        "./react": {
+            "types": "./dist/types/react.d.ts",
+            "import": "./dist/rs-gantt.react.esm.min.js"
+        }
     },
     "files": [
         "dist"
@@ -29,6 +37,31 @@
     ],
     "author": "ryusuke.sano <ryusuke.sano@parelabo.com>",
     "license": "SEE LICENSE IN LICENSE.txt",
+    "homepage": "https://github.com/sano1023/rs-package/tree/main/rs-gantt#readme",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/sano1023/rs-package.git",
+        "directory": "rs-gantt"
+    },
+    "bugs": {
+        "url": "https://parelabo.com",
+        "email": "contact@parelabo.com"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
     "types": "./dist/types/index.d.ts",
-    "style": "./dist/rs-gantt.css"
+    "style": "./dist/rs-gantt.css",
+    "peerDependencies": {
+        "vue": "^3.0.0",
+        "react": ">=18"
+    },
+    "peerDependenciesMeta": {
+        "vue": {
+            "optional": true
+        },
+        "react": {
+            "optional": true
+        }
+    }
 }

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>rs-slider デモ — 5. 商品画像ギャラリー</title>
+<link rel="stylesheet" href="../dist/rs-slider.css">
+<link rel="stylesheet" href="demo.css">
+<style>
+    .product { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 28px; align-items: start; }
+    @media (max-width: 860px) { .product { grid-template-columns: 1fr; } }
+    .info h2 { font-size: 20px; margin: 0 0 4px; }
+    .info .price { font-size: 24px; font-weight: 700; color: #0f172a; margin: 8px 0 14px; }
+    .info .price small { font-size: 12px; color: #64748b; font-weight: 400; }
+    .swatches { display: flex; gap: 10px; margin: 10px 0 18px; }
+    .swatch {
+        width: 40px; height: 40px; border-radius: 50%; border: 2px solid transparent;
+        cursor: pointer; padding: 2px; background: none;
+    }
+    .swatch span { display: block; width: 100%; height: 100%; border-radius: 50%; }
+    .swatch.is-on { border-color: #2563eb; }
+    .buy { background: #2563eb; color: #fff; border: 0; border-radius: 9px; padding: 12px 34px; font-size: 15px; font-weight: 600; cursor: pointer; }
+    .buy:hover { filter: brightness(1.1); }
+    .desc { font-size: 13px; color: #475569; }
+</style>
+</head>
+<body>
+<div class="page">
+    <p class="back"><a href="./">← デモ一覧へ</a></p>
+    <h1>5. 商品画像ギャラリー <small>createRSGallery</small></h1>
+    <p class="lead">
+        メイン画像 + サムネイル・ホバーで拡大ズーム（スマホはダブルタップ）・カラーバリエーション連動・
+        動画サムネイル対応・サムネイル遅延読み込み・スワイプ切替。
+    </p>
+
+    <div class="card">
+        <div class="product">
+            <div id="g-product"></div>
+            <div class="info">
+                <h2>rs-slider スニーカー（デモ商品）</h2>
+                <div class="price">¥12,800 <small>（税込）</small></div>
+                <p class="desc">
+                    カラーを選ぶとギャラリーの画像セットが丸ごと切り替わります（<code>setItems()</code>）。
+                    メイン画像にマウスを乗せると拡大ズーム。動画サムネイルは裏側で実時間録画して生成するため、
+                    初回訪問時のみ数秒遅れて末尾に追加されます（2回目以降はキャッシュから即時表示）。
+                </p>
+                <div class="swatches" id="swatches" role="group" aria-label="カラー選択"></div>
+                <button class="buy" type="button">カートに入れる</button>
+                <div class="value" id="v-product"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { createRSGallery } from '../dist/rs-slider.esm.min.js';
+    import { photo, makeVideoCached } from './assets.js';
+
+    const COLORS = [
+        { name: 'オーシャン', base: 200, css: '#3b82f6' },
+        { name: 'サンセット', base: 300, css: '#f97316' },
+        { name: 'フォレスト', base: 400, css: '#22c55e' },
+    ];
+
+    // 動画は裏で生成し、完成したらサムネイルに差し込む（ページ表示をブロックしない）
+    let videoURL = null;
+    let currentColor = COLORS[0];
+
+    function itemsFor(color) {
+        const items = Array.from({ length: 5 }, (_, i) => ({
+            image: photo(color.base + i, { w: 1000, h: 750, label: `${color.name} ${i + 1}` }),
+            large: photo(color.base + i, { w: 2000, h: 1500, label: `${color.name} ${i + 1}` }),
+            thumb: photo(color.base + i, { w: 180, h: 180, label: '' }),
+            alt: `${color.name} ${i + 1}`,
+            caption: `${color.name} — アングル ${i + 1}`,
+        }));
+        if (videoURL) {
+            items.push({
+                video: { src: videoURL, poster: photo(color.base + 9, { w: 640, h: 480, label: '▶ 動画' }) },
+                thumb: photo(color.base + 9, { w: 180, h: 180, label: '' }),
+                caption: `${color.name} — 紹介動画`,
+            });
+        }
+        return items;
+    }
+
+    const gallery = createRSGallery('#g-product', {
+        items: itemsFor(currentColor),
+        thumbs: 'bottom',
+        zoom: true,
+        zoomScale: 2.4,
+        lazy: true,
+        onChange: (i, _prev, item) => {
+            document.getElementById('v-product').textContent =
+                `change: ${i + 1} / ${gallery.getCount()}${item.video ? '（動画）' : ''}`;
+        },
+    });
+
+    // カラーバリエーション連動
+    const wrap = document.getElementById('swatches');
+    COLORS.forEach((c, i) => {
+        const b = document.createElement('button');
+        b.className = 'swatch' + (i === 0 ? ' is-on' : '');
+        b.type = 'button';
+        b.setAttribute('aria-label', c.name);
+        b.innerHTML = `<span style="background:${c.css}"></span>`;
+        b.addEventListener('click', () => {
+            wrap.querySelectorAll('.swatch').forEach((s) => s.classList.remove('is-on'));
+            b.classList.add('is-on');
+            currentColor = c;
+            gallery.setItems(itemsFor(c));
+        });
+        wrap.appendChild(b);
+    });
+
+    // 動画サムネイル用のデモ動画（生成できない環境では画像のみになります）
+    makeVideoCached('product-360', { seconds: 4, seed: 9, label: '360° VIEW', w: 640, h: 480 })
+        .then((url) => {
+            if (!url) return;
+            videoURL = url;
+            gallery.setItems(itemsFor(currentColor), { startIndex: gallery.getIndex() });
+        });
+</script>
+</body>
+</html>

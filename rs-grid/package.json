@@ -1,5 +1,5 @@
 {
-    "name": "rs-grid",
+    "name": "@parelabo/rs-grid",
     "version": "0.4.1",
     "description": "Excel風データグリッド（依存ゼロ・仮想スクロール・Excel互換コピペ・フィルハンドル・undo/redo）",
     "type": "module",
@@ -14,7 +14,15 @@
             "default": "./dist/rs-grid.esm.min.js"
         },
         "./dist/*": "./dist/*",
-        "./rs-grid.css": "./dist/rs-grid.css"
+        "./rs-grid.css": "./dist/rs-grid.css",
+        "./vue": {
+            "types": "./dist/types/vue.d.ts",
+            "import": "./dist/rs-grid.vue.esm.min.js"
+        },
+        "./react": {
+            "types": "./dist/types/react.d.ts",
+            "import": "./dist/rs-grid.react.esm.min.js"
+        }
     },
     "files": [
         "dist"
@@ -23,11 +31,35 @@
         "datagrid",
         "spreadsheet",
         "excel",
-        "handsontable",
         "table"
     ],
     "author": "ryusuke.sano <ryusuke.sano@parelabo.com>",
     "license": "SEE LICENSE IN LICENSE.txt",
+    "homepage": "https://github.com/sano1023/rs-package/tree/main/rs-grid#readme",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/sano1023/rs-package.git",
+        "directory": "rs-grid"
+    },
+    "bugs": {
+        "url": "https://parelabo.com",
+        "email": "contact@parelabo.com"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
     "types": "./dist/types/index.d.ts",
-    "style": "./dist/rs-grid.css"
+    "style": "./dist/rs-grid.css",
+    "peerDependencies": {
+        "vue": "^3.0.0",
+        "react": ">=18"
+    },
+    "peerDependenciesMeta": {
+        "vue": {
+            "optional": true
+        },
+        "react": {
+            "optional": true
+        }
+    }
 }

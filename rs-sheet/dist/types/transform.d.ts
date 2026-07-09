@@ -9,6 +9,8 @@
  */
 /** AST を再帰的に写像する。fn(node) が ref/range ノードを置換する */
 export function mapRefs(node: any, fn: any): any;
+/** AST 内の名前付き範囲ノード（name）を列挙する */
+export function collectNames(node: any, out?: any[]): any[];
 /** AST 内の参照ノード（ref / range）を列挙する */
 export function collectRefs(node: any, out?: any[]): any[];
 /**

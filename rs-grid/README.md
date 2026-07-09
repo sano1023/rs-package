@@ -2,30 +2,73 @@
 > 利用は無償（商用可）ですが、**改変・再配布はできません**（LICENSE.txt 参照）。
 > 機能追加・改修のご依頼は有償で承ります → https://parelabo.com （contact@parelabo.com）
 
-## インストール / 読み込み
+## インストール
 
 ```bash
-# npm（GitHubのtarball指定）
-npm install https://github.com/sano1023/ryusuke-packages-dist/raw/main/tarballs/rs-grid-0.4.1.tgz
+npm install @parelabo/rs-grid
 ```
 
-```html
-<!-- CDN（jsDelivr・scriptタグ直読み） -->
-<script src="https://cdn.jsdelivr.net/gh/sano1023/ryusuke-packages-dist@main/rs-grid/dist/rs-grid.min.js"></script>
+<details>
+<summary>npm レジストリを使わない場合（GitHub tarball 直指定）</summary>
+
+```bash
+npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-grid-0.4.1.tgz
 ```
+</details>
+
+## 使い方
+
+### バニラ JS（ESM・バンドラあり）
 
 ```js
-// ESM import（npmインストール後）
-import { /* 公開API */ } from 'rs-grid';
+import { createRSGrid } from '@parelabo/rs-grid';
+import '@parelabo/rs-grid/rs-grid.css';   // スタイル（バンドラ経由）
+
+createRSGrid(document.querySelector('#app'), { /* オプション */ });
 ```
 
-CSSが必要なパッケージは `dist/rs-grid.css` を link してください。
+### `<script>` タグ（CDN・ビルド環境不要）
+
+```html
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@parelabo/rs-grid@0.4.1/dist/rs-grid.css">
+<script src="https://cdn.jsdelivr.net/npm/@parelabo/rs-grid@0.4.1/dist/rs-grid.min.js"></script>
+<script>
+  // 公開APIはグローバル RSGrid に載る
+  RSGrid.createRSGrid(document.querySelector('#app'), { /* オプション */ });
+</script>
+```
+
+### Vue 3
+
+```js
+import { RsGrid } from '@parelabo/rs-grid/vue';
+import '@parelabo/rs-grid/rs-grid.css';   // スタイル（バンドラ経由）
+```
+
+```vue
+<template>
+  <RsGrid />
+</template>
+```
+
+### React 18 / 19
+
+```jsx
+import { RsGrid } from '@parelabo/rs-grid/react';
+import '@parelabo/rs-grid/rs-grid.css';   // スタイル（バンドラ経由）
+
+export default function App() {
+  return <RsGrid />;
+}
+```
+
+> `vue` / `react` は peerDependency です（バンドルには含みません）。アプリ側のものが使われます。
 
 ---
 
 # rs-grid
 
-Excel風データグリッド（Handsontable の代替）。仮想スクロールで10万行、Excelとの相互コピペ、フィルハンドル連番、**数式（=SUM(A1:B2) 等）**、undo/redo まで揃った表計算ライクな編集体験を依存ゼロで提供します。ビルド不要・ESモジュール。
+Excel風データグリッド。仮想スクロールで10万行、Excelとの相互コピペ、フィルハンドル連番、**数式（=SUM(A1:B2) 等）**、undo/redo まで揃った表計算ライクな編集体験を依存ゼロで提供します。ビルド不要・ESモジュール。
 
 - **仮想スクロール**: 描画は可視分だけ（100,000行の setData が約40ms、スクロールしても描画行数一定）
 - **Excel互換コピペ**: Ctrl+C/X/V が TSV で Excel・スプレッドシートと相互運用（不可視 textarea プロキシ方式）

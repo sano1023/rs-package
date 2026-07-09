@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>rs-slider デモ — 1. 基本画像スライダー</title>
+<link rel="stylesheet" href="../dist/rs-slider.css">
+<link rel="stylesheet" href="demo.css">
+</head>
+<body>
+<div class="page">
+    <p class="back"><a href="./">← デモ一覧へ</a></p>
+    <h1>1. 基本画像スライダー <small>createRSSlider</small></h1>
+    <p class="lead">自動再生・矢印・ドット・ループ・スワイプ・レスポンシブ。ドラッグ/スワイプでも操作できます。</p>
+
+    <div class="card">
+        <h2>標準構成（自動再生4秒・矢印・ドット・ループ）</h2>
+        <p class="note">ホバー中は自動再生が一時停止します。フォーカスして <kbd>←</kbd><kbd>→</kbd> でも操作可能（keyboard: true）。</p>
+        <div id="s-basic"></div>
+        <div class="controls">
+            <button class="ctl" id="b-prev">← prev()</button>
+            <button class="ctl" id="b-next">next() →</button>
+            <button class="ctl" id="b-goto">goTo(3)</button>
+            <button class="ctl" id="b-toggle">一時停止 / 再生</button>
+        </div>
+        <div class="value" id="v-basic"></div>
+    </div>
+
+    <div class="card">
+        <h2>複数枚表示 + レスポンシブ</h2>
+        <p class="note">コンテナ幅で表示枚数が変わります: <code>responsive: {0:{perView:1}, 640:{perView:2}, 960:{perView:3}}</code>。ウィンドウ幅を変えてみてください。</p>
+        <div id="s-multi"></div>
+    </div>
+
+    <div class="card">
+        <h2>ループなし（loop: false）</h2>
+        <p class="note">端に到達すると矢印が無効化され、スワイプに抵抗が付きます。</p>
+        <div id="s-noloop"></div>
+    </div>
+</div>
+
+<script type="module">
+    import { createRSSlider } from '../dist/rs-slider.esm.min.js';
+    import { photo } from './assets.js';
+
+    const slides = (n, w, h) => Array.from({ length: n }, (_, i) => ({
+        image: photo(i + 1, { w, h, label: `Slide ${i + 1}` }),
+        alt: `サンプル画像 ${i + 1}`,
+    }));
+
+    const basic = createRSSlider('#s-basic', {
+        slides: slides(5, 1200, 675),
+        autoplay: 4000,
+        keyboard: true,
+        onChange: (i) => {
+            document.getElementById('v-basic').textContent = `change: index = ${i + 1} / ${basic.getCount()}`;
+        },
+    });
+    document.getElementById('b-prev').addEventListener('click', () => basic.prev());
+    document.getElementById('b-next').addEventListener('click', () => basic.next());
+    document.getElementById('b-goto').addEventListener('click', () => basic.goTo(3));
+    document.getElementById('b-toggle').addEventListener('click', () => {
+        basic.isPlaying() ? basic.pause() : basic.play();
+    });
+
+    createRSSlider('#s-multi', {
+        slides: slides(8, 800, 500).map((s, i) => ({ ...s, image: photo(i + 20, { w: 800, h: 500, label: `Photo ${i + 1}` }) })),
+        gap: 12,
+        aspectRatio: false,
+        loop: true,
+        responsive: { 0: { perView: 1 }, 640: { perView: 2 }, 960: { perView: 3 } },
+    });
+
+    createRSSlider('#s-noloop', {
+        slides: slides(4, 1200, 500).map((s, i) => ({ ...s, image: photo(i + 40, { w: 1200, h: 500, label: `No Loop ${i + 1}` }) })),
+        loop: false,
+        aspectRatio: '12 / 5',
+    });
+</script>
+</body>
+</html>

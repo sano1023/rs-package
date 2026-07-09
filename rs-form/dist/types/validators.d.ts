@@ -37,4 +37,5 @@ export namespace DEFAULT_MESSAGES {
     let minSelect: string;
     let maxSelect: string;
     let date: string;
+    let matrixAll: string;
 }

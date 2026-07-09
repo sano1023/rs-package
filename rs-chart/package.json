@@ -1,7 +1,7 @@
 {
-    "name": "rs-chart",
+    "name": "@parelabo/rs-chart",
     "version": "0.5.0",
-    "description": "有料チャートライブラリの機能網羅を目指す、依存ゼロのSVGチャートライブラリ",
+    "description": "依存ゼロのSVG/Canvasチャートライブラリ",
     "type": "module",
     "main": "./dist/rs-chart.esm.min.js",
     "module": "./dist/rs-chart.esm.min.js",
@@ -14,7 +14,15 @@
             "default": "./dist/rs-chart.esm.min.js"
         },
         "./dist/*": "./dist/*",
-        "./rs-chart.css": "./dist/rs-chart.css"
+        "./rs-chart.css": "./dist/rs-chart.css",
+        "./vue": {
+            "types": "./dist/types/vue.d.ts",
+            "import": "./dist/rs-chart.vue.esm.min.js"
+        },
+        "./react": {
+            "types": "./dist/types/react.d.ts",
+            "import": "./dist/rs-chart.react.esm.min.js"
+        }
     },
     "files": [
         "dist"
@@ -29,6 +37,31 @@
     ],
     "author": "ryusuke.sano <ryusuke.sano@parelabo.com>",
     "license": "SEE LICENSE IN LICENSE.txt",
+    "homepage": "https://github.com/sano1023/rs-package/tree/main/rs-chart#readme",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/sano1023/rs-package.git",
+        "directory": "rs-chart"
+    },
+    "bugs": {
+        "url": "https://parelabo.com",
+        "email": "contact@parelabo.com"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
     "types": "./dist/types/index.d.ts",
-    "style": "./dist/rs-chart.css"
+    "style": "./dist/rs-chart.css",
+    "peerDependencies": {
+        "vue": "^3.0.0",
+        "react": ">=18"
+    },
+    "peerDependenciesMeta": {
+        "vue": {
+            "optional": true
+        },
+        "react": {
+            "optional": true
+        }
+    }
 }

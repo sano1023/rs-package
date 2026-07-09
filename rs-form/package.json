@@ -1,20 +1,36 @@
 {
-    "name": "rs-form",
-    "version": "0.1.0",
-    "description": "有料フォームビルダー製品の機能網羅を目指す、依存ゼロのスキーマ駆動フォームライブラリ",
+    "name": "@parelabo/rs-form",
+    "version": "0.5.0",
+    "description": "依存ゼロのスキーマ駆動フォームビルダー",
     "type": "module",
-    "main": "./dist/rs-form.esm.min.js",
-    "module": "./dist/rs-form.esm.min.js",
+    "main": "./dist/esm/index.js",
+    "module": "./dist/esm/index.js",
     "unpkg": "./dist/rs-form.min.js",
     "jsdelivr": "./dist/rs-form.min.js",
     "exports": {
         ".": {
             "types": "./dist/types/index.d.ts",
-            "import": "./dist/rs-form.esm.min.js",
-            "default": "./dist/rs-form.esm.min.js"
+            "import": "./dist/esm/index.js",
+            "default": "./dist/esm/index.js"
         },
         "./dist/*": "./dist/*",
-        "./rs-form.css": "./dist/rs-form.css"
+        "./rs-form.css": "./dist/rs-form.css",
+        "./vue": {
+            "types": "./dist/types/vue.d.ts",
+            "import": "./dist/rs-form.vue.esm.min.js"
+        },
+        "./react": {
+            "types": "./dist/types/react.d.ts",
+            "import": "./dist/rs-form.react.esm.min.js"
+        },
+        "./builder": {
+            "types": "./dist/types/builder.d.ts",
+            "import": "./dist/esm/builder.js"
+        },
+        "./conversational": {
+            "types": "./dist/types/conversational.d.ts",
+            "import": "./dist/esm/conversational.js"
+        }
     },
     "files": [
         "dist"
@@ -30,6 +46,31 @@
     ],
     "author": "ryusuke.sano <ryusuke.sano@parelabo.com>",
     "license": "SEE LICENSE IN LICENSE.txt",
+    "homepage": "https://github.com/sano1023/rs-package/tree/main/rs-form#readme",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/sano1023/rs-package.git",
+        "directory": "rs-form"
+    },
+    "bugs": {
+        "url": "https://parelabo.com",
+        "email": "contact@parelabo.com"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
     "types": "./dist/types/index.d.ts",
-    "style": "./dist/rs-form.css"
+    "style": "./dist/rs-form.css",
+    "peerDependencies": {
+        "vue": "^3.0.0",
+        "react": ">=18"
+    },
+    "peerDependenciesMeta": {
+        "vue": {
+            "optional": true
+        },
+        "react": {
+            "optional": true
+        }
+    }
 }

@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>rs-replay デモ — セッション記録＆ループバック再生</title>
+<link rel="stylesheet" href="../dist/rs-replay.css">
+<style>
+    * { box-sizing: border-box; }
+    body {
+        margin: 0;
+        font-family: system-ui, -apple-system, "Segoe UI", "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+        color: #1e293b;
+        background: #f1f5f9;
+    }
+    header {
+        padding: 14px 20px;
+        background: #0f172a;
+        color: #f8fafc;
+    }
+    header h1 { margin: 0; font-size: 18px; }
+    header p { margin: 4px 0 0; font-size: 12px; color: #94a3b8; }
+    main {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        padding: 16px 20px 40px;
+        align-items: start;
+    }
+    .pane {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 16px;
+    }
+    .pane h2 { margin: 0 0 12px; font-size: 15px; }
+    fieldset {
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        margin: 0 0 14px;
+        padding: 12px;
+    }
+    legend { font-size: 12px; color: #64748b; padding: 0 6px; }
+    label { display: block; font-size: 12px; color: #475569; margin: 8px 0 3px; }
+    input[type="text"], input[type="password"], textarea, select {
+        width: 100%;
+        padding: 7px 9px;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        font-size: 13px;
+        font-family: inherit;
+    }
+    .row { display: flex; gap: 10px; }
+    .row > div { flex: 1; }
+    button {
+        padding: 7px 13px;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        background: #fff;
+        font-size: 13px;
+        cursor: pointer;
+    }
+    button:hover { background: #f1f5f9; }
+    button.primary { background: #0284c7; border-color: #0284c7; color: #fff; }
+    button.primary:hover { background: #0369a1; }
+    .btns { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
+    ul#itemList { margin: 8px 0 0; padding-left: 20px; font-size: 13px; }
+    #scrollArea {
+        height: 130px;
+        overflow-y: auto;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        padding: 8px 12px;
+        font-size: 12px;
+        background: #f8fafc;
+    }
+    .secret-box {
+        background: #fef2f2;
+        border: 1px dashed #fca5a5;
+        border-radius: 6px;
+        padding: 8px 12px;
+        font-size: 12px;
+        margin-top: 8px;
+    }
+    .secret-box strong { color: #b91c1c; }
+    #viewer { height: 460px; }
+    .demo-controls {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 12px;
+        font-size: 13px;
+    }
+    #stats {
+        margin-top: 10px;
+        font-size: 12px;
+        color: #64748b;
+        font-variant-numeric: tabular-nums;
+    }
+    .filler { color: #94a3b8; font-size: 12px; line-height: 1.9; }
+</style>
+</head>
+<body>
+<header>
+    <h1>rs-replay デモ — 左で操作 → 右で再生（ループバック）</h1>
+    <p>左のフォームやボタンを操作し、「ここまでを再生」を押すと右のプレイヤーで再現されます。password・マスク要素の生値は記録データに一切残りません。</p>
+</header>
+<main>
+    <!-- ================= 左: 記録される側のサンプルアプリ ================= -->
+    <section class="pane" id="app">
+        <h2>サンプルアプリ（記録対象）</h2>
+
+        <fieldset>
+            <legend>会員情報フォーム</legend>
+            <div class="row">
+                <div>
+                    <label for="name">氏名（text — 文字数を保った伏字で記録）</label>
+                    <input type="text" id="name" name="name" autocomplete="off">
+                </div>
+                <div>
+                    <label for="password">パスワード（password — 固定長 ●●● で記録）</label>
+                    <input type="password" id="password" name="password" autocomplete="new-password">
+                </div>
+            </div>
+            <div class="row">
+                <div>
+                    <label for="card">カード番号（data-rs-mask — 固定長 ●●● で記録）</label>
+                    <input type="text" id="card" name="card" data-rs-mask autocomplete="off">
+                </div>
+                <div>
+                    <label for="pref">都道府県（select）</label>
+                    <select id="pref" name="pref">
+                        <option>東京都</option>
+                        <option>大阪府</option>
+                        <option>福岡県</option>
+                        <option>北海道</option>
+                    </select>
+                </div>
+            </div>
+            <label for="memo">メモ（textarea — 文字数を保った伏字で記録）</label>
+            <textarea id="memo" name="memo" rows="2"></textarea>
+            <label style="display:flex;align-items:center;gap:6px;margin-top:10px;">
+                <input type="checkbox" id="agree" name="agree" style="width:auto;">
+                利用規約に同意する
+            </label>
+        </fieldset>
+
+        <fieldset>
+            <legend>DOM操作（Mutation記録の確認）</legend>
+            <div class="btns">
+                <button type="button" id="addItem">項目を追加</button>
+                <button type="button" id="replaceList" class="primary">リストを差し替え（大きめsubtree置換）</button>
+                <button type="button" id="counterBtn">カウント: <span id="counter">0</span></button>
+                <button type="button" id="deadBtn">反応しないボタン（デッド/レイジ実演）</button>
+            </div>
+            <div id="listWrap">
+                <ul id="itemList">
+                    <li>最初の項目</li>
+                </ul>
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>スクロール領域</legend>
+            <div id="scrollArea">
+                <p>ここは高さ固定のスクロール領域です。スクロール位置も記録・再生されます。</p>
+                <p>行 1 / 20</p><p>行 2 / 20</p><p>行 3 / 20</p><p>行 4 / 20</p>
+                <p>行 5 / 20</p><p>行 6 / 20</p><p>行 7 / 20</p><p>行 8 / 20</p>
+                <p>行 9 / 20</p><p>行 10 / 20</p><p>行 11 / 20</p><p>行 12 / 20</p>
+                <p>行 13 / 20</p><p>行 14 / 20</p><p>行 15 / 20</p><p>行 16 / 20</p>
+                <p>行 17 / 20</p><p>行 18 / 20</p><p>行 19 / 20</p><p>行 20 / 20 （最後の行）</p>
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>高度な記録（v0.2 — Shadow DOM / iframe / Canvas / カスタムイベント）</legend>
+            <div class="btns">
+                <button type="button" id="shadowAdd">Shadow DOMに項目追加</button>
+                <button type="button" id="frameAdd">iframeに項目追加</button>
+                <button type="button" id="canvasDraw">Canvasに描画</button>
+                <button type="button" id="fireEvent">カスタムイベント発火</button>
+                <button type="button" id="fireError">console.error 発火</button>
+            </div>
+            <label>Shadow DOM（同一オリジン・カプセル化。中の password もマスクされる）</label>
+            <div id="shadowHost"></div>
+            <label style="margin-top:10px;">同一オリジン iframe（中身ごと記録・再生される）</label>
+            <iframe id="subFrame" title="サブフレーム" style="width:100%;height:120px;border:1px solid #cbd5e1;border-radius:6px;"></iframe>
+            <label style="margin-top:10px;">Canvas（recordCanvas: true で画像スナップショット）</label>
+            <canvas id="chart" width="360" height="90" style="width:100%;border:1px solid #cbd5e1;border-radius:6px;background:#fff;"></canvas>
+        </fieldset>
+
+        <fieldset>
+            <legend>マスク要素（テキストごと伏字になる）</legend>
+            <div class="secret-box" data-rs-mask>
+                <strong>[data-rs-mask]</strong> 法人番号 8010-4012-3456 / 代表者 佐野竜介
+            </div>
+            <div class="secret-box rs-mask">
+                <strong>.rs-mask</strong> 社外秘: 次期プロダクトのコードネームは「あかつき零号」
+            </div>
+        </fieldset>
+
+        <p class="filler">
+            以下はページ（window）スクロール確認用の余白テキストです。<br>
+            セッションリプレイはDOMベースの再現なので、動画と違いテキストの選択やレイアウトの検証も可能です。<br>
+            記録データはこのブラウザの外へは一切送信されません（onChunk コールバックの中身は空です）。
+        </p>
+    </section>
+
+    <!-- ================= 右: プレイヤー（data-rs-ignore で記録対象外） ================= -->
+    <section class="pane rsr-viewer-pane" data-rs-ignore>
+        <h2>リプレイ プレイヤー</h2>
+        <div class="demo-controls">
+            <button type="button" id="playLoopback" class="primary">ここまでを再生 ▶</button>
+            <label style="display:flex;align-items:center;gap:5px;">
+                <input type="checkbox" id="autoRefresh"> 自動更新（4秒ごと）
+            </label>
+            <label style="display:flex;align-items:center;gap:5px;">
+                <input type="checkbox" id="skipInactive"> 無操作スキップ
+            </label>
+        </div>
+        <div id="viewer"></div>
+        <div id="stats">記録中…</div>
+
+        <fieldset style="margin-top:14px;">
+            <legend>ヒートマップ（v0.3 — 記録済みセッションを集計して左ペインに重ねる）</legend>
+            <div class="btns">
+                <button type="button" id="captureSession">現在の操作をセッションに追加</button>
+                <button type="button" id="showHeatmap" class="primary">ヒートマップ表示 / 更新</button>
+                <button type="button" id="clearHeatmap">消す</button>
+            </div>
+            <div id="heatInfo" style="font-size:12px;color:#64748b;">
+                セッション: 0 個 — 「追加」で複数セッションを溜め、「表示」で左ペインにヒートマップを重ねます。
+                重ねた後は左ペイン右上の操作から <strong>クリック / ムーブ / スクロール</strong> 切替と <strong>強度</strong> 調整ができます。
+            </div>
+        </fieldset>
+
+        <fieldset style="margin-top:14px;">
+            <legend>分析と監査（v0.4 — レイジ/デッドクリック・ファネル・プライバシー監査）</legend>
+            <div class="btns">
+                <button type="button" id="auditCurrent" class="primary">現在のセッションを監査</button>
+                <button type="button" id="auditLeak">わざと漏れたセッションを監査</button>
+                <button type="button" id="funnelBtn">ファネル到達集計を表示</button>
+            </div>
+            <div id="analysisInfo" style="font-size:12px;color:#334155;line-height:1.7;">
+                再生すると、<strong style="color:#c2680b;">レイジクリック（連打）</strong>は
+                <span style="color:#fb923c;">◆</span>、<strong>デッドクリック（DOM無反応）</strong>は
+                <span style="color:#64748b;">○</span> でタイムラインに表示されます。
+                左の「反応しないボタン」を素早く5回ほど押してから「ここまでを再生」で確認できます。
+                「現在のセッションを監査」でマスク漏れ検査（メール/電話/カード番号/未マスクinput）を実行します。
+            </div>
+        </fieldset>
+    </section>
+</main>
+
+<script type="module">
+    import {
+        createRSReplayRecorder, createRSReplayPlayer, createRSHeatmap,
+        sessionToJSON, sessionToGzip, mergeChunks, isCompressionSupported,
+        aggregate, buildSelector, isDynamicId,
+        auditSession, funnelReach, detectRageClicks, detectDeadClicks, analysisMarkers,
+    } from '../dist/rs-replay.esm.min.js';
+
+    // ---------------- v0.2: Shadow DOM / iframe / Canvas を記録開始前に用意 ----------------
+    // Shadow DOM（中の password もマスクされる）
+    const shadowHost = document.getElementById('shadowHost');
+    const shadow = shadowHost.attachShadow({ mode: 'open' });
+    shadow.innerHTML = `
+        <style>.card{font:12px/1.6 system-ui;padding:8px 12px;border:1px solid #c7d2fe;border-radius:6px;background:#eef2ff;}
+        .card h4{margin:0 0 4px;font-size:12px;color:#4338ca;} input{width:100%;padding:5px 8px;border:1px solid #c7d2fe;border-radius:5px;}
+        ul{margin:6px 0 0;padding-left:18px;}</style>
+        <div class="card">
+            <h4>Shadow DOM コンポーネント</h4>
+            <label style="font-size:11px;color:#6366f1;">秘密メモ（password — 固定長●●●で記録）</label>
+            <input type="password" id="shadowPw" autocomplete="new-password">
+            <ul id="shadowList"><li>シャドウ項目 1</li></ul>
+        </div>`;
+
+    // 同一オリジン iframe（about:blank に同期で書き込む）
+    const subFrame = document.getElementById('subFrame');
+    const fdoc = subFrame.contentDocument;
+    fdoc.open();
+    fdoc.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><style>
+        body{font:12px/1.6 system-ui;margin:8px;color:#1e293b;}
+        input{width:100%;padding:5px 8px;border:1px solid #cbd5e1;border-radius:5px;box-sizing:border-box;}
+        ul{margin:6px 0 0;padding-left:18px;}</style></head><body>
+        <strong>iframe 内フォーム</strong>
+        <div style="margin-top:4px;">氏名（text — マスク）: <input type="text" id="frameName"></div>
+        <ul id="frameList"><li>フレーム項目 1</li></ul></body></html>`);
+    fdoc.close();
+
+    // Canvas（recordCanvas: true で toDataURL 画像として記録される）
+    const canvas = document.getElementById('chart');
+    let canvasSeed = 0;
+    function drawCanvas() {
+        const g = canvas.getContext('2d');
+        g.clearRect(0, 0, canvas.width, canvas.height);
+        g.fillStyle = '#0284c7';
+        for (let i = 0; i < 12; i++) {
+            const h = 12 + ((Math.sin(i + canvasSeed) + 1) * 30);
+            g.fillRect(10 + i * 28, canvas.height - h - 6, 20, h);
+        }
+        g.fillStyle = '#0f172a';
+        g.font = '12px system-ui';
+        g.fillText('Canvas スナップショット #' + canvasSeed, 10, 14);
+        canvasSeed++;
+    }
+    drawCanvas();
+
+    // ---------------- 記録開始（チャンクはページ内に貯めるだけ。外部送信はしない） ----------------
+    const chunks = [];
+    const recorder = createRSReplayRecorder({
+        chunkInterval: 5000,
+        chunkEvents: 200,
+        recordCanvas: true,               // v0.2: canvas を画像スナップショット
+        onChunk: (chunk, meta) => { chunks.push(chunk); updateStats(); },
+    });
+    recorder.start();
+
+    // ---------------- 左ペインのサンプルアプリ挙動 ----------------
+    let itemNo = 1;
+    document.getElementById('addItem').addEventListener('click', () => {
+        const li = document.createElement('li');
+        li.textContent = `追加された項目 ${++itemNo}（${new Date().toLocaleTimeString('ja-JP')}）`;
+        document.getElementById('itemList').appendChild(li);
+    });
+
+    let replaced = false;
+    document.getElementById('replaceList').addEventListener('click', () => {
+        replaced = !replaced;
+        const wrap = document.getElementById('listWrap');
+        wrap.innerHTML = '';
+        if (replaced) {
+            const table = document.createElement('table');
+            table.id = 'replacedTable';
+            table.style.cssText = 'border-collapse:collapse;font-size:12px;';
+            for (let r = 0; r < 5; r++) {
+                const tr = table.insertRow();
+                for (let c = 0; c < 4; c++) {
+                    const td = tr.insertCell();
+                    td.textContent = `セル ${r + 1}-${c + 1}`;
+                    td.style.cssText = 'border:1px solid #cbd5e1;padding:4px 10px;';
+                }
+            }
+            wrap.appendChild(table);
+        } else {
+            const ul = document.createElement('ul');
+            ul.id = 'itemList';
+            ul.innerHTML = '<li>最初の項目（復元）</li>';
+            wrap.appendChild(ul);
+            itemNo = 1;
+        }
+    });
+
+    let count = 0;
+    document.getElementById('counterBtn').addEventListener('click', () => {
+        document.getElementById('counter').textContent = String(++count);
+    });
+
+    // ---------------- v0.2 の操作（Shadow / iframe / Canvas / カスタムイベント） ----------------
+    let shadowNo = 1;
+    document.getElementById('shadowAdd').addEventListener('click', () => {
+        const li = document.createElement('li');
+        li.textContent = `シャドウ項目 ${++shadowNo}`;
+        shadow.getElementById('shadowList').appendChild(li);
+    });
+    let frameNo = 1;
+    document.getElementById('frameAdd').addEventListener('click', () => {
+        const li = fdoc.createElement('li');
+        li.textContent = `フレーム項目 ${++frameNo}`;
+        fdoc.getElementById('frameList').appendChild(li);
+    });
+    document.getElementById('canvasDraw').addEventListener('click', () => {
+        drawCanvas();
+        recorder.addEvent('canvas-redraw', { seed: canvasSeed });
+    });
+    document.getElementById('fireEvent').addEventListener('click', () => {
+        recorder.addEvent('purchase', { item: 'pro-plan', amount: 4980 });
+    });
+    document.getElementById('fireError').addEventListener('click', () => {
+        console.error('デモ用のエラー: 在庫の取得に失敗しました (code=STOCK_503)');
+    });
+
+    // ---------------- ループバック再生 ----------------
+    let player = null;
+    function playLoopback() {
+        const session = recorder.getSession();
+        if (player) player.destroy();
+        const skipInactive = document.getElementById('skipInactive').checked;
+        player = createRSReplayPlayer('#viewer', session, { autoplay: true, skipInactive });
+        window.player = player;
+        updateStats(session);
+        return player;
+    }
+    document.getElementById('playLoopback').addEventListener('click', playLoopback);
+    document.getElementById('skipInactive').addEventListener('change', (e) => {
+        if (player) player.setSkipInactive(e.target.checked);
+    });
+
+    let autoTimer = 0;
+    let lastCount = -1;
+    document.getElementById('autoRefresh').addEventListener('change', (e) => {
+        clearInterval(autoTimer);
+        if (e.target.checked) {
+            autoTimer = setInterval(() => {
+                const n = recorder.session ? recorder.session.events.length : 0;
+                if (n !== lastCount) { lastCount = n; playLoopback(); }
+            }, 4000);
+        }
+    });
+
+    let statsBusy = false;
+    async function updateStats(session) {
+        const s = session || (recorder.session && recorder.getSession());
+        if (!s) return;
+        const json = sessionToJSON(s);
+        const rawKB = (json.length / 1024).toFixed(1);
+        let gzipText = '';
+        if (isCompressionSupported() && !statsBusy) {
+            statsBusy = true;
+            try {
+                const gz = await sessionToGzip(s);
+                const ratio = json.length ? (100 * gz.byteLength / json.length).toFixed(0) : '—';
+                gzipText = ` / gzip後: ${(gz.byteLength / 1024).toFixed(1)} KB（${ratio}%）`;
+            } catch { /* noop */ } finally { statsBusy = false; }
+        }
+        document.getElementById('stats').textContent =
+            `イベント: ${s.events.length} 件 / JSON: ${rawKB} KB${gzipText} / 受信チャンク: ${chunks.length} 個（seq 0〜${Math.max(0, chunks.length - 1)}）`;
+    }
+    setInterval(() => updateStats(), 2000);
+
+    // ---------------- v0.3: ヒートマップ（記録済みセッションを左ペインに重ねる） ----------------
+    const heatSessions = [];
+    let heatmap = null;
+    function updateHeatInfo() {
+        document.getElementById('heatInfo').innerHTML =
+            `セッション: <strong>${heatSessions.length}</strong> 個 — ` +
+            '「表示」で左ペインにヒートマップを重ねます。左ペイン右上で <strong>クリック / ムーブ / スクロール</strong> 切替と <strong>強度</strong> 調整ができます。';
+    }
+    document.getElementById('captureSession').addEventListener('click', () => {
+        heatSessions.push(recorder.getSession());
+        updateHeatInfo();
+        if (heatmap) heatmap.setSessions(heatSessions);
+    });
+    document.getElementById('showHeatmap').addEventListener('click', () => {
+        const sessions = heatSessions.length ? heatSessions : [recorder.getSession()];
+        if (heatmap) heatmap.destroy();
+        heatmap = createRSHeatmap('#app', sessions, { type: 'click' });
+        window.heatmap = heatmap;
+    });
+    document.getElementById('clearHeatmap').addEventListener('click', () => {
+        if (heatmap) { heatmap.destroy(); heatmap = null; window.heatmap = null; }
+    });
+
+    // ---------------- v0.4: 分析（レイジ/デッド/ファネル）と監査（auditSession） ----------------
+    // 「反応しないボタン」(#deadBtn) には意図的にハンドラを付けない → 押しても DOM は変化せず、
+    // 再生時にデッドクリック（無反応）・素早い連打はレイジクリックとして検出・マーカー表示される。
+
+    // わざと生値を混入させた「マスク漏れセッション」（監査ツールのデモ用・記録経路は通さない）
+    function makeLeakSession() {
+        return {
+            version: 1,
+            meta: { startedAt: Date.now(), url: 'http://localhost/checkout?ref=demo', viewport: { w: 1280, h: 800 }, userAgent: 'demo' },
+            snapshot: { node: { id: 1, k: 1, t: 'html', ch: [
+                { id: 2, k: 1, t: 'body', ch: [
+                    { id: 3, k: 1, t: 'p', ch: [{ id: 4, k: 3, x: 'お問い合わせは support@example.com へ' }] },
+                    { id: 5, k: 1, t: 'input', a: { type: 'text' }, v: '山田太郎' },   // 未マスクの生値（漏れ）
+                ] },
+            ] } },
+            events: [
+                { t: 10, type: 'input', data: { id: 5, v: '山田太郎' } },              // 未マスク input
+                { t: 20, type: 'input', data: { id: 5, v: '090-1234-5678' } },         // 電話番号
+                { t: 30, type: 'mutation', data: { ops: [
+                    { o: 'add', p: 2, b: 0, n: { id: 20, k: 1, t: 'div', ch: [{ id: 21, k: 3, x: 'カード 4242 4242 4242 4242' }] } },
+                ] } },
+            ],
+        };
+    }
+
+    function renderAudit(title, r) {
+        const box = document.getElementById('analysisInfo');
+        if (r.ok) {
+            box.innerHTML = `<strong>監査（${title}）: <span style="color:#16a34a;">マスク漏れなし ✓</span></strong><br>` +
+                `走査: ノード ${r.scanned.nodes} / イベント ${r.scanned.events} / 文字列 ${r.scanned.strings}`;
+        } else {
+            const c = r.counts;
+            const rows = r.findings.map((f) =>
+                `<li><strong>${f.kind}</strong> @ ${f.where}${f.rsid ? '（rsid ' + f.rsid + '）' : ''} → <code>${f.redacted}</code></li>`).join('');
+            box.innerHTML = `<strong>監査（${title}）: <span style="color:#dc2626;">マスク漏れ ${r.findings.length} 件 ✗</span></strong><br>` +
+                `メール ${c.email} / 電話 ${c.phone} / カード ${c.card} / 未マスクinput ${c.unmaskedInput}` +
+                `<ul style="margin:6px 0 0;padding-left:18px;">${rows}</ul>` +
+                `<span style="color:#94a3b8;">※ 報告に生値は載せず伏字化しています（監査結果自体が漏えい経路にならないように）</span>`;
+        }
+    }
+
+    function renderFunnel(f) {
+        const rows = f.steps.map((s) =>
+            `<li>${s.name}: <strong>${s.count}</strong> / ${f.total} — 到達 ${(s.rate * 100).toFixed(0)}% ・遷移 ${(s.stepRate * 100).toFixed(0)}% ・離脱 ${s.dropoff}</li>`).join('');
+        document.getElementById('analysisInfo').innerHTML =
+            `<strong>ファネル到達集計（${f.total} セッション・順序あり）</strong>` +
+            `<ul style="margin:6px 0 0;padding-left:18px;">${rows}</ul>`;
+    }
+
+    document.getElementById('auditCurrent').addEventListener('click', () => {
+        renderAudit('現在のセッション', auditSession(recorder.getSession()));
+    });
+    document.getElementById('auditLeak').addEventListener('click', () => {
+        renderAudit('わざと漏れたセッション', auditSession(makeLeakSession()));
+    });
+    document.getElementById('funnelBtn').addEventListener('click', () => {
+        const steps = ['view', 'cart', 'pay', 'done'];
+        const mk = (names) => ({ version: 1, meta: { viewport: { w: 1, h: 1 } }, snapshot: { node: { id: 1, k: 1, t: 'html' } },
+            events: names.map((n, i) => ({ t: i * 100, type: 'custom', data: { name: n, data: null } })) });
+        const sessions = [
+            mk(['view', 'cart', 'pay', 'done']), mk(['view', 'cart', 'pay']),
+            mk(['view', 'cart']), mk(['view']), mk(['about']),
+        ];
+        renderFunnel(funnelReach(sessions, steps));
+    });
+
+    // ---------------- 検証用に公開（デモの動作には不要） ----------------
+    window.recorder = recorder;
+    window.chunks = chunks;
+    window.playLoopback = playLoopback;
+    window.shadow = shadow;
+    window.subFrame = subFrame;
+    window.heatSessions = heatSessions;
+    window.makeLeakSession = makeLeakSession;
+    window.RSReplay = {
+        createRSReplayRecorder, createRSReplayPlayer, createRSHeatmap,
+        sessionToJSON, sessionToGzip, mergeChunks, isCompressionSupported,
+        aggregate, buildSelector, isDynamicId,
+        auditSession, funnelReach, detectRageClicks, detectDeadClicks, analysisMarkers,
+    };
+    // v0.2 検証用に compress ユーティリティも公開
+    import('../dist/rs-replay.esm.min.js').then((m) => { window.RSReplayCompress = m; });
+</script>
+</body>
+</html>

@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>rs-gantt v0.5 デモ — 対話型プロジェクトガント + スケジューラビュー</title>
+<link rel="stylesheet" href="../dist/rs-gantt.css">
+<style>
+    body {
+        font-family: system-ui, -apple-system, "Segoe UI", "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+        margin: 0; padding: 16px 20px; background: #f1f5f9; color: #0f172a;
+    }
+    h1 { font-size: 20px; margin: 0 0 4px; }
+    .sub { color: #64748b; font-size: 13px; margin: 0 0 12px; }
+    .toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 10px; }
+    .toolbar button {
+        padding: 6px 14px; border: 1px solid #cbd5e1; border-radius: 6px;
+        background: #fff; cursor: pointer; font-size: 13px;
+    }
+    .toolbar button:hover { background: #eef4ff; }
+    .toolbar button.active { background: #2563eb; color: #fff; border-color: #2563eb; }
+    .toolbar .sep { width: 1px; height: 22px; background: #cbd5e1; }
+    #gantt { height: 560px; background: #fff; }
+    .panel { display: flex; gap: 16px; margin-top: 12px; }
+    .panel section { flex: 1; background: #fff; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 12px; }
+    .panel h2 { font-size: 13px; margin: 0 0 6px; color: #475569; }
+    #log { height: 140px; overflow: auto; font: 11px/1.6 ui-monospace, monospace; margin: 0; white-space: pre-wrap; }
+    .hint { font-size: 12px; color: #64748b; line-height: 1.8; margin: 0; }
+    /* タスク編集ダイアログ（デモ実装。taskDblClick フックの使用例） */
+    .demo-dialog-overlay {
+        position: fixed; inset: 0; background: rgba(15,23,42,.4);
+        display: flex; align-items: center; justify-content: center; z-index: 100;
+    }
+    .demo-dialog {
+        background: #fff; border-radius: 10px; padding: 18px 20px; width: 320px;
+        box-shadow: 0 20px 60px rgba(0,0,0,.25); font-size: 13px;
+    }
+    .demo-dialog h3 { margin: 0 0 12px; font-size: 15px; }
+    .demo-dialog label { display: flex; align-items: center; gap: 8px; margin-bottom: 9px; }
+    .demo-dialog label span { width: 64px; color: #475569; flex: none; }
+    .demo-dialog input[type="text"], .demo-dialog input[type="date"], .demo-dialog input[type="number"] {
+        flex: 1; padding: 5px 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px;
+    }
+    .demo-dialog .row { display: flex; gap: 8px; justify-content: flex-end; margin-top: 14px; }
+    .demo-dialog button {
+        padding: 6px 14px; border: 1px solid #cbd5e1; border-radius: 6px;
+        background: #fff; font-size: 12.5px; cursor: pointer;
+    }
+    .demo-dialog button.primary { background: #2563eb; border-color: #2563eb; color: #fff; }
+    .demo-dialog button.danger { color: #dc2626; border-color: #fca5a5; margin-right: auto; }
+</style>
+</head>
+<body>
+<h1>rs-gantt v0.5 デモ</h1>
+<p class="sub">社内業務システム開発プロジェクトの工程表 — <b>v0.5: スケジューラビュー（縦軸=リソース×横軸=時間の予約・シフト表／下部に会議室予約デモ）</b>＋ 仮想スクロール（1万タスク）・TSV/CSV/PNG・リソース/ヒストグラム/ベースライン・依存4種・自動スケジューリング・クリティカルパス・時〜年ズーム</p>
+
+<div class="toolbar">
+    <button id="zoom-hour">時</button>
+    <button id="zoom-day" class="active">日</button>
+    <button id="zoom-week">週</button>
+    <button id="zoom-month">月</button>
+    <button id="zoom-quarter">四半期</button>
+    <button id="zoom-year">年</button>
+    <span class="sep"></span>
+    <button id="btn-critical">クリティカルパス</button>
+    <label style="font-size:12.5px;display:flex;align-items:center;gap:5px;cursor:pointer">
+        <input type="checkbox" id="chk-auto" checked> 自動スケジュール
+    </label>
+    <span class="sep"></span>
+    <button id="btn-baseline" title="現在の日程を計画ベースラインとして保存">ベースライン保存</button>
+    <button id="btn-baseline-clear" title="ベースラインを破棄">計画クリア</button>
+    <label style="font-size:12.5px;display:flex;align-items:center;gap:5px;cursor:pointer">
+        <input type="checkbox" id="chk-progressline" checked> 進捗ライン
+    </label>
+    <label style="font-size:12.5px;display:flex;align-items:center;gap:5px;cursor:pointer">
+        <input type="checkbox" id="chk-histogram" checked> リソース稼働
+    </label>
+    <span class="sep"></span>
+    <label style="font-size:12.5px;display:flex;align-items:center;gap:4px">
+        依存
+        <select id="sel-linktype" title="選択中リンクの種類 / 新規リンクの既定">
+            <option value="FS">FS 終了→開始</option>
+            <option value="SS">SS 開始→開始</option>
+            <option value="FF">FF 終了→終了</option>
+            <option value="SF">SF 開始→終了</option>
+        </select>
+        lag <input type="number" id="in-lag" value="0" style="width:44px;padding:3px 4px;border:1px solid #cbd5e1;border-radius:5px">
+    </label>
+    <span class="sep"></span>
+    <button id="btn-indent" title="選択タスクをインデント (Tab)">→ インデント</button>
+    <button id="btn-outdent" title="選択タスクをアウトデント (Shift+Tab)">← アウトデント</button>
+    <span class="sep"></span>
+    <button id="btn-undo">← 元に戻す</button>
+    <button id="btn-redo">やり直す →</button>
+    <span class="sep"></span>
+    <button id="btn-json">JSON</button>
+    <button id="btn-scroll">リリース判定へ</button>
+    <button id="btn-add">＋ タスク</button>
+    <button id="btn-add-child">＋ 子タスク</button>
+    <span class="sep"></span>
+    <label style="font-size:12.5px;display:flex;align-items:center;gap:5px;cursor:pointer">
+        <input type="checkbox" id="chk-holiday"> 休日にも予定を引く
+    </label>
+</div>
+
+<!-- v0.4: 大規模データと入出力 -->
+<div class="toolbar" style="background:#eef4ff;padding:8px 10px;border-radius:8px">
+    <b style="font-size:12px;color:#1e40af">v0.4</b>
+    <button id="btn-10k" title="1万タスクを生成して仮想スクロール描画">1万タスク生成（仮想スクロール）</button>
+    <button id="btn-restore" title="デモの初期プロジェクトに戻す">初期プロジェクトに戻す</button>
+    <span class="sep"></span>
+    <button id="btn-import" title="下のTSVをタスクツリーとして取り込む">TSV貼り付け取り込み ▾</button>
+    <button id="btn-csv" title="CSVをダウンロード">CSV書き出し</button>
+    <button id="btn-png" title="タイムラインをPNGでダウンロード">PNG書き出し</button>
+    <button id="btn-print" title="印刷（A4横・ページ分割）">印刷</button>
+</div>
+<div id="import-area" style="display:none;margin-bottom:10px">
+    <p class="hint" style="margin:0 0 4px">Excel/スプレッドシートの範囲をコピーして貼り付け（タブ区切り）。名前セル先頭の空白 or 空列で階層になります。</p>
+    <textarea id="import-tsv" style="width:100%;height:120px;box-sizing:border-box;font:12px/1.5 ui-monospace,monospace;padding:8px;border:1px solid #cbd5e1;border-radius:6px"></textarea>
+    <div style="margin-top:6px;display:flex;gap:8px">
+        <button id="btn-import-do" style="padding:6px 14px;border:1px solid #2563eb;background:#2563eb;color:#fff;border-radius:6px;cursor:pointer">取り込む（置換）</button>
+        <button id="btn-import-cancel" style="padding:6px 14px;border:1px solid #cbd5e1;background:#fff;border-radius:6px;cursor:pointer">閉じる</button>
+    </div>
+</div>
+
+<div id="gantt"></div>
+
+<div class="panel">
+    <section>
+        <h2>イベントログ</h2>
+        <pre id="log"></pre>
+    </section>
+    <section>
+        <h2>操作方法</h2>
+        <p class="hint">
+            <b>v0.5</b>: 下の<b>スケジューラビュー</b>（会議室予約）は縦軸=リソース×横軸=時間の予約表。予約ブロックを<b>ドラッグ</b>で別の部屋／別の時間へ移動、右端で終了時刻を変更。同じ部屋で時間が重なる予約は<b>段組み</b>で並ぶ。土日は網掛け<br>
+            <b>v0.4</b>: 「1万タスク生成」で<b>仮想スクロール</b>（可視域だけDOM描画・左右ペイン同期）。<b>TSV貼り付け取り込み</b>（インデントで階層化）・<b>CSV/PNG書き出し</b>・<b>印刷</b>（A4横・ページ分割）<br>
+            <b>v0.3</b>: 担当列/バー右に<b>リソースアバター</b>。下部<b>リソースヒストグラム</b>は日別の割当合計で、capacity 超過日を<b>赤</b>表示（「稼働率(%)で表示」ボタンで稼働率ビュー）。<br>
+            <b>ベースライン保存</b>で計画を記録 → タスクを動かすとバー下に薄い<b>計画バー</b>が残り、<b>遅延</b>列に営業日で遅延/前倒しが出る。<b>進捗ライン</b>は today 基準の稲妻線（遅れは左へ折れる）<br>
+            バー: ドラッグで移動（営業日にスナップ）・両端でリサイズ・下の▲で進捗変更・端点○を別バーへドラッグで依存線作成<br>
+            依存線: クリックで選択 → 種類(FS/SS/FF/SF)/lag 変更・Delete 削除。行: ↑↓選択・←→移動・Tab/Shift+Tab インデント・ドラッグ並べ替え<br>
+            ズーム: 時/日/週/月/四半期/年（<b>Ctrl+ホイール</b>）。土日・祝日・年末年始は網掛け、赤線 = today。クリティカルパスはスラック0を赤強調
+        </p>
+    </section>
+</div>
+
+<!-- v0.5: スケジューラビュー（会議室/設備予約） -->
+<h1 style="margin-top:26px">v0.5 スケジューラビュー — 会議室・設備予約</h1>
+<p class="sub">縦軸=リソース（会議室・設備）× 横軸=時間の予約表。予約ブロックをドラッグで別リソース/別時間へ、右端で終了時刻を変更。重なりは段組み表示</p>
+<div class="toolbar">
+    <button id="sc-add">＋ 予約を追加</button>
+    <button id="sc-undo">← 元に戻す</button>
+    <button id="sc-redo">やり直す →</button>
+    <span class="sep"></span>
+    <span class="hint" style="margin:0">予約をドラッグで移動・右端で時間変更・クリックで選択して Delete で削除</span>
+</div>
+<div id="scheduler" style="height:420px;background:#fff"></div>
+<div class="panel">
+    <section>
+        <h2>スケジューラ イベントログ</h2>
+        <pre id="sc-log" style="height:120px;overflow:auto;font:11px/1.6 ui-monospace,monospace;margin:0;white-space:pre-wrap"></pre>
+    </section>
+</div>
+
+<script type="module">
+import { createRSGantt } from '../dist/rs-gantt.esm.min.js';
+
+// v0.3 リソース（担当者）。capacity=1人日/日。色はアバター/ヒストグラムに反映
+const resources = [
+    { id: 'pm', name: '佐藤（PM）',   color: '#4e79a7' },
+    { id: 'de', name: '高橋（設計）', color: '#af7aa1' },
+    { id: 'be', name: '田中（BE）',   color: '#59a14f' },
+    { id: 'fe', name: '鈴木（FE）',   color: '#f28e2b' },
+    { id: 'qa', name: '伊藤（QA）',   color: '#e15759' },
+];
+
+const tasks = [
+    { id: 1,  name: '要件定義フェーズ', open: true },
+    { id: 2,  parent: 1, name: 'ヒアリング・現状調査',   start: '2026-06-22', duration: 5, progress: 100, assignees: ['pm'] },
+    { id: 3,  parent: 1, name: '要件定義書作成',         start: '2026-06-29', duration: 6, progress: 80, assignees: ['pm', 'de'] },
+    { id: 4,  parent: 1, name: '要件レビュー・承認',     start: '2026-07-07', duration: 2, progress: 0, assignees: ['pm'] },
+    { id: 5,  name: '設計フェーズ', open: true },
+    { id: 6,  parent: 5, name: '基本設計',               start: '2026-07-09', duration: 8, progress: 30, assignees: ['de'] },
+    { id: 7,  parent: 5, name: 'DB設計',                 start: '2026-07-22', duration: 5, progress: 10, assignees: ['de'] },
+    { id: 8,  parent: 5, name: '画面設計',               start: '2026-07-22', duration: 6, progress: 0, assignees: ['fe'] },
+    { id: 9,  parent: 5, name: '設計レビュー',           start: '2026-07-30', duration: 2, progress: 0, assignees: ['de', 'pm'] },
+    { id: 10, name: '開発フェーズ', open: true },
+    { id: 11, parent: 10, name: '環境構築',              start: '2026-07-21', duration: 3, progress: 0, color: '#59a14f', assignees: ['be'] },
+    { id: 12, parent: 10, name: 'バックエンド実装',      start: '2026-08-03', duration: 12, progress: 0, assignees: ['be'] },
+    { id: 13, parent: 10, name: 'フロントエンド実装',    start: '2026-08-03', duration: 12, progress: 0, assignees: ['fe'] },
+    { id: 14, parent: 10, name: 'バッチ・帳票実装',      start: '2026-08-17', duration: 6, progress: 0, assignees: ['be'] },
+    { id: 15, name: 'テストフェーズ', open: true },
+    { id: 16, parent: 15, name: '単体テスト',            start: '2026-08-25', duration: 5, progress: 0, assignees: ['qa'] },
+    { id: 17, parent: 15, name: '結合テスト',            start: '2026-09-01', duration: 8, progress: 0, assignees: ['qa'] },
+    { id: 18, parent: 15, name: '総合テスト・受入テスト', start: '2026-09-14', duration: 7, progress: 0, assignees: ['qa', 'pm'] },
+    { id: 19, name: 'リリース準備',                      start: '2026-09-28', duration: 3, progress: 0, color: '#af7aa1', assignees: ['pm'] },
+    { id: 20, name: 'リリース判定',                      start: '2026-10-01', milestone: true },
+    { id: 21, name: '本番リリース',                      start: '2026-10-02', milestone: true, color: '#e15759' },
+];
+
+const links = [
+    { from: 2, to: 3 },
+    { from: 3, to: 4 },
+    { from: 4, to: 6 },
+    { from: 6, to: 7 },
+    { from: 6, to: 8 },
+    { from: 7, to: 9 },
+    { from: 8, to: 9 },
+    { from: 9, to: 12 },
+    { from: 11, to: 12 },
+    { from: 12, to: 16 },
+    { from: 13, to: 16 },
+    { from: 14, to: 17 },
+    { from: 16, to: 17 },
+    { from: 17, to: 18 },
+    { from: 18, to: 19 },
+    { from: 19, to: 20 },
+    { from: 20, to: 21 },
+];
+
+const gantt = createRSGantt('#gantt', {
+    tasks,
+    links,
+    resources,
+    zoom: 'day',
+    calendar: { holidays: 'jp' },
+    columns: ['wbs', { name: 'name', width: 150 }, { name: 'assignees', width: 100 }, 'duration', 'progress', { name: 'delay', width: 54 }],
+    resourceHistogram: true,   // 下部にリソースヒストグラムを表示
+    progressLine: true,        // 進捗ライン（イナズマ線）を表示
+});
+// 読み込み時点をベースライン（計画）として保存 → バー下に薄いバー・遅延日数列の基準
+gantt.captureBaseline();
+// v0.4「初期プロジェクトに戻す」用に初期状態を保持
+const INITIAL_JSON = gantt.toJSON();
+
+// ---- イベントログ
+const logEl = document.getElementById('log');
+const eventLog = [];
+const log = (name, detail) => {
+    eventLog.push({ name, detail });
+    logEl.textContent = `${new Date().toLocaleTimeString()} ${name} ${detail}\n` + logEl.textContent;
+};
+gantt.on('taskClick', (e) => log('taskClick', e.task.name));
+gantt.on('taskDblClick', (e) => log('taskDblClick', `${e.task.name}（ここでアプリ側の編集UIを開く）`));
+gantt.on('taskDrop', (e) => log('taskDrop', `${e.task.name} [${e.mode}] → ${JSON.stringify(gantt.toJSON().tasks.find((t) => t.id === e.task.id))}`));
+gantt.on('progressChange', (e) => log('progressChange', `${e.task.name} → ${e.progress}%`));
+gantt.on('linkAdd', (e) => log('linkAdd', `${e.link.from} → ${e.link.to} (${e.link.type})`));
+gantt.on('linkClick', (e) => log('linkClick', `${e.link.from} → ${e.link.to}（Delete で削除）`));
+gantt.on('expand', (e) => log('expand', e.task.name));
+gantt.on('collapse', (e) => log('collapse', e.task.name));
+gantt.on('selectionChange', (e) => log('selectionChange', e.task ? e.task.name : e.link ? `link ${e.link.from}→${e.link.to}` : '(なし)'));
+gantt.on('change', (e) => log('change', e.action));
+
+// ---- ツールバー（ズーム: 時/日/週/月/四半期/年）
+const zoomButtons = {
+    hour: document.getElementById('zoom-hour'),
+    day: document.getElementById('zoom-day'),
+    week: document.getElementById('zoom-week'),
+    month: document.getElementById('zoom-month'),
+    quarter: document.getElementById('zoom-quarter'),
+    year: document.getElementById('zoom-year'),
+};
+const syncZoomButtons = () => {
+    for (const [z, b] of Object.entries(zoomButtons)) b.classList.toggle('active', z === gantt.zoom);
+};
+for (const [zoom, btn] of Object.entries(zoomButtons)) {
+    btn.addEventListener('click', () => { gantt.zoomTo(zoom); syncZoomButtons(); });
+}
+// Ctrl+ホイールズームでもボタンの active を追従
+gantt.on('change', (e) => { if (e && e.action === 'zoom') syncZoomButtons(); });
+
+// クリティカルパス表示トグル
+const btnCritical = document.getElementById('btn-critical');
+btnCritical.addEventListener('click', () => {
+    gantt.setCriticalPath(!gantt.getCriticalPath());
+    btnCritical.classList.toggle('active', gantt.getCriticalPath());
+    log('criticalPath', gantt.getCriticalPath() ? 'ON（スラック0のタスク/リンクを赤で強調）' : 'OFF');
+});
+
+// 自動スケジュール トグル
+document.getElementById('chk-auto').addEventListener('change', (e) => {
+    gantt.setAutoSchedule(e.target.checked);
+    log('autoSchedule', e.target.checked ? 'ON（依存の連鎖シフト）' : 'OFF（手動配置）');
+});
+
+// v0.3: ベースライン保存 / クリア
+document.getElementById('btn-baseline').addEventListener('click', () => {
+    gantt.captureBaseline();
+    log('captureBaseline', '現在の日程を計画として保存（バー下に薄いバー・遅延日数列の基準）');
+});
+document.getElementById('btn-baseline-clear').addEventListener('click', () => {
+    gantt.clearBaseline();
+    log('clearBaseline', 'ベースラインを破棄');
+});
+
+// v0.3: 進捗ライン（イナズマ線）トグル
+document.getElementById('chk-progressline').addEventListener('change', (e) => {
+    gantt.setProgressLine(e.target.checked);
+    log('progressLine', e.target.checked ? 'ON（today基準の稲妻線・進捗遅れは左へ折れる）' : 'OFF');
+});
+
+// v0.3: リソースヒストグラム（下部パネル）トグル
+document.getElementById('chk-histogram').addEventListener('change', (e) => {
+    gantt.setResourceHistogram(e.target.checked);
+    log('resourceHistogram', e.target.checked ? 'ON（日別の割当合計・過負荷を赤表示）' : 'OFF');
+});
+
+// 依存タイプ / lag（選択中リンクに適用・未選択なら新規リンクの既定）
+const selLinkType = document.getElementById('sel-linktype');
+const inLag = document.getElementById('in-lag');
+const applyLink = () => {
+    const type = selLinkType.value, lag = Number(inLag.value) || 0;
+    if (gantt.selectedLinkId != null) {
+        gantt.updateLink(gantt.selectedLinkId, { type, lag });
+        log('updateLink', `選択リンク → ${type} lag ${lag}`);
+    } else {
+        gantt.setDefaultLinkType(type);
+        log('defaultLinkType', `新規リンクの既定を ${type} に`);
+    }
+};
+selLinkType.addEventListener('change', applyLink);
+inLag.addEventListener('change', applyLink);
+// リンク選択時に現在の種類/lag をコントロールへ反映
+gantt.on('selectionChange', (e) => {
+    if (e.link) { selLinkType.value = e.link.type; inLag.value = e.link.lag || 0; }
+});
+
+// インデント / アウトデント
+document.getElementById('btn-indent').addEventListener('click', () => {
+    if (gantt.selectedId != null) gantt.indentTask(gantt.selectedId);
+});
+document.getElementById('btn-outdent').addEventListener('click', () => {
+    if (gantt.selectedId != null) gantt.outdentTask(gantt.selectedId);
+});
+
+document.getElementById('btn-undo').addEventListener('click', () => gantt.undo());
+document.getElementById('btn-redo').addEventListener('click', () => gantt.redo());
+document.getElementById('btn-json').addEventListener('click', () => {
+    const json = gantt.toJSON();
+    gantt.fromJSON(json);
+    const again = gantt.toJSON();
+    log('JSONラウンドトリップ', JSON.stringify(json) === JSON.stringify(again) ? '一致 ✓' : '不一致 ✗');
+});
+document.getElementById('btn-scroll').addEventListener('click', () => gantt.scrollToTask(20));
+document.getElementById('chk-holiday').addEventListener('change', (e) => {
+    gantt.setScheduleOnHolidays(e.target.checked);
+    log('calendarMode', e.target.checked
+        ? '休日にも予定を引けるモード（土日祝に開始/終了OK・日数は暦日）'
+        : '営業日ベースに戻しました（土日祝はスナップで回避・日数は営業日）');
+});
+
+// ---- タスクの追加・編集ダイアログ（taskDblClick フックの使用例）
+let taskSeq = 100;
+
+function openTaskDialog(task) {
+    const isNew = !task;
+    const overlay = document.createElement('div');
+    overlay.className = 'demo-dialog-overlay';
+    const json = task ? gantt.toJSON().tasks.find((t) => t.id === task.id) : null;
+    const today = new Date().toISOString().slice(0, 10);
+    overlay.innerHTML = `
+        <div class="demo-dialog">
+            <h3>${isNew ? 'タスクを追加' : 'タスクを編集'}</h3>
+            <label><span>名前</span><input type="text" name="name" value="${task ? task.name.replace(/"/g, '&quot;') : '新しいタスク'}"></label>
+            <label><span>開始日</span><input type="date" name="start" value="${json && json.start ? json.start : today}"></label>
+            <label><span>日数</span><input type="number" name="duration" min="1" value="${json && json.duration ? json.duration : 3}"></label>
+            <label><span>進捗%</span><input type="number" name="progress" min="0" max="100" value="${task && task.progress != null ? task.progress : 0}"></label>
+            <label><span>種別</span><label style="margin:0"><input type="checkbox" name="milestone" ${task && task.milestone ? 'checked' : ''}> マイルストーン（◆）</label></label>
+            <div class="row">
+                ${isNew ? '' : '<button type="button" class="danger" data-act="remove">削除</button>'}
+                <button type="button" data-act="cancel">キャンセル</button>
+                <button type="button" class="primary" data-act="save">${isNew ? '追加' : '保存'}</button>
+            </div>
+        </div>`;
+    document.body.appendChild(overlay);
+    const $ = (sel) => overlay.querySelector(sel);
+    const close = () => overlay.remove();
+    overlay.addEventListener('mousedown', (e) => { if (e.target === overlay) close(); });
+    overlay.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') close();
+        if (e.key === 'Enter' && e.target.tagName === 'INPUT') $('[data-act="save"]').click();
+    });
+    $('[data-act="cancel"]').addEventListener('click', close);
+    if (!isNew) {
+        $('[data-act="remove"]').addEventListener('click', () => {
+            gantt.removeTask(task.id);
+            close();
+        });
+    }
+    $('[data-act="save"]').addEventListener('click', () => {
+        const fields = {
+            name: $('[name="name"]').value.trim() || '無題',
+            start: $('[name="start"]').value || today,
+            duration: Math.max(1, Number($('[name="duration"]').value) || 1),
+            progress: Math.max(0, Math.min(100, Number($('[name="progress"]').value) || 0)),
+            milestone: $('[name="milestone"]').checked,
+        };
+        if (isNew) {
+            const sel = gantt.getTask(gantt.selectedId);
+            const t = gantt.addTask({ id: 'u' + (++taskSeq), parent: openTaskDialog._parent ?? (sel ? sel.parent : null), ...fields });
+            if (t) gantt.selectTask(t.id);
+        } else {
+            gantt.updateTask(task.id, fields);
+        }
+        close();
+    });
+    $('[name="name"]').focus();
+    $('[name="name"]').select();
+}
+
+document.getElementById('btn-add').addEventListener('click', () => {
+    openTaskDialog._parent = undefined; // 選択タスクと同じ階層
+    openTaskDialog(null);
+});
+document.getElementById('btn-add-child').addEventListener('click', () => {
+    const sel = gantt.getTask(gantt.selectedId);
+    if (!sel) { log('addTask', '子を追加するには先に親にしたいタスクを選択してください'); return; }
+    openTaskDialog._parent = sel.id; // 選択タスクの子
+    openTaskDialog(null);
+});
+gantt.on('taskDblClick', (e) => openTaskDialog(e.task));
+window.openTaskDialog = openTaskDialog;
+
+// ---- v0.4: 大規模データ（仮想スクロール）
+function generateTasks(n) {
+    const iso = (serial) => { const d = new Date(serial * 86400000); return d.toISOString().slice(0, 10); };
+    const base = Math.round(Date.UTC(2026, 6, 6) / 86400000); // 2026-07-06
+    const tasks = [];
+    let phase = null;
+    for (let i = 1; i <= n; i++) {
+        if (i % 25 === 1) { // 25件ごとにサマリー親
+            phase = i;
+            tasks.push({ id: i, name: `フェーズ ${Math.ceil(i / 25)}`, open: true });
+        } else {
+            const off = (i % 240);           // 約240日レンジに分散（横幅を有界に）
+            tasks.push({
+                id: i, parent: phase, name: `タスク ${i}`,
+                start: iso(base + off), duration: 1 + (i % 6), progress: i % 101,
+            });
+        }
+    }
+    return tasks;
+}
+document.getElementById('btn-10k').addEventListener('click', () => {
+    // 大規模時はヒストグラム/進捗ラインを切って初期描画を軽くする
+    gantt.setResourceHistogram(false);
+    gantt.setProgressLine(false);
+    gantt.setAutoSchedule(false);
+    const t0 = performance.now();
+    gantt.fromJSON({ tasks: generateTasks(10000) });
+    const ms = Math.round(performance.now() - t0);
+    log('generate', `1万タスクを生成 → 仮想スクロール描画（${ms}ms・可視域のみDOM ${gantt.timeline.barsEl.querySelectorAll('[data-task-id]').length}本）`);
+});
+document.getElementById('btn-restore').addEventListener('click', () => {
+    gantt.fromJSON(INITIAL_JSON);
+    gantt.setResourceHistogram(true);
+    gantt.setProgressLine(true);
+    gantt.setAutoSchedule(true);
+    gantt.captureBaseline();
+    log('restore', '初期プロジェクトに戻しました');
+});
+
+// ---- v0.4: TSV 貼り付けインポート
+const SAMPLE_TSV = [
+    'タスク名\t開始\t終了\t担当',
+    '要件定義フェーズ',
+    '  ヒアリング\t2026-07-06\t2026-07-10\t佐藤',
+    '  要件定義書作成\t2026-07-13\t2026-07-20\t佐藤、高橋',
+    '設計フェーズ',
+    '  基本設計\t2026-07-21\t2026-07-30\t高橋',
+    '    画面設計\t2026-07-21\t2026-07-27\t鈴木',
+    '    DB設計\t2026-07-21\t2026-07-24\t田中',
+    '開発フェーズ',
+    '  実装\t2026-08-03\t2026-08-21\t田中',
+].join('\n');
+const importArea = document.getElementById('import-area');
+const importTa = document.getElementById('import-tsv');
+importTa.value = SAMPLE_TSV;
+document.getElementById('btn-import').addEventListener('click', () => {
+    importArea.style.display = importArea.style.display === 'none' ? '' : 'none';
+});
+document.getElementById('btn-import-cancel').addEventListener('click', () => { importArea.style.display = 'none'; });
+document.getElementById('btn-import-do').addEventListener('click', () => {
+    const recs = gantt.importTSV(importTa.value, { mode: 'replace' });
+    log('importTSV', `${recs.length} タスクを取り込み（インデントで階層化）`);
+    importArea.style.display = 'none';
+});
+
+// ---- v0.4: CSV / PNG / 印刷
+document.getElementById('btn-csv').addEventListener('click', () => {
+    gantt.downloadCSV('gantt.csv');
+    log('exportCSV', 'CSV（BOM付きUTF-8）をダウンロード');
+});
+document.getElementById('btn-png').addEventListener('click', () => {
+    gantt.downloadPNG('gantt.png');
+    log('exportPNG', 'タイムラインをPNGでダウンロード');
+});
+document.getElementById('btn-print').addEventListener('click', () => {
+    log('print', '印刷ダイアログ（A4横・ページ分割）');
+    gantt.print();
+});
+
+// ---- v0.5: スケジューラビュー（会議室・設備予約）
+const rooms = [
+    { id: 'roomL', name: '大会議室',   color: '#4e79a7' },
+    { id: 'roomM', name: '中会議室A', color: '#59a14f' },
+    { id: 'roomS', name: '応接室',     color: '#af7aa1' },
+    { id: 'proj',  name: 'プロジェクター', color: '#f28e2b' },
+    { id: 'car',   name: '社用車',     color: '#e15759' },
+];
+// 2026-07-09(木)・07-10(金)・07-13(月)。07-11/12 は土日で網掛け
+const bookings = [
+    { id: 'b1', resource: 'roomL', name: '全体定例',       start: '2026-07-09 09:00', end: '2026-07-09 10:30' },
+    { id: 'b2', resource: 'roomL', name: '採用面接',       start: '2026-07-09 10:00', end: '2026-07-09 11:00' }, // b1 と重なる→段組み
+    { id: 'b3', resource: 'roomL', name: '役員会',         start: '2026-07-09 13:00', end: '2026-07-09 15:00' },
+    { id: 'b4', resource: 'roomM', name: '設計レビュー',   start: '2026-07-09 10:00', end: '2026-07-09 12:00' },
+    { id: 'b5', resource: 'roomM', name: '1on1',           start: '2026-07-09 14:00', end: '2026-07-09 14:30' },
+    { id: 'b6', resource: 'roomS', name: '来客商談',       start: '2026-07-09 15:00', end: '2026-07-09 16:30' },
+    { id: 'b7', resource: 'proj',  name: 'デモ準備',       start: '2026-07-09 09:30', end: '2026-07-09 11:00' },
+    { id: 'b8', resource: 'car',   name: '客先訪問',       start: '2026-07-10 09:00', end: '2026-07-10 17:00' },
+    { id: 'b9', resource: 'roomL', name: 'キックオフ',     start: '2026-07-10 10:00', end: '2026-07-10 11:30' },
+    { id: 'b10', resource: 'roomM', name: 'スプリント計画', start: '2026-07-13 09:30', end: '2026-07-13 11:30' },
+    { id: 'b11', resource: 'roomL', name: '月曜定例',       start: '2026-07-13 09:00', end: '2026-07-13 10:00' },
+];
+const scheduler = createRSGantt('#scheduler', {
+    view: 'scheduler',
+    resources: rooms,
+    events: bookings,
+    calendar: { holidays: 'jp' },
+    scheduler: { dayStart: '08:00', dayEnd: '20:00', pxPerMin: 1.3, slotMinutes: 60 },
+});
+const scLogEl = document.getElementById('sc-log');
+const scLog = (name, detail) => { scLogEl.textContent = `${new Date().toLocaleTimeString()} ${name} ${detail}\n` + scLogEl.textContent; };
+scheduler.on('eventDrop', (e) => scLog('eventDrop', `${e.event.name} → ${(scheduler.getResource(e.event.resource) || {}).name} / ${JSON.stringify(scheduler.getEvents().find((x) => x.id === e.event.id))}`));
+scheduler.on('eventClick', (e) => scLog('eventClick', `${e.event.name}（Delete で削除）`));
+scheduler.on('eventDblClick', (e) => scLog('eventDblClick', e.event.name));
+scheduler.on('change', (e) => scLog('change', e.action));
+let scSeq = 100;
+document.getElementById('sc-add').addEventListener('click', () => {
+    const ev = scheduler.addEvent({ id: 'u' + (++scSeq), resource: 'roomS', name: '新規予約', start: '2026-07-13 14:00', end: '2026-07-13 15:00' });
+    if (ev) scheduler.selectEvent(ev.id);
+});
+document.getElementById('sc-undo').addEventListener('click', () => scheduler.undo());
+document.getElementById('sc-redo').addEventListener('click', () => scheduler.redo());
+
+// ---- テスト用に公開
+window.INITIAL_JSON = INITIAL_JSON;
+window.gantt = gantt;
+window.scheduler = scheduler;
+window.eventLog = eventLog;
+import('../dist/rs-gantt.esm.min.js').then((mod) => { window.rsGantt = mod; });
+</script>
+</body>
+</html>

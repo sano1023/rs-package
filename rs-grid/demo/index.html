@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>rs-grid デモ</title>
+<link rel="stylesheet" href="../dist/rs-grid.css">
+<style>
+    body {
+        font-family: system-ui, -apple-system, "Segoe UI", "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+        margin: 0; background: #f1f5f9; color: #1e293b;
+    }
+    .page { max-width: 1100px; margin: 0 auto; padding: 32px 20px 120px; }
+    h1 { font-size: 24px; }
+    h1 small { font-size: 13px; color: #64748b; font-weight: 400; margin-left: 10px; }
+    .lead { color: #475569; font-size: 14px; margin-bottom: 20px; line-height: 1.7; }
+    .card { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 18px; margin-bottom: 16px; }
+    .card h2 { font-size: 15px; margin: 0 0 12px; }
+    .controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 12px; }
+    button {
+        appearance: none; border: 1px solid #cbd5e1; background: #fff; color: #334155;
+        padding: 7px 14px; border-radius: 7px; font-size: 13px; cursor: pointer; font-family: inherit;
+    }
+    button:hover { background: #f1f5f9; }
+    .value { font-size: 12px; color: #64748b; margin-top: 8px; min-height: 16px; }
+</style>
+</head>
+<body>
+<div class="page">
+    <h1>rs-grid <small>v0.4 デモ — Excel風データグリッド（結合・コメント・並べ替えドラッグ対応）</small></h1>
+    <p class="lead">
+        ダブルクリックか文字キーで編集、Shift+矢印/ドラッグで範囲選択、Ctrl+C/V で <strong>Excelと相互コピペ</strong>、
+        右下の■をドラッグで連番フィル、ヘッダークリックでソート、ヘッダー境界ドラッグで列幅、右クリックで行列の挿入・削除、Ctrl+Z/Y で undo/redo。<strong>「賞与」列は数式</strong>（=D1*0.1 など）— セルを編集すると <code>=SUM(D1:D5)</code> のような数式が書けます（青字=数式・複数セル選択で下に合計/平均）。<strong>列ヘッダーの ▾ からフィルタ・非表示・固定</strong>。進捗はバー、評価は★、不正メールは赤。名前列は固定済み。<strong>行番号や列ヘッダーをドラッグで並べ替え</strong>、範囲選択して右クリック→<strong>セルを結合</strong>、右クリック→<strong>コメント追加</strong>（Shift+ヘッダークリックで複数列ソート）。
+    </p>
+
+    <div class="card">
+        <h2>社員リスト（1,000行・5タイプの列）</h2>
+        <div class="controls">
+            <button id="btn-100k">100,000行を生成（仮想スクロール性能）</button>
+            <button id="btn-reset">1,000行に戻す</button>
+            <button id="btn-undo">元に戻す</button>
+            <button id="btn-redo">やり直す</button>
+            <input id="search" placeholder="検索…" style="padding:7px 10px;border:1px solid #cbd5e1;border-radius:7px;font-size:13px;">
+            <span id="search-count" style="font-size:12px;color:#64748b;"></span>
+            <button id="btn-csv">CSV</button>
+            <button id="btn-json">JSON</button>
+        </div>
+        <div id="grid"></div>
+        <div class="value" id="v-grid"></div>
+    </div>
+
+    <div class="card">
+        <h2>ネストヘッダー + セル結合 + 数式（四半期売上）</h2>
+        <div id="grid2"></div>
+    </div>
+</div>
+
+<script type="module">
+    import { createRSGrid } from '../dist/rs-grid.esm.min.js';
+    window.__mod = { createRSGrid };
+
+    const DEPTS = ['営業', '開発', '人事', '経理', 'マーケ'];
+    const SEI = ['佐藤', '鈴木', '高橋', '田中', '伊藤', '渡辺', '山本', '中村', '小林', '加藤'];
+    const MEI = ['翔太', '陽菜', '大輝', '結衣', '健太', 'さくら', '直樹', '美咲', '亮', '葵'];
+
+    function makeRows(n) {
+        const rows = [];
+        for (let i = 0; i < n; i++) {
+            rows.push({
+                name: `${SEI[i % 10]} ${MEI[(i * 7) % 10]}`,
+                dept: DEPTS[i % 5],
+                joined: `20${String(10 + (i % 15)).padStart(2, '0')}-${String((i % 12) + 1).padStart(2, '0')}-15`,
+                salary: 240000 + (i % 40) * 5000,
+                bonus: i < 100 ? `=D${i + 1}*0.1` : '',
+                active: i % 7 !== 0,
+                memo: i % 11 === 0 ? '時短勤務' : '',
+                progress: (i * 13) % 101,
+                rating: i % 6,
+                email: i % 17 === 0 ? 'invalid-mail' : `user${i}@example.com`,
+            });
+        }
+        return rows;
+    }
+
+    window.grid = createRSGrid('#grid', {
+        columns: [
+            { key: 'name', title: '名前', width: 140 },
+            { key: 'dept', title: '部署', type: 'select', options: DEPTS, width: 100 },
+            { key: 'joined', title: '入社日', type: 'date', width: 130 },
+            { key: 'salary', title: '給与', type: 'number', width: 120, format: 'currency', cellClass: (v) => (typeof v === 'number' && v >= 420000 ? 'rsg-hot' : '') },
+            { key: 'active', title: '在籍', type: 'checkbox', width: 70 },
+            { key: 'bonus', title: '賞与（数式）', type: 'number', width: 130 },
+            { key: 'memo', title: 'メモ', width: 160 },
+            { key: 'progress', title: '進捗', type: 'number', renderer: 'progress', width: 120 },
+            { key: 'rating', title: '評価', type: 'number', renderer: 'stars', width: 110 },
+            { key: 'email', title: 'メール', width: 200, validator: (v) => v === '' || /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(String(v)) },
+        ],
+        data: makeRows(1000),
+        height: 440,
+        fixedColumns: 1,
+        onChange: (changes) => {
+            if (changes.length) {
+                const c = changes[0];
+                document.getElementById('v-grid').textContent =
+                    `変更: ${changes.length}セル（例: 行${c.row + 1} ${c.key}: ${c.oldValue} → ${c.newValue}）`;
+            }
+        },
+    });
+
+    document.getElementById('btn-100k').addEventListener('click', () => {
+        const t0 = performance.now();
+        window.grid.setData(makeRows(100000));
+        document.getElementById('v-grid').textContent =
+            `100,000行を setData: ${Math.round(performance.now() - t0)}ms`;
+    });
+    document.getElementById('btn-reset').addEventListener('click', () => window.grid.setData(makeRows(1000)));
+    document.getElementById('btn-undo').addEventListener('click', () => window.grid.undo());
+    document.getElementById('btn-redo').addEventListener('click', () => window.grid.redo());
+    document.getElementById('search').addEventListener('input', (e) => {
+        const q = e.target.value;
+        const n = q ? window.grid.search(q) : (window.grid.clearSearch(), 0);
+        document.getElementById('search-count').textContent = q ? `${n}件` : '';
+    });
+    document.getElementById('btn-csv').addEventListener('click', () => window.grid.exportCsv('社員リスト.csv'));
+    document.getElementById('btn-json').addEventListener('click', () => window.grid.exportJson('社員リスト.json'));
+
+    // ---- ネストヘッダー + 結合のデモ
+    const branches = ['東京本社', '大阪支社', '名古屋支社', '福岡支社'];
+    const qData = [];
+    branches.forEach((b, i) => {
+        qData.push({
+            branch: b,
+            q1: 800 + i * 120, q2: 900 + i * 100, q3: 850 + i * 140, q4: 1000 + i * 90,
+            total: `=SUM(B${i + 1}:E${i + 1})`,
+        });
+    });
+    window.grid2 = createRSGrid('#grid2', {
+        columns: [
+            { key: 'branch', title: '支店', width: 130 },
+            { key: 'q1', title: 'Q1', type: 'number', width: 90 },
+            { key: 'q2', title: 'Q2', type: 'number', width: 90 },
+            { key: 'q3', title: 'Q3', type: 'number', width: 90 },
+            { key: 'q4', title: 'Q4', type: 'number', width: 90 },
+            { key: 'total', title: '合計（数式）', type: 'number', width: 120 },
+        ],
+        headerGroups: [
+            { title: '上期', from: 1, to: 2 },
+            { title: '下期', from: 3, to: 4 },
+        ],
+        data: qData,
+        height: 220,
+    });
+    window.grid2.mergeCells(0, 0, 2, 1); // 東京本社+大阪支社の支店セルを縦結合（例）
+    window.grid2.setComment(0, 'q1', '前年比 +12%\n新規契約が好調');
+</script>
+</body>
+</html>
