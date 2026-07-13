@@ -1,0 +1,70 @@
+{
+    "name": "@parelabo/rs-lightbox",
+    "version": "0.1.0",
+    "description": "依存ゼロ・フレームワーク非依存の画像ライトボックス（ズーム/パン/スワイプ/ピンチ・WAI-ARIAモーダル・フォーカストラップ・先読み・DOM/配列入力）。PhotoSwipe/GLightbox/Fancybox代替。",
+    "type": "module",
+    "main": "./dist/rs-lightbox.esm.min.js",
+    "module": "./dist/rs-lightbox.esm.min.js",
+    "unpkg": "./dist/rs-lightbox.min.js",
+    "jsdelivr": "./dist/rs-lightbox.min.js",
+    "exports": {
+        ".": {
+            "types": "./dist/types/index.d.ts",
+            "import": "./dist/rs-lightbox.esm.min.js",
+            "default": "./dist/rs-lightbox.esm.min.js"
+        },
+        "./dist/*": "./dist/*",
+        "./rs-lightbox.css": "./dist/rs-lightbox.css",
+        "./vue": {
+            "types": "./dist/types/vue.d.ts",
+            "import": "./dist/rs-lightbox.vue.esm.min.js"
+        },
+        "./react": {
+            "types": "./dist/types/react.d.ts",
+            "import": "./dist/rs-lightbox.react.esm.min.js"
+        }
+    },
+    "files": [
+        "dist"
+    ],
+    "keywords": [
+        "lightbox",
+        "gallery",
+        "image-viewer",
+        "zoom",
+        "pinch",
+        "swipe",
+        "modal",
+        "photoswipe",
+        "a11y"
+    ],
+    "author": "ryusuke.sano <ryusuke.sano@parelabo.com>",
+    "license": "SEE LICENSE IN LICENSE.txt",
+    "homepage": "https://github.com/sano1023/rs-package/tree/main/rs-lightbox#readme",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/sano1023/rs-package.git",
+        "directory": "rs-lightbox"
+    },
+    "bugs": {
+        "url": "https://parelabo.com",
+        "email": "contact@parelabo.com"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
+    "types": "./dist/types/index.d.ts",
+    "style": "./dist/rs-lightbox.css",
+    "peerDependencies": {
+        "vue": "^3.0.0",
+        "react": ">=18"
+    },
+    "peerDependenciesMeta": {
+        "vue": {
+            "optional": true
+        },
+        "react": {
+            "optional": true
+        }
+    }
+}

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>rs-lightbox デモ</title>
+<link rel="stylesheet" href="../dist/rs-lightbox.css">
+<style>
+    body {
+        font-family: system-ui, -apple-system, "Segoe UI", "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+        margin: 0; background: #f1f5f9; color: #1e293b;
+    }
+    .page { max-width: 1000px; margin: 0 auto; padding: 32px 20px 120px; }
+    h1 { font-size: 24px; }
+    h1 small { font-size: 13px; color: #64748b; font-weight: 400; margin-left: 10px; }
+    .lead { color: #475569; font-size: 14px; margin-bottom: 24px; line-height: 1.7; }
+    h2 { font-size: 15px; margin: 32px 0 12px; }
+    .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+    .gallery a {
+        display: block; border-radius: 10px; overflow: hidden; border: 1px solid #e2e8f0;
+        background: #fff; aspect-ratio: 4 / 3; cursor: zoom-in; line-height: 0;
+    }
+    .gallery a img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .controls { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; }
+    button {
+        appearance: none; border: 1px solid #cbd5e1; background: #fff; color: #334155;
+        padding: 8px 16px; border-radius: 8px; font-size: 13px; cursor: pointer; font-family: inherit;
+    }
+    button:hover { background: #f8fafc; }
+    .note { color: #64748b; font-size: 12px; margin-top: 6px; }
+    /* テーマカスタム（CSS 変数の上書き） */
+    .rslb.theme-warm {
+        --rslb-backdrop: rgba(30, 20, 10, 0.94);
+        --rslb-accent: #f59e0b;
+        --rslb-caption-bg: rgba(120, 53, 15, 0.6);
+    }
+</style>
+</head>
+<body>
+<div class="page">
+    <h1>rs-lightbox <small>v0.1 デモ — 依存ゼロの画像ライトボックス</small></h1>
+    <p class="lead">
+        サムネイルをクリックで開きます。<strong>矢印キー / Home / End</strong> で移動、<strong>Esc</strong> で閉じる、
+        <strong>ダブルクリック（ダブルタップ）</strong>や <strong>Ctrl+ホイール</strong> でズーム、ズーム中はドラッグでパン。
+        スマホは横スワイプで前後、縦スワイプで閉じる、ピンチでズームできます。
+    </p>
+
+    <h2>1. DOM 宣言モード（<code>data-rslb-item</code> をイベント委譲で開く）</h2>
+    <div class="gallery" id="gallery"></div>
+    <div class="controls">
+        <button id="add-item">画像を動的に追加（委譲で開けることの確認）</button>
+    </div>
+    <p class="note">
+        <code>&lt;a href="大画像" data-rslb-item data-caption="..."&gt;&lt;img src="サムネ" alt="..."&gt;&lt;/a&gt;</code>
+        の形。修飾キーなしの通常クリックでのみ既定遷移を抑止します（Ctrl+クリックは新規タブ）。
+    </p>
+
+    <h2>2. 配列モード（ギャラリー DOM 無しで命令的に開く）</h2>
+    <div class="controls">
+        <button id="open-array">配列から開く（loop・wheelZoom 有効）</button>
+        <button id="open-single">1 枚だけ（矢印・カウンター非表示）</button>
+        <button id="open-theme">テーマカスタム（暖色）で開く</button>
+    </div>
+    <p class="note" id="log"></p>
+</div>
+
+<script type="module">
+    import { createRSLightbox } from '../dist/rs-lightbox.esm.min.js';
+    window.__mod = { createRSLightbox };
+
+    // ---- サンプル画像を canvas で生成（外部素材に依存しない・様々な比率）
+    function scene(w, h, hue, label) {
+        const c = document.createElement('canvas');
+        c.width = w; c.height = h;
+        const x = c.getContext('2d');
+        const g = x.createLinearGradient(0, 0, w, h);
+        g.addColorStop(0, `hsl(${hue}, 65%, 55%)`);
+        g.addColorStop(1, `hsl(${(hue + 40) % 360}, 60%, 35%)`);
+        x.fillStyle = g; x.fillRect(0, 0, w, h);
+        // 幾何モチーフ
+        x.globalAlpha = 0.35;
+        for (let i = 0; i < 6; i++) {
+            x.fillStyle = `hsl(${(hue + i * 30) % 360}, 70%, 70%)`;
+            x.beginPath();
+            x.arc((i * 0.19 + 0.1) * w, (Math.sin(i) * 0.3 + 0.5) * h, h * 0.18, 0, Math.PI * 2);
+            x.fill();
+        }
+        x.globalAlpha = 1;
+        x.fillStyle = 'rgba(255,255,255,0.92)';
+        x.font = `bold ${Math.round(h * 0.12)}px system-ui, sans-serif`;
+        x.textAlign = 'center'; x.textBaseline = 'middle';
+        x.fillText(label, w / 2, h / 2);
+        x.font = `${Math.round(h * 0.05)}px system-ui, sans-serif`;
+        x.fillText(`${w}×${h}`, w / 2, h / 2 + h * 0.12);
+        return c.toDataURL('image/png');
+    }
+
+    // 大画像とサムネ（比率いろいろ）
+    const SHOTS = [
+        { w: 1600, h: 1067, hue: 205, cap: '鎌倉の海（横長 3:2）' },
+        { w: 1200, h: 1600, hue: 15, cap: '灯台（縦長 3:4）' },
+        { w: 1600, h: 900, hue: 140, cap: '棚田（ワイド 16:9）' },
+        { w: 1400, h: 1400, hue: 280, cap: '花畑（正方形）' },
+        { w: 1600, h: 700, hue: 45, cap: 'パノラマの夕焼け' },
+        { w: 1100, h: 1500, hue: 330, cap: '路地裏' },
+    ];
+    const items = SHOTS.map((s, i) => ({
+        src: scene(s.w, s.h, s.hue, `#${i + 1}`),
+        thumb: scene(320, 240, s.hue, `#${i + 1}`),
+        alt: s.cap.split('（')[0],
+        caption: s.cap,
+        width: s.w, height: s.h,
+    }));
+
+    // ---- 1) DOM ギャラリーを組み立て
+    const gallery = document.getElementById('gallery');
+    function makeAnchor(item) {
+        const a = document.createElement('a');
+        a.href = item.src;
+        a.dataset.rslbItem = '';
+        a.dataset.caption = item.caption;
+        a.dataset.width = item.width;
+        a.dataset.height = item.height;
+        const img = document.createElement('img');
+        img.src = item.thumb; img.alt = item.alt;
+        a.appendChild(img);
+        return a;
+    }
+    items.forEach((it) => gallery.appendChild(makeAnchor(it)));
+
+    // data-src → href の順で src を読む。ここでは href に大画像を入れている
+    const domLightbox = createRSLightbox('#gallery', { loop: true });
+
+    // 動的追加も委譲で開ける（open 時に一覧を再収集）
+    let added = 0;
+    document.getElementById('add-item').addEventListener('click', () => {
+        added += 1;
+        const it = {
+            src: scene(1500, 1000, (added * 60) % 360, `＋${added}`),
+            thumb: scene(320, 240, (added * 60) % 360, `＋${added}`),
+            alt: `追加画像 ${added}`, caption: `あとから追加した画像 ${added}`, width: 1500, height: 1000,
+        };
+        gallery.appendChild(makeAnchor(it));
+    });
+
+    // ---- 2) 配列モード
+    const log = document.getElementById('log');
+    const arrayLightbox = createRSLightbox(items, { loop: true, wheelZoom: true });
+    arrayLightbox.on('change', ({ index }) => { log.textContent = `change: ${index + 1} / ${items.length}`; });
+    document.getElementById('open-array').addEventListener('click', () => arrayLightbox.open(2));
+
+    const singleLightbox = createRSLightbox([items[0]]);
+    document.getElementById('open-single').addEventListener('click', () => singleLightbox.open(0));
+
+    const themed = createRSLightbox(items, { loop: true });
+    document.getElementById('open-theme').addEventListener('click', async () => {
+        await themed.open(3);
+        // 開いているオーバーレイへテーマ用クラスを付与（CSS 変数を上書き）
+        document.querySelector('.rslb.rslb-open')?.classList.add('theme-warm');
+    });
+
+    window.lightboxes = { domLightbox, arrayLightbox, singleLightbox, themed };
+</script>
+</body>
+</html>

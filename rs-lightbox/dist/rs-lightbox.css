@@ -1,0 +1,289 @@
+/**
+ * rs-lightbox 標準スタイル
+ *
+ * テーマは CSS カスタムプロパティ（--rslb-*）の上書きで差し替えられる。
+ * CSS を外しても機能例外にはならない（見た目が素になるだけ）。
+ * z-index は変数化。<dialog> / top layer は使わず、複数インスタンス制御を優先する。
+ */
+
+.rslb {
+    --rslb-z: 2147483000;
+    --rslb-backdrop: rgba(15, 23, 42, 0.92);
+    --rslb-fg: #f8fafc;
+    --rslb-btn-bg: rgba(15, 23, 42, 0.55);
+    --rslb-btn-bg-hover: rgba(51, 65, 85, 0.85);
+    --rslb-accent: #38bdf8;
+    --rslb-gap: 16px;
+    --rslb-btn-size: 44px;
+    --rslb-caption-bg: rgba(15, 23, 42, 0.6);
+    --rslb-radius: 10px;
+    --rslb-anim-ms: 240ms;
+    --rslb-easing: cubic-bezier(0.22, 0.61, 0.36, 1);
+
+    position: fixed;
+    inset: 0;
+    z-index: var(--rslb-z);
+    display: flex;
+    color: var(--rslb-fg);
+    font-family: system-ui, -apple-system, "Segoe UI", "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.rslb[hidden] { display: none; }
+
+/* ---------------------------------------------------------------- 開閉アニメ */
+
+.rslb { opacity: 0; }
+.rslb.rslb-anim-fade,
+.rslb.rslb-anim-zoom { transition: opacity var(--rslb-anim-ms) var(--rslb-easing); }
+.rslb.rslb-open { opacity: 1; }
+
+.rslb-anim-zoom .rslb-stage { transform: scale(0.94); transition: transform var(--rslb-anim-ms) var(--rslb-easing); }
+.rslb-anim-zoom.rslb-open .rslb-stage { transform: scale(1); }
+
+@media (prefers-reduced-motion: reduce) {
+    .rslb, .rslb .rslb-stage, .rslb .rslb-media, .rslb .rslb-track, .rslb .rslb-backdrop {
+        transition: none !important;
+    }
+}
+
+/* ---------------------------------------------------------------- 背景・ステージ */
+
+.rslb-backdrop {
+    position: absolute;
+    inset: 0;
+    background: var(--rslb-backdrop);
+}
+
+.rslb-stage {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    touch-action: none;         /* 本文はロック済み。ジェスチャーは自前で処理する */
+    cursor: default;
+}
+
+.rslb.is-zoomed .rslb-stage { cursor: grab; }
+.rslb.is-zoomed .rslb-stage:active { cursor: grabbing; }
+
+/* ---------------------------------------------------------------- スライド（3枚ウィンドウ） */
+
+.rslb-track {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 300%;
+    height: 100%;
+    display: flex;
+    /* transform の % はトラック自身の幅(=300%)基準。1 スライド分 = 33.3333% 左へ寄せて中央を表示する */
+    transform: translate3d(-33.33333%, 0, 0);
+    transition: transform var(--rslb-anim-ms) var(--rslb-easing);
+    will-change: transform;
+}
+
+.rslb-slide {
+    position: relative;
+    flex: 0 0 33.3333%;
+    width: 33.3333%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.rslb-media {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform-origin: center center;
+    transition: transform var(--rslb-anim-ms) var(--rslb-easing);
+    will-change: transform;
+}
+
+.rslb-img {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    display: block;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-user-drag: none;
+    -webkit-touch-callout: none;
+    transition: opacity 180ms ease;
+}
+
+.rslb-slide.is-loading .rslb-img { opacity: 0; }
+.rslb-slide.is-empty .rslb-img,
+.rslb-slide.is-error .rslb-img { visibility: hidden; }
+
+/* ---------------------------------------------------------------- スピナー / エラー */
+
+.rslb-spinner {
+    position: absolute;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+.rslb-slide.is-loading .rslb-spinner { display: flex; }
+
+.rslb-spinner-ring {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: 3px solid rgba(248, 250, 252, 0.25);
+    border-top-color: var(--rslb-accent);
+    animation: rslb-spin 0.8s linear infinite;
+}
+
+@keyframes rslb-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+    .rslb-spinner-ring { animation-duration: 1.6s; }
+}
+
+.rslb-error {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    text-align: center;
+    padding: 24px;
+    color: rgba(248, 250, 252, 0.85);
+}
+.rslb-error[hidden] { display: none; }
+.rslb-error-icon { color: rgba(248, 250, 252, 0.5); }
+.rslb-error-msg { margin: 0; font-size: 14px; }
+.rslb-error-retry {
+    appearance: none;
+    border: 1px solid rgba(248, 250, 252, 0.4);
+    background: transparent;
+    color: var(--rslb-fg);
+    padding: 8px 18px;
+    border-radius: 8px;
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+}
+.rslb-error-retry:hover { background: rgba(248, 250, 252, 0.12); }
+
+/* ---------------------------------------------------------------- ツールバー / ボタン */
+
+.rslb-toolbar {
+    position: absolute;
+    top: var(--rslb-gap);
+    right: var(--rslb-gap);
+    display: flex;
+    gap: 8px;
+    z-index: 2;
+}
+
+.rslb-btn,
+.rslb-nav {
+    appearance: none;
+    border: none;
+    color: var(--rslb-fg);
+    background: var(--rslb-btn-bg);
+    width: var(--rslb-btn-size);
+    height: var(--rslb-btn-size);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+    transition: background 0.15s ease, transform 0.15s ease, opacity 0.15s ease;
+}
+
+.rslb-btn:hover,
+.rslb-nav:hover { background: var(--rslb-btn-bg-hover); }
+
+.rslb-btn:focus-visible,
+.rslb-nav:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--rslb-accent);
+}
+
+.rslb-btn:disabled,
+.rslb-nav:disabled { opacity: 0.35; cursor: default; pointer-events: none; }
+.rslb-btn[hidden],
+.rslb-nav[hidden] { display: none; }
+
+.rslb-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: calc(var(--rslb-btn-size) + 6px);
+    height: calc(var(--rslb-btn-size) + 6px);
+    z-index: 2;
+}
+.rslb-prev { left: var(--rslb-gap); }
+.rslb-next { right: var(--rslb-gap); }
+
+/* ---------------------------------------------------------------- カウンター / キャプション */
+
+.rslb-counter {
+    position: absolute;
+    top: var(--rslb-gap);
+    left: var(--rslb-gap);
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: var(--rslb-btn-bg);
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+    z-index: 2;
+}
+.rslb-counter[hidden] { display: none; }
+
+.rslb-caption {
+    position: absolute;
+    left: 50%;
+    bottom: var(--rslb-gap);
+    transform: translateX(-50%);
+    max-width: min(90%, 720px);
+    padding: 10px 16px;
+    border-radius: var(--rslb-radius);
+    background: var(--rslb-caption-bg);
+    font-size: 14px;
+    line-height: 1.5;
+    text-align: center;
+    z-index: 2;
+    word-break: break-word;
+}
+.rslb-caption[hidden] { display: none; }
+
+/* スクリーンリーダー専用（視覚的に隠す） */
+.rslb-live {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    border: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+/* ---------------------------------------------------------------- 高コントラスト */
+
+@media (prefers-contrast: more) {
+    .rslb {
+        --rslb-btn-bg: rgba(0, 0, 0, 0.85);
+        --rslb-backdrop: rgba(0, 0, 0, 0.97);
+    }
+    .rslb-btn, .rslb-nav { outline: 1px solid var(--rslb-fg); }
+}
+
+@media (max-width: 640px) {
+    .rslb { --rslb-btn-size: 40px; --rslb-gap: 10px; }
+    .rslb-caption { font-size: 13px; }
+}
