@@ -12,7 +12,7 @@ npm install @parelabo/rs-diagram
 <summary>npm レジストリを使わない場合（GitHub tarball 直指定）</summary>
 
 ```bash
-npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-diagram-0.5.0.tgz
+npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-diagram-0.6.0.tgz
 ```
 </details>
 
@@ -30,8 +30,8 @@ createRSDiagram(document.querySelector('#app'), { /* オプション */ });
 ### `<script>` タグ（CDN・ビルド環境不要）
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@parelabo/rs-diagram@0.5.0/dist/rs-diagram.css">
-<script src="https://cdn.jsdelivr.net/npm/@parelabo/rs-diagram@0.5.0/dist/rs-diagram.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@parelabo/rs-diagram@0.6.0/dist/rs-diagram.css">
+<script src="https://cdn.jsdelivr.net/npm/@parelabo/rs-diagram@0.6.0/dist/rs-diagram.min.js"></script>
 <script>
   // 公開APIはグローバル RSDiagram に載る
   RSDiagram.createRSDiagram(document.querySelector('#app'), { /* オプション */ });
@@ -68,7 +68,7 @@ export default function App() {
 
 # rs-diagram
 
-依存ゼロのSVG作図・ダイアグラムライブラリです（現在 v0.5）。
+依存ゼロのSVG作図・ダイアグラムライブラリです（現在 v0.6）。
 
 - **宣言的**: `nodes` / `links` の配列を渡すだけで3行で図が出る。独自DSLもクラス継承も不要
 - **依存ゼロ**: ランタイム依存なし。ビルド不要で `src/` から直接 import できる ESモジュール
@@ -101,6 +101,13 @@ export default function App() {
 - **v0.5 の機能（エコシステム連携・opt-in）**: 同リポジトリの他パッケージと相互運用する。**連携先は import しない**（生成関数を「注入」で受け取るので rs-diagram 自体は依存ゼロのまま）。**連携先が未ロードでも図は壊れない**（自動フォールバック）。
   - **rs-chart 内包ノード**: `defineChartNode({ createRSChart })` が返すノードタイプを登録すると、`{ type: 'chart', chart: {...rs-chartのオプション} }` で**図の中に小型チャート（rs-chart 実体）**を持てる。チャートは SVG の `foreignObject` に埋め込まれ、ノードのドラッグ/選択/ズームにそのまま追従する。`updateNode(id, { chart })` で**図中のチャートがデータ追従**（ノード再構築時・削除時・破棄時にチャートは確実に destroy される）。`createRSChart` を渡さなければ純SVGの簡易バー（サムネイル）へフォールバック。「`defineNodeType` の draw 内で `createRSChart` を呼ぶだけで実現できる」ことの実証
   - **画像ノードの rs-image 編集**: `makeRSImagePicker({ createRSImageEditor })` を `options.imagePicker` に渡すと、**画像ノードのダブルクリックで rs-image のエディタがモーダル起動**し、トリミング/回転/文字入れ等の編集結果を dataURL でノードへ書き戻す。`createRSImageEditor` が無ければ既定のファイル選択へフォールバック
+- **v0.6 の機能（家系図テンプレート）**: `template: 'familytree'` で **本人（ego）視点の家系図**が一発生成
+  - 人物の配列だけ（`father` / `mother` / `spouse` の参照）から夫婦（union）を導出し、**上に直系祖先・同段に兄弟姉妹＋配偶者・下に子孫**が扇状に広がるアワーグラス配置。DOM非依存の純粋関数 `buildFamilyTree` が座標確定済みの nodes/links を返す
+  - 夫婦は小さな結合点ノード（婚姻マーク）で結び、子はそこから orthogonal で降ろす（片親のみでも可）
+  - 人物カードは氏名＋生没年・性別アクセント色・本人は強調＋「本人」バッジ。`image`（顔写真URL）で円形アバター、`url` でクリック遷移先を持てる（未知のプロパティも保持）
+  - `panOnDrag: true`（v0.6の新オプション・全図種で使用可）で背景ドラッグのカメラ移動。読み取り専用＋本人固定の「サイト埋め込み」は `demo/familytree-embed.html` 参照
+  - **大規模対応**: `makeRandomFamily({ size, seed })` で合成家系を生成（決定的）。**10,000人**でレイアウト41ms・初期化47ms・パン1フレーム中央値16.6ms（仮想化・ヘッドレスChromium実測）。あわせて一括ロード経路の O(n²)（重複IDチェック・自動採番の全件走査）を解消 — 全図種の大規模初期化が速くなる
+  - **視点の切り替え**: `ego` を差し替えて再構築するだけで「その人視点の家系図」に組み替わる（視点から辿れない親族 — 例: 本人視点の叔父一家 — は隠れ、視点を移すと現れる）。デモは人物クリックで切り替え
 - **ライセンス**: MIT
 
 対応ブラウザ: 最新の Chrome / Edge / Safari / Firefox（IE・旧ブラウザは非対応）
@@ -114,6 +121,8 @@ php -S localhost:8099   # または任意の静的サーバー
 ```
 
 デモはパレット付きフローチャートエディタです。パレットからのD&D投入・ドラッグ編集・接続作成・undo/redo・保存/読込（localStorage）・SVG/PNGエクスポート・読み取り専用切り替えを試せます。
+
+家系図デモは `/rs-diagram/demo/familytree.html`。35人のサンプル家系で、人物カードをクリックすると**その人視点の家系図**に組み替わります。
 
 ## インストール
 
@@ -184,6 +193,7 @@ diagram.destroy();
 | `paletteItems` | `[{ type, label, defaults? }]` | パレットの項目（省略時は組み込み6形状） |
 | `contextMenu` | `true` | 右クリックメニュー。`false` で無効、配列で項目差し替え |
 | `readOnly` | `false` | 読み取り専用ビューア（`nodeClick` 等の閲覧イベントは生きる） |
+| `panOnDrag` | `false` | 背景ドラッグでカメラ移動（スペース不要。家系図等の閲覧ビューア向け。ノードのクリック/ドラッグは通常どおり） |
 | `nodeTypes` / `linkTypes` | `[]` | カスタム形状プラグインの登録 |
 | `virtualize` | `true` | 仮想化描画（ビューポート外ノード/リンクの `<g>` を DOM から除去）。大規模図で有効 |
 | `virtualizeMargin` | `160` | 仮想化の先読み余白（model座標）。画面外に少し広げてパン時の欠けを防ぐ |
@@ -227,6 +237,28 @@ diagram.destroy();
 | `er` | ER図（テーブル＋カラム） | `er-table` | grid |
 | `network` | ネットワーク構成図 | `net-device`（cloud/router/switch/server/pc） | tree |
 | `seating` | 座席表 | `seat` | 明示配置 |
+| `familytree` | 家系図（本人視点アワーグラス） | `family-person` / `family-union` | build内で確定 |
+
+**familytree** の `data` は `{ ego, people, scope? }`。人物は `{ id, name, sex ('M'/'F'), born?, died?, father?, mother?, spouse?, image?, url? }` で、夫婦は `father`/`mother` の組と `spouse` から自動導出されます。`ego` 視点から辿れる親族だけが描かれ（直系祖先＋兄弟姉妹＋子孫＋配偶者）、`ego` を替えて `buildFamilyTree({ people, ego })` → `fromJSON` すれば視点を切り替えられます。
+
+- `image`: 顔写真のURL / dataURL。カード左に円形で表示
+- `url`: クリック先。カードのカーソルが pointer になる。遷移はアプリ側で `nodeClick` を拾う（下記）
+- 上記以外の未知のプロパティもノードにそのまま保持される
+- `scope: 'all'`: ego で刈り込まず**全員を配置**する（親を持たない人を根に系統樹の森として並べ、ego はハイライトのみ。嫁ぎ先が別の木の場合は長距離リンクでつながる）。大きな家系を丸ごと探索する用途は `'all'` ＋ `centerOnNode(ego)` ＋ `panOnDrag` の組み合わせが向く
+
+サイトへの埋め込み（**本人固定**・写真・クリックでプロフィールへ・背景ドラッグで移動）は `demo/familytree-embed.html` がコピペ用の実例です:
+
+```js
+const built = buildFamilyTree({ people, ego: 'me' });   // ego は固定
+const diagram = createRSDiagram('#canvas', {
+    nodes: built.nodes, links: built.links,
+    nodeTypes: [familyPerson, familyUnion],
+    readOnly: true,
+    panOnDrag: true,   // 背景ドラッグでカメラ移動
+});
+diagram.centerOnNode('me', { scale: 0.9 });   // 本人中心・読めるサイズで開始（大家系向け。小家系なら zoomToFit() でも）
+diagram.on('nodeClick', (e) => { if (e.node.url) window.open(e.node.url, '_blank'); });
+```
 
 ### Diagram メソッド
 
@@ -243,6 +275,7 @@ diagram.destroy();
 | `loadFrom(url, fetchOptions)` / `saveTo(url, {method, headers})` | fetchでAPIからの読み込み・APIへの送信 |
 | `selectLinks(ids)` / `getLinkSelection()` | リンクの選択 |
 | `setView({x, y, scale})` / `getView()` / `resetView()` / `zoomToFit()` | パン/ズーム |
+| `centerOnNode(id, { scale? })` | 指定ノードを画面中央に置く（家系図の「本人フォーカス」等。scale 省略時は現在の倍率を維持） |
 | `setDrawMode({arrow, arrowStart, router})` / `getDrawMode()` | 線描画モード（キャンバスドラッグで線を引く。router で bezier/avoid も可） |
 | `layout(name, opts)` | 自動レイアウト（`'tree'`/`'layered'`/`'grid'`/`'radial'`・undo可） |
 | `group(ids)` / `ungroup(id)` / `toggleCollapse(id)` | グループ化・解除・折りたたみ |
@@ -369,10 +402,11 @@ CSSカスタムプロパティ（`--rsd-*`）で差し替えられます。
 - v0.3: bezier・障害物回避ルーティング / ポート / リンクラベル・再接続 / グループ化・折りたたみ / キーボード一式 / 自動レイアウト（tree/layered/grid/radial）/ 日本語業務テンプレ（組織図・稟議フロー・ER図・ネットワーク図・座席表）/ スイムレーン（実装済み）
 - v0.4: 仮想化描画（1,000ノードでパン/ズーム60fps）/ 差分描画 / 変更イベントストリーム（実装済み）
 - v0.5: rs-chart 内包ノード / 画像ノードの rs-image 編集（エコシステム連携・実装済み）
+- v0.6: 家系図テンプレート（本人視点アワーグラス配置・視点切替・実装済み）
 
 ## 検証
 
-- 幾何計算・ルーティング・自動レイアウト・グループ・ポート・**仮想化/差分描画・変更イベントストリーム・エコシステム連携の純粋関数**の node 単体テスト（`test/*.test.mjs`、45項目）
+- 幾何計算・ルーティング・自動レイアウト・グループ・ポート・**仮想化/差分描画・変更イベントストリーム・エコシステム連携・家系図（夫婦導出/世代/アワーグラス配置/視点切替）の純粋関数**の node 単体テスト（`test/*.test.mjs`、57項目）
 - ヘッドレスChromiumでの受け入れテスト:
   - v0.1（13項目）: 初期描画のSVG構造 / D&D後の座標一致 / グリッドスナップ / リサイズとリンク追従 / パレットD&D / アンカー接続 / 直交経路 / 矩形選択と一括削除 / undo・redo / JSONラウンドトリップ / 複製 / エクスポート / readOnly
   - v0.2（15項目）: パン/ズーム / 自由な線・矢印 / リンク選択・再接続 / スタイルバー / 画像 / スタンプ / ラベル編集 / 入出力

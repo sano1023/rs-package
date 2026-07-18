@@ -23,3 +23,4 @@ export { isGroup, childrenOf, descendantIds, parentOf, fitBounds } from "./group
 export { viewportRect, rectVisible, spanBounds, visibleIdSet, diffKeys, changedKeys } from "./virtualize.js";
 export { defineChartNode, chartFallbackBars, firstSeriesValues, chartOptionsFor, destroyEmbed } from "./integrations/rs-chart.js";
 export { makeRSImagePicker, resolveImageEditFlow } from "./integrations/rs-image.js";
+export { buildFamilyTree, familyUnions, familyGenerations, familyIndex, formatYears, sampleFamily, makeRandomFamily, familyPerson, familyUnion, FAMILY_LAYOUT } from "./familytree.js";

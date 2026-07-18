@@ -137,6 +137,20 @@ export namespace templates {
         let layout_4: null;
         export { layout_4 as layout };
     }
+    namespace familytree {
+        let label_5: string;
+        export { label_5 as label };
+        export { buildFamilyTree as build };
+        let nodeTypes_4: {
+            defaults: any;
+            anchors: string[];
+            shape: string;
+            labelPosition: string;
+        }[];
+        export { nodeTypes_4 as nodeTypes };
+        let layout_5: null;
+        export { layout_5 as layout };
+    }
 }
 export const TEMPLATE_NAMES: string[];
 declare function orgchartBuild(data: any): {
@@ -159,4 +173,5 @@ declare function seatingBuild(data: any): {
     nodes: any;
     links: never[];
 };
+import { buildFamilyTree } from './familytree.js';
 export {};

@@ -79,13 +79,15 @@ export class Diagram {
     getLink(id: any): null;
     nodeTypeDef(type: any): any;
     linkTypeDef(name: any): any;
-    genId(prefix: any): string;
-    /** ノードの正規化。未知のプロパティは保持する（toJSONでそのまま返す） */
-    normalizeNode(raw: any): any;
+    /** 自動採番。taken（Set）を渡すと衝突チェックをそれで行う（一括ロード用・O(1)） */
+    genId(prefix: any, taken?: null): string;
+    /** ノードの正規化。未知のプロパティは保持する（toJSONでそのまま返す）。
+     *  seen（Set）を渡すと重複/採番チェックをそれで行う（一括ロード用・O(1)） */
+    normalizeNode(raw: any, seen?: null): any;
     /** リンクの正規化。router/arrow の既定値は描画時に解決する（データを汚さない） */
-    normalizeLink(raw: any): any;
+    normalizeLink(raw: any, seen?: null): any;
     /** スイムレーンの正規化 */
-    normalizeLane(raw: any): any;
+    normalizeLane(raw: any, seen?: null): any;
     getLane(id: any): null;
     /**
      * v0.4 変更イベントストリーム。
@@ -196,6 +198,8 @@ export class Diagram {
     setDrawMode(mode: any): void;
     _drawMode: any;
     getDrawMode(): any;
+    /** 指定ノードを画面中央に置く（家系図の「本人フォーカス」等。scale 省略時は現在の倍率を維持） */
+    centerOnNode(id: any, { scale }?: {}): this;
     /** 内容全体が収まるようにパン/ズームする */
     zoomToFit({ padding, maxScale }?: {
         padding?: number | undefined;

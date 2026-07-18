@@ -65,12 +65,14 @@ import '@parelabo/rs-editor/rs-editor.css';
 | [@parelabo/rs-baslider](./rs-baslider/) | 0.1.0 | ✅ | 要 | Before/After比較スライダー |
 | [@parelabo/rs-chart](./rs-chart/) | 0.5.0 | ✅ | 要 | 依存ゼロのSVG/Canvasチャートライブラリ |
 | [@parelabo/rs-datepicker](./rs-datepicker/) | 0.3.0 | ✅ | 要 | 日本語ファースト・依存ゼロの日付ピッカー |
-| [@parelabo/rs-diagram](./rs-diagram/) | 0.5.0 | ✅ | 要 | 依存ゼロのSVG作図・ダイアグラムライブラリ |
+| [@parelabo/rs-diagram](./rs-diagram/) | 0.6.0 | ✅ | 要 | 依存ゼロのSVG作図・ダイアグラムライブラリ |
 | [@parelabo/rs-editor](./rs-editor/) | 0.5.0 | ✅ | 要 | プラグインアーキテクチャを持つ、依存ゼロのWYSIWYGエディタライブラリ |
 | [@parelabo/rs-form](./rs-form/) | 0.5.0 | ✅ | 要 | 依存ゼロのスキーマ駆動フォームビルダー |
 | [@parelabo/rs-gantt](./rs-gantt/) | 0.5.0 | ✅ | 要 | 依存ゼロの対話型プロジェクトガントチャート |
 | [@parelabo/rs-grid](./rs-grid/) | 0.4.1 | ✅ | 要 | Excel風データグリッド |
 | [@parelabo/rs-image](./rs-image/) | 0.6.0 | ✅ | 要 | 依存ゼロの画像処理＆合成エディタ |
+| [@parelabo/rs-kana](./rs-kana/) | 0.1.0 | — | 不要 | IME変換中の読みを使う依存ゼロのカタカナ自動入力ライブラリ |
+| [@parelabo/rs-lightbox](./rs-lightbox/) | 0.1.0 | ✅ | 要 | 依存ゼロ・フレームワーク非依存の画像ライトボックス |
 | [@parelabo/rs-livecam](./rs-livecam/) | 0.2.0 | ✅ | 不要 | リアルタイムカメラ加工 |
 | [@parelabo/rs-pdf](./rs-pdf/) | 0.5.0 | ✅ | 要 | 依存ゼロのPDFビューア＆注釈ライブラリ |
 | [@parelabo/rs-pivot](./rs-pivot/) | 0.4.0 | ✅ | 要 | 依存ゼロのピボットテーブルライブラリ |
@@ -81,6 +83,7 @@ import '@parelabo/rs-editor/rs-editor.css';
 | [@parelabo/rs-sheet](./rs-sheet/) | 0.5.0 | ✅ | 要 | 本格数式エンジン内蔵・依存ゼロのセル指向スプレッドシートライブラリ |
 | [@parelabo/rs-sign](./rs-sign/) | 0.4.0 | ✅ | 要 | 電子署名SaaSの画面部品網羅を目指す、依存ゼロの署名パッド＋電子印鑑ライブラリ |
 | [@parelabo/rs-slider](./rs-slider/) | 0.1.0 | ✅ | 要 | 依存ゼロの画像スライダーコレクション |
+| [@parelabo/rs-text-animation](./rs-text-animation/) | 0.1.0 | — | 要 | 依存ゼロのテキストアニメーションライブラリ |
 | [@parelabo/rs-tour](./rs-tour/) | 0.1.0 | ✅ | 不要 | 依存ゼロ・フレームワーク非依存のスポットライト型ガイドツアーライブラリ |
 | [@parelabo/rs-upload](./rs-upload/) | 0.4.0 | ✅ | 要 | 依存ゼロのファイルアップロードUI＋転送エンジン |
 

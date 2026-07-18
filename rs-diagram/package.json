@@ -1,6 +1,6 @@
 {
     "name": "@parelabo/rs-diagram",
-    "version": "0.5.0",
+    "version": "0.6.0",
     "description": "依存ゼロのSVG作図・ダイアグラムライブラリ",
     "type": "module",
     "main": "./dist/rs-diagram.esm.min.js",

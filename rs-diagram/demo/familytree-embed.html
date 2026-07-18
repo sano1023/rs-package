@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>rs-diagram デモ — 家系図の埋め込み例（写真・リンク・本人固定）</title>
+<link rel="stylesheet" href="../dist/rs-diagram.css">
+<style>
+    * { box-sizing: border-box; }
+    body {
+        margin: 0;
+        font-family: system-ui, -apple-system, "Segoe UI", "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+        background: #f1f5f9;
+        color: #1e293b;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+    }
+    header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 8px 14px;
+        background: #fff;
+        border-bottom: 1px solid #e2e8f0;
+        flex-wrap: wrap;
+    }
+    header h1 { font-size: 15px; margin: 0 8px 0 0; }
+    header h1 small { color: #64748b; font-weight: normal; margin-left: 6px; }
+    header h1 small a { color: #2563eb; }
+    #status { font-size: 12px; color: #64748b; margin-left: auto; }
+    #hint {
+        padding: 6px 14px;
+        font-size: 12.5px;
+        color: #1e40af;
+        background: #eff6ff;
+        border-bottom: 1px solid #bfdbfe;
+    }
+    main { flex: 1; min-height: 0; padding: 10px; }
+    #canvas {
+        height: 100%;
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    #canvas .rsd { border-radius: 10px; }
+</style>
+</head>
+<body>
+<header>
+    <h1>rs-diagram<small>家系図の埋め込み例 — 本人固定・写真・クリックでプロフィールへ（<a href="./familytree.html">視点切替デモ →</a>）</small></h1>
+    <span id="status"></span>
+</header>
+<div id="hint">💡 <b>背景をドラッグで移動</b>（panOnDrag）・Ctrl+ホイールでズーム。<b>人物カードをクリックするとその人のページへ飛びます</b>（このデモでは URL を表示するだけ）。視点（本人）は固定です。</div>
+<main><div id="canvas"></div></main>
+<script type="module">
+import { createRSDiagram, buildFamilyTree, familyPerson, familyUnion } from '../dist/rs-diagram.esm.min.js';
+
+// ---- 顔写真のダミー（実際は 'https://…/photo.jpg' 等のURLを image に入れるだけ）
+const avatar = (initial, bg) => 'data:image/svg+xml;utf8,' + encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="72" height="72">`
+    + `<rect width="72" height="72" fill="${bg}"/>`
+    + `<circle cx="36" cy="27" r="13" fill="#ffffff" opacity=".9"/>`
+    + `<path d="M12 66c3-15 13-21 24-21s21 6 24 21z" fill="#ffffff" opacity=".9"/>`
+    + `<text x="36" y="68" font-size="13" text-anchor="middle" fill="#0009" font-family="sans-serif">${initial}</text>`
+    + `</svg>`,
+);
+
+// ---- 人物データ: image（写真URL）と url（クリック先）を足すだけ
+const people = [
+    { id: 'gf', name: '山田 清', sex: 'M', born: 1902, died: 1978, image: avatar('清', '#94a3b8'), url: 'https://example.com/p/kiyoshi' },
+    { id: 'gm', name: '松', sex: 'F', born: 1908, died: 1990, image: avatar('松', '#f9a8d4'), url: 'https://example.com/p/matsu' },
+    { id: 'father', name: '山田 昭夫', sex: 'M', born: 1930, died: 2001, father: 'gf', mother: 'gm', spouse: 'mother', image: avatar('昭', '#60a5fa'), url: 'https://example.com/p/akio' },
+    { id: 'mother', name: '良子', sex: 'F', born: 1935, image: avatar('良', '#f472b6'), url: 'https://example.com/p/yoshiko' },
+    { id: 'sis', name: '和子', sex: 'F', born: 1953, father: 'father', mother: 'mother', spouse: 'sish', image: avatar('和', '#fb7185'), url: 'https://example.com/p/kazuko' },
+    { id: 'sish', name: '高橋 実', sex: 'M', born: 1950, image: avatar('実', '#38bdf8'), url: 'https://example.com/p/minoru' },
+    { id: 'me', name: '山田 健一', sex: 'M', born: 1955, father: 'father', mother: 'mother', spouse: 'wife', image: avatar('健', '#3b82f6'), url: 'https://example.com/p/kenichi' },
+    { id: 'wife', name: '恵子', sex: 'F', born: 1958, image: avatar('恵', '#ec4899'), url: 'https://example.com/p/keiko' },
+    { id: 'son1', name: '山田 太一', sex: 'M', born: 1980, father: 'me', mother: 'wife', spouse: 'son1w', image: avatar('太', '#2dd4bf'), url: 'https://example.com/p/taichi' },
+    { id: 'son1w', name: '沙織', sex: 'F', born: 1982, image: avatar('沙', '#fbbf24'), url: 'https://example.com/p/saori' },
+    { id: 'dau', name: '直美', sex: 'F', born: 1983, father: 'me', mother: 'wife', image: avatar('直', '#a78bfa'), url: 'https://example.com/p/naomi' },
+    { id: 'gs1', name: '山田 悠斗', sex: 'M', born: 2008, father: 'son1', mother: 'son1w', image: avatar('悠', '#34d399'), url: 'https://example.com/p/yuto' },
+    { id: 'gd1', name: '結衣', sex: 'F', born: 2011, father: 'son1', mother: 'son1w', image: avatar('結', '#f0abfc'), url: 'https://example.com/p/yui' },
+];
+
+// ---- 本人（ego）は固定。クリックでは組み替えず、url へ飛ばす
+const built = buildFamilyTree({ people, ego: 'me' });
+const diagram = createRSDiagram('#canvas', {
+    nodes: built.nodes,
+    links: built.links,
+    nodeTypes: [familyPerson, familyUnion],
+    readOnly: true,
+    panOnDrag: true,            // 背景ドラッグでカメラ移動（スペース不要）
+    grid: { show: false, snap: false },
+    contextMenu: false,
+    ariaLabel: '家系図',
+});
+diagram.zoomToFit({ padding: 30 });
+
+diagram.on('nodeClick', (e) => {
+    if (e.node.type !== 'family-person' || !e.node.url) return;
+    // 実サイトでは: window.open(e.node.url, '_blank') や location.href = e.node.url
+    document.getElementById('status').textContent = `→ ${e.node.name}: ${e.node.url}`;
+});
+
+window.__diagram = diagram;   // 検証用
+</script>
+</body>
+</html>

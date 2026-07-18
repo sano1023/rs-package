@@ -5,7 +5,11 @@
  * コマンドは apply(model) / revert(model) を持つ純粋なオブジェクトで、
  * DOMには一切触れない（viewはmodelから再描画される）。
  */
-/** 深いコピー（model はプレーンなJSONデータのみを想定） */
+/**
+ * 深いコピー（model はプレーンなJSONデータのみを想定）。
+ * structuredClone は1呼び出しのオーバーヘッドが大きく、数万ノードの一括ロードで
+ * 秒単位になるため、手書きの再帰クローンにしている（小さなオブジェクト多数に強い）。
+ */
 export function deepClone(v: any): any;
 export class CommandStack {
     constructor(limit?: number);
