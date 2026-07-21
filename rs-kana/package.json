@@ -1,0 +1,45 @@
+{
+    "name": "@parelabo/rs-kana",
+    "version": "0.1.0",
+    "description": "IME変換中の読みを使う依存ゼロのカタカナ自動入力ライブラリ",
+    "type": "module",
+    "main": "./dist/rs-kana.esm.min.js",
+    "module": "./dist/rs-kana.esm.min.js",
+    "unpkg": "./dist/rs-kana.min.js",
+    "jsdelivr": "./dist/rs-kana.min.js",
+    "exports": {
+        ".": {
+            "types": "./dist/types/index.d.ts",
+            "import": "./dist/rs-kana.esm.min.js",
+            "default": "./dist/rs-kana.esm.min.js"
+        },
+        "./dist/*": "./dist/*"
+    },
+    "files": [
+        "dist"
+    ],
+    "keywords": [
+        "kana",
+        "katakana",
+        "furigana",
+        "ime",
+        "japanese",
+        "form"
+    ],
+    "author": "ryusuke.sano <ryusuke.sano@parelabo.com>",
+    "license": "SEE LICENSE IN LICENSE.txt",
+    "homepage": "https://github.com/sano1023/rs-package/tree/main/rs-kana#readme",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/sano1023/rs-package.git",
+        "directory": "rs-kana"
+    },
+    "bugs": {
+        "url": "https://parelabo.com",
+        "email": "contact@parelabo.com"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
+    "types": "./dist/types/index.d.ts"
+}

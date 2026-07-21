@@ -1,0 +1,134 @@
+.rsta {
+    display: inline-block;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.rsta-char {
+    display: inline-block;
+    animation-delay: calc(var(--rsta-i) * var(--rsta-stagger, 42ms));
+    animation-fill-mode: both;
+}
+
+.rsta-reveal-char {
+    animation-name: rsta-reveal;
+    animation-duration: var(--rsta-duration, 700ms);
+    animation-timing-function: cubic-bezier(.16, 1, .3, 1);
+}
+
+.rsta-bounce-char {
+    animation-name: rsta-bounce;
+    animation-duration: var(--rsta-duration, 700ms);
+    animation-timing-function: cubic-bezier(.2, .8, .25, 1.2);
+}
+
+.rsta-scramble-char { min-width: .38em; }
+.rsta-slide-char,
+.rsta-flip-char,
+.rsta-blur-char,
+.rsta-wave-char,
+.rsta-glitch-char {
+    animation-duration: var(--rsta-duration, 700ms);
+    animation-timing-function: cubic-bezier(.16, 1, .3, 1);
+}
+
+.rsta-slide-char { animation-name: rsta-slide; }
+.rsta-flip-char { transform-origin: 50% 100%; animation-name: rsta-flip; }
+.rsta-blur-char { animation-name: rsta-blur; }
+.rsta-wave-char { animation-name: rsta-wave; }
+
+.rsta-glitch-char {
+    position: relative;
+    animation-name: rsta-glitch-in;
+}
+
+.rsta-glitch-char::before,
+.rsta-glitch-char::after {
+    content: attr(data-rsta-char);
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: .72;
+}
+
+.rsta-glitch-char::before {
+    color: #00e5ff;
+    animation: rsta-glitch-a 360ms steps(2, end) both;
+    animation-delay: calc(var(--rsta-i) * var(--rsta-stagger, 42ms) + 110ms);
+}
+
+.rsta-glitch-char::after {
+    color: #ff4fa3;
+    animation: rsta-glitch-b 360ms steps(2, end) both;
+    animation-delay: calc(var(--rsta-i) * var(--rsta-stagger, 42ms) + 110ms);
+}
+
+
+.rsta-cursor,
+.rsta-prompt {
+    display: inline-block;
+    margin-left: .06em;
+    font-weight: 400;
+    animation: rsta-blink .8s steps(1, end) infinite;
+}
+
+.rsta-rpg-ready .rsta-prompt { margin-left: .35em; }
+.rsta-advanceable { cursor: pointer; }
+.rsta[data-rsta-paused="true"] .rsta-cursor { animation-play-state: paused; }
+
+@keyframes rsta-reveal {
+    from { opacity: 0; transform: translateY(.62em); filter: blur(4px); }
+    to { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+
+@keyframes rsta-bounce {
+    0% { opacity: 0; transform: translateY(-.8em) scale(.75); }
+    62% { opacity: 1; transform: translateY(.12em) scale(1.07); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes rsta-blink { 50% { opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+    .rsta *, .rsta { animation-duration: .001ms !important; animation-iteration-count: 1 !important; }
+}
+@keyframes rsta-slide {
+    from { opacity: 0; transform: translateX(.75em) skewX(-8deg); }
+    to { opacity: 1; transform: translateX(0) skewX(0); }
+}
+
+@keyframes rsta-flip {
+    from { opacity: 0; transform: perspective(7em) rotateX(88deg); }
+    to { opacity: 1; transform: perspective(7em) rotateX(0); }
+}
+
+@keyframes rsta-blur {
+    from { opacity: 0; transform: scale(1.2); filter: blur(12px); }
+    to { opacity: 1; transform: scale(1); filter: blur(0); }
+}
+
+@keyframes rsta-wave {
+    0% { opacity: 0; transform: translateY(.9em) rotate(8deg); }
+    55% { opacity: 1; transform: translateY(-.15em) rotate(-3deg); }
+    100% { opacity: 1; transform: translateY(0) rotate(0); }
+}
+
+@keyframes rsta-glitch-in {
+    0% { opacity: 0; transform: translateX(-.22em); }
+    30% { opacity: .3; transform: translateX(.14em); }
+    58% { opacity: .88; transform: translateX(-.05em); }
+    100% { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes rsta-glitch-a {
+    0%, 100% { transform: translate(0); opacity: 0; }
+    32% { transform: translate(-.11em, -.04em); opacity: .75; }
+    68% { transform: translate(.08em, .04em); opacity: .55; }
+}
+
+@keyframes rsta-glitch-b {
+    0%, 100% { transform: translate(0); opacity: 0; }
+    32% { transform: translate(.11em, .04em); opacity: .75; }
+    68% { transform: translate(-.08em, -.04em); opacity: .55; }
+}
+

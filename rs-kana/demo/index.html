@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>rs-kana demo</title>
+<style>
+:root{--ink:#172033;--muted:#657187;--line:#d6dce6;--blue:#1267d6;--blue-pale:#eaf3ff;--mint:#1b9b7c;--warn:#a65d00}*{box-sizing:border-box}body{margin:0;background:#f4f7fb;color:var(--ink);font-family:system-ui,-apple-system,"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif}header{min-height:64px;padding:20px clamp(18px,5vw,64px);background:#fff;border-bottom:1px solid var(--line);font-weight:800}main{width:min(920px,calc(100% - 32px));margin:auto;padding:48px 0 72px}.eyebrow{margin:0 0 10px;color:var(--blue);font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}h1{margin:0;font-size:clamp(29px,5vw,48px);line-height:1.16}.lead{max-width:690px;margin:16px 0 32px;color:var(--muted);line-height:1.75}.layout{display:grid;grid-template-columns:minmax(0,1fr) 270px;border:1px solid var(--line);background:#fff}.form{padding:30px}.field{display:grid;gap:8px;margin-bottom:24px}.field label{font-size:13px;font-weight:800}.field small{color:var(--muted);font-size:12px}.field input{height:48px;padding:0 13px;border:1px solid #bfc9d8;border-radius:5px;background:#fff;color:var(--ink);font-size:17px;outline:0}.field input:focus{border-color:var(--blue);box-shadow:0 0 0 3px #dbeaff}.field input[readonly]{background:#f8fbff}.hint{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 20px;background:var(--blue-pale);border-top:1px solid #d5e7ff;font-size:13px}.button{border:1px solid #8ab8f0;border-radius:4px;background:#fff;color:#0758bd;padding:8px 11px;font-weight:700;cursor:pointer}.monitor{padding:24px;border-left:1px solid var(--line);background:#fbfcfe}.monitor h2{margin:0 0 16px;font-size:14px}.status{min-height:86px;padding:14px;border:1px solid var(--line);border-left:4px solid var(--blue);background:#fff;color:var(--muted);font-size:13px;line-height:1.65}.status[data-kind="update"]{border-left-color:var(--mint)}.status[data-kind="unresolved"]{border-left-color:var(--warn);color:#754300}.notes{margin:30px 0 0;padding:22px;border-left:4px solid var(--blue);background:#fff;line-height:1.8;color:#44516a}.notes strong{color:var(--ink)}@media(max-width:700px){.layout{grid-template-columns:1fr}.monitor{border-left:0;border-top:1px solid var(--line)}}@media(max-width:420px){main{width:min(100% - 24px,920px);padding-top:32px}.hint{align-items:flex-start;flex-direction:column}}
+</style>
+</head>
+<body>
+<header>rs-kana <span style="color:#657187;font-size:12px;font-weight:600">v0.1.0 / IME-aware</span></header>
+<main>
+<p class="eyebrow">Name reading form</p>
+<h1>読みを推測せず、入力されたかなを使う。</h1>
+<p class="lead">氏名欄で日本語IMEを使って入力してください。変換前のかなを取得して、カタカナ欄へ反映します。カタカナ欄を手で直した後は自動上書きを停止します。</p>
+<section class="layout">
+<div>
+<form class="form">
+<div class="field"><label for="name">お名前</label><input id="name" name="name" autocomplete="name" placeholder="例: 山田 太郎"><small>IME変換中のかなを読みとして利用します。</small></div>
+<div class="field"><label for="name-kana">お名前（カタカナ）</label><input id="name-kana" name="name-kana" autocomplete="off" placeholder="例: ヤマダ タロウ"><small>必要なら手で修正できます。</small></div>
+</form>
+<div class="hint"><span>手動修正後の自動更新をもう一度有効にします。</span><button class="button" id="reset" type="button">自動入力を再開</button></div>
+</div>
+<aside class="monitor"><h2>INPUT STATUS</h2><div class="status" id="status" data-kind="ready">入力待機中です。</div></aside>
+</section>
+<p class="notes"><strong>精度について:</strong> 確定済みの「山田」だけでは、どの読みかを機械的に確定できません。IME変換中の「やまだ」を取得できる通常の入力では、その読みをそのまま使えます。貼り付けた漢字などは誤った候補を出さず、確認が必要な状態として通知します。</p>
+</main>
+<script type="module">
+import { createRSKana } from '../dist/rs-kana.esm.min.js';
+const status = document.querySelector('#status');
+const show = (kind, message) => { status.dataset.kind = kind; status.textContent = message; };
+const kana = createRSKana('#name', '#name-kana', {
+  onUpdate: ({ reading, reason }) => show('update', '反映しました: ' + reading + ' (' + reason + ')'),
+  onUnresolved: ({ reason }) => show('unresolved', '読みを確定できません: ' + reason + '。カタカナ欄を確認してください。'),
+  onManual: () => show('manual', '手動修正を保護しています。必要なら「自動入力を再開」を押してください。'),
+});
+document.querySelector('#reset').addEventListener('click', () => {
+  kana.reset({ fromSource: true });
+  show('ready', '自動入力を再開しました。');
+});
+</script>
+</body>
+</html>
+

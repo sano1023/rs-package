@@ -1,0 +1,48 @@
+{
+    "name": "@parelabo/rs-text-animation",
+    "version": "0.1.0",
+    "description": "依存ゼロのテキストアニメーションライブラリ（タイプライター・レトロRPG・リビール・バウンス・スクランブル）",
+    "type": "module",
+    "main": "./dist/rs-text-animation.esm.min.js",
+    "module": "./dist/rs-text-animation.esm.min.js",
+    "unpkg": "./dist/rs-text-animation.min.js",
+    "jsdelivr": "./dist/rs-text-animation.min.js",
+    "exports": {
+        ".": {
+            "types": "./dist/types/index.d.ts",
+            "import": "./dist/rs-text-animation.esm.min.js",
+            "default": "./dist/rs-text-animation.esm.min.js"
+        },
+        "./dist/*": "./dist/*",
+        "./rs-text-animation.css": "./dist/rs-text-animation.css"
+    },
+    "files": [
+        "dist"
+    ],
+    "keywords": [
+        "text-animation",
+        "typewriter",
+        "typing",
+        "rpg",
+        "scramble",
+        "typography",
+        "animation"
+    ],
+    "author": "ryusuke.sano <ryusuke.sano@parelabo.com>",
+    "license": "SEE LICENSE IN LICENSE.txt",
+    "homepage": "https://github.com/sano1023/rs-package/tree/main/rs-text-animation#readme",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/sano1023/rs-package.git",
+        "directory": "rs-text-animation"
+    },
+    "bugs": {
+        "url": "https://parelabo.com",
+        "email": "contact@parelabo.com"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
+    "types": "./dist/types/index.d.ts",
+    "style": "./dist/rs-text-animation.css"
+}
