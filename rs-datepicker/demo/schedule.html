@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>rs-datepicker スケジュール調整デモ</title>
+<link rel="stylesheet" href="../dist/rs-datepicker.css">
+<style>
+    body {
+        font-family: system-ui, -apple-system, "Segoe UI", "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+        margin: 0;
+        background: #f1f5f9;
+        color: #1e293b;
+    }
+    .page { max-width: 1000px; margin: 0 auto; padding: 32px 20px 200px; }
+    h1 { font-size: 24px; }
+    h1 small { font-size: 13px; color: #64748b; font-weight: 400; margin-left: 10px; }
+    .lead { color: #475569; font-size: 14px; margin-bottom: 20px; }
+    .card {
+        background: #fff; border: 1px solid #e2e8f0; border-radius: 10px;
+        padding: 16px 18px; margin-bottom: 16px;
+    }
+    .card h2 { font-size: 14px; margin: 0 0 10px; }
+    .card input[type=text] {
+        width: 100%; box-sizing: border-box; padding: 9px 12px;
+        border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px;
+        font-family: inherit; outline: none;
+    }
+    .value { font-size: 12px; color: #64748b; margin-top: 10px; min-height: 16px; word-break: break-all; }
+    .submit {
+        appearance: none; margin-top: 12px; padding: 8px 18px; border-radius: 8px;
+        border: 1px solid #4e79a7; background: #4e79a7; color: #fff;
+        font-family: inherit; font-size: 13px; cursor: pointer;
+    }
+    a.back { font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="page">
+    <h1>スケジュール調整 <small>createRSSchedulePicker — ドラッグで期間選択＋時間帯チップ</small></h1>
+    <p class="lead">
+        カレンダーを<strong>ドラッグ（なぞる）で 1日〜5日のような期間</strong>を、<strong>クリックで単日</strong>を選択。
+        時間帯は「終日 / 午前 / 午後 / 17時以降」をワンタップ、「時間を指定」で
+        開始・終了（片方だけ=以降/まで、同時刻=ピンポイント）を選べます。
+        <a class="back" href="./index.html">← 基本デモへ</a>
+    </p>
+
+    <div class="card">
+        <h2>日程調整フォーム（name="term" → term_from / term_to / term_time_* の hidden 出力）</h2>
+        <form id="sched-form">
+            <div id="sched"></div>
+            <button type="button" class="submit" id="dump-btn">送信内容を確認</button>
+        </form>
+        <div class="value" id="v-sched"></div>
+        <div class="value" id="v-form"></div>
+    </div>
+
+    <div class="card">
+        <h2>コンパクト（1ヶ月・サマリーなし・プリセット差し替え・15分刻み）</h2>
+        <div id="sched-compact"></div>
+        <div class="value" id="v-compact"></div>
+    </div>
+
+    <div class="card">
+        <h2>既存の range ピッカーにもドラッグ選択（dragSelect: true・input ポップアップ）</h2>
+        <input type="text" id="dp-drag" placeholder="期間を選択（開いてドラッグ）">
+        <div class="value" id="v-drag"></div>
+    </div>
+</div>
+
+<script type="module">
+    import { createRSSchedulePicker, createRSDatePicker } from '../dist/rs-datepicker.esm.min.js';
+    window.__mod = { createRSSchedulePicker, createRSDatePicker }; // 検証用
+    window.pickers = {};
+
+    const fmt = (v) => {
+        if (!v) return 'null';
+        const d = (x) => `${x.getFullYear()}/${x.getMonth() + 1}/${x.getDate()}`;
+        return `{ from: ${d(v.from)}, to: ${d(v.to)}, days: ${v.days}, time: ${JSON.stringify(v.time)} }`;
+    };
+
+    window.pickers.sched = createRSSchedulePicker('#sched', {
+        name: 'term',
+        months: 2,
+        onChange: (v) => {
+            document.getElementById('v-sched').textContent = 'getValue(): ' + fmt(v);
+        },
+    });
+
+    document.getElementById('dump-btn').addEventListener('click', () => {
+        const fd = new FormData(document.getElementById('sched-form'));
+        const parts = [];
+        for (const [k, v] of fd.entries()) parts.push(`${k}=${v}`);
+        document.getElementById('v-form').textContent = '送信内容: ' + parts.join(' & ');
+    });
+
+    window.pickers.compact = createRSSchedulePicker('#sched-compact', {
+        months: 1,
+        showSummary: false,
+        timeStep: 15,
+        timePresets: [
+            { key: 'morning', label: '朝（〜10時）', from: null, to: '10:00' },
+            { key: 'lunch', label: '昼休み', from: '12:00', to: '13:00' },
+            { key: 'night', label: '夜（19時〜）', from: '19:00', to: null },
+        ],
+        defaultValue: { from: new Date(2026, 6, 22), to: new Date(2026, 6, 24), time: 'night' },
+        onChange: (v) => {
+            document.getElementById('v-compact').textContent = 'getValue(): ' + fmt(v);
+        },
+    });
+    document.getElementById('v-compact').textContent =
+        'getValue(): ' + fmt(window.pickers.compact.getValue());
+
+    window.pickers.drag = createRSDatePicker('#dp-drag', {
+        mode: 'range',
+        months: 2,
+        dragSelect: true,
+        rangeColors: { band: '#dcfce7', endpoint: '#16a34a' },
+        onChange: (v) => {
+            document.getElementById('v-drag').textContent = 'getValue(): ' + JSON.stringify(v);
+        },
+    });
+</script>
+</body>
+</html>

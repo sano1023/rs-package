@@ -1,7 +1,7 @@
 {
     "name": "@parelabo/rs-datepicker",
-    "version": "0.3.0",
-    "description": "日本語ファースト・依存ゼロの日付ピッカー（単一/複数/期間・時刻・年スクロールナビ・マーカー）",
+    "version": "0.4.0",
+    "description": "日本語ファースト・依存ゼロの日付ピッカー（単一/複数/期間・ドラッグ期間選択・スケジュール調整・時刻・年スクロールナビ・マーカー）",
     "type": "module",
     "main": "./dist/rs-datepicker.esm.min.js",
     "module": "./dist/rs-datepicker.esm.min.js",

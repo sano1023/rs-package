@@ -54,6 +54,20 @@ export class DatePicker {
     render(): void;
     renderDays(doc: any): void;
     _hoverKey: any;
+    /**
+     * pointerdown起点のドラッグ選択。
+     * - ドラッグ: 押した日=開始 → なぞって帯プレビュー → 離した日=終了（逆順は自動スワップ）
+     * - 同じ日で離す=単日選択（{ from, to } 同日）
+     * DOMは作り直さず updateRangePreview のクラス差し替えだけで追従する。
+     * キーボード（Enter 2回）は従来の selectDay フローがそのまま使える。
+     */
+    startDrag(e: any): void;
+    _dragAnchor: Date | null | undefined;
+    _onDragMove: ((ev: any) => void) | undefined;
+    _onDragEnd: (() => void) | undefined;
+    _onDragCancel: (() => void) | undefined;
+    stopDragListeners(doc: any): void;
+    dateFromKey(key: any): Date;
     /** 期間プレビューのクラスをDOM再構築なしで更新する */
     updateRangePreview(): void;
     renderYears(doc: any): void;

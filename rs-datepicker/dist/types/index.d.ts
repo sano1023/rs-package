@@ -14,9 +14,21 @@ export function createRSDatePicker(target: string | HTMLElement, options?: objec
  * @returns {DateSelect}
  */
 export function createRSDateSelect(target: string | HTMLElement, options?: object): DateSelect;
+/**
+ * スケジュール調整ピッカーを生成する（インライン常時表示）。
+ * カレンダーをドラッグで期間選択（1日なら単日選択）し、時間帯を
+ * チップ（終日/午前/午後/17時以降… + 開始・終了セレクト）で選ぶ。
+ * name 指定で {name}_from/_to と {name}_time_type/_time_from/_time_to の hidden を出力。
+ * @param {string|HTMLElement} target コンテナ要素
+ * @param {object} options { name, months, timeStep, timePresets, showTime, showSummary, defaultValue, ... }
+ * @returns {SchedulePicker}
+ */
+export function createRSSchedulePicker(target: string | HTMLElement, options?: object): SchedulePicker;
 import { DatePicker } from './picker.js';
 import { DateSelect } from './dateselect.js';
+import { SchedulePicker } from './schedule.js';
+import { DEFAULT_TIME_PRESETS } from './schedule.js';
 import { formatDate } from './dateutil.js';
 import { parseDate } from './dateutil.js';
 import { JA_LOCALE } from './dateutil.js';
-export { DatePicker, DateSelect, formatDate, parseDate, JA_LOCALE };
+export { DatePicker, DateSelect, SchedulePicker, DEFAULT_TIME_PRESETS, formatDate, parseDate, JA_LOCALE };

@@ -64,7 +64,7 @@ import '@parelabo/rs-editor/rs-editor.css';
 |---|---|---|---|---|
 | [@parelabo/rs-baslider](./rs-baslider/) | 0.1.0 | ✅ | 要 | Before/After比較スライダー |
 | [@parelabo/rs-chart](./rs-chart/) | 0.5.0 | ✅ | 要 | 依存ゼロのSVG/Canvasチャートライブラリ |
-| [@parelabo/rs-datepicker](./rs-datepicker/) | 0.3.0 | ✅ | 要 | 日本語ファースト・依存ゼロの日付ピッカー |
+| [@parelabo/rs-datepicker](./rs-datepicker/) | 0.4.0 | ✅ | 要 | 日本語ファースト・依存ゼロの日付ピッカー |
 | [@parelabo/rs-diagram](./rs-diagram/) | 0.6.0 | ✅ | 要 | 依存ゼロのSVG作図・ダイアグラムライブラリ |
 | [@parelabo/rs-editor](./rs-editor/) | 0.5.0 | ✅ | 要 | プラグインアーキテクチャを持つ、依存ゼロのWYSIWYGエディタライブラリ |
 | [@parelabo/rs-form](./rs-form/) | 0.5.0 | ✅ | 要 | 依存ゼロのスキーマ駆動フォームビルダー |
