@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>rs-kanban デモ — 依存ゼロのカンバンボード</title>
+<link rel="stylesheet" href="../dist/rs-kanban.css">
+<style>
+    body {
+        font-family: system-ui, -apple-system, "Segoe UI", "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+        margin: 0; background: #f8fafc; color: #1e293b;
+    }
+    .page { max-width: 1200px; margin: 0 auto; padding: 28px 20px 80px; }
+    h1 { font-size: 22px; }
+    h1 small { font-size: 13px; color: #64748b; font-weight: 400; margin-left: 10px; }
+    .lead { color: #475569; font-size: 13px; margin-bottom: 14px; line-height: 1.7; }
+    .controls { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 12px; align-items: center; }
+    input[type="search"], select {
+        border: 1px solid #cbd5e1; border-radius: 8px; font: inherit; font-size: 13px; padding: 7px 12px;
+    }
+    button {
+        appearance: none; border: 1px solid #cbd5e1; background: #fff; color: #334155;
+        padding: 7px 14px; border-radius: 8px; font-size: 13px; cursor: pointer; font-family: inherit;
+    }
+    button:hover { background: #f8fafc; }
+    .note { color: #64748b; font-size: 12px; }
+    label.chk { font-size: 13px; display: flex; align-items: center; gap: 4px; }
+</style>
+</head>
+<body>
+<div class="page">
+    <h1>rs-kanban <small>依存ゼロのカンバンボード — ドラッグ移動・WIP制限・スイムレーン</small></h1>
+    <p class="lead">
+        カードをドラッグして列間移動・並べ替えができます。「進行中」列は WIP 制限（3枚）つきで、
+        超過するドロップは拒否されます。列末尾の「＋ カードを追加」でインライン追加、検索ボックスで絞り込み。
+    </p>
+    <div class="controls">
+        <input type="search" id="q" placeholder="カードを検索…">
+        <select id="tag-filter">
+            <option value="">タグ: すべて</option>
+            <option>設計</option><option>開発</option><option>急ぎ</option><option>バグ</option>
+        </select>
+        <label class="chk"><input type="checkbox" id="lane-toggle"> スイムレーン（チーム別）</label>
+        <button id="btn-undo">元に戻す</button>
+        <span class="note" id="status"></span>
+    </div>
+    <div id="board"></div>
+</div>
+
+<script type="module">
+import { createRSKanban } from '../dist/rs-kanban.esm.min.js';
+
+const CARDS = [
+    { id: 1, title: '要件ヒアリング議事録の整理', columnId: 'todo', tags: ['設計'], assignee: '佐藤', lane: '開発チーム' },
+    { id: 2, title: 'ワイヤーフレーム作成', columnId: 'todo', tags: ['設計'], assignee: '鈴木', due: '8/8', lane: '開発チーム' },
+    { id: 3, title: 'ログイン画面の実装', columnId: 'doing', tags: ['開発'], assignee: '田中', lane: '開発チーム', color: '#2563eb' },
+    { id: 4, title: '本番環境の構築', columnId: 'doing', tags: ['開発', '急ぎ'], assignee: '佐藤', due: '8/1', lane: '開発チーム', color: '#d97706' },
+    { id: 5, title: '一覧画面のページング不具合', columnId: 'todo', tags: ['バグ', '急ぎ'], assignee: '田中', lane: '開発チーム', color: '#dc2626' },
+    { id: 6, title: '料金プラン資料の更新', columnId: 'todo', tags: [], assignee: '高橋', lane: '営業チーム' },
+    { id: 7, title: '展示会の出展申込', columnId: 'done', tags: [], assignee: '高橋', lane: '営業チーム' },
+    { id: 8, title: '導入事例インタビュー', columnId: 'doing', tags: [], assignee: '伊藤', due: '8/12', lane: '営業チーム' },
+    { id: 9, title: 'リリースノート執筆', columnId: 'review', tags: ['開発'], assignee: '鈴木', lane: '開発チーム' },
+    { id: 10, title: '新機能のQAテスト', columnId: 'review', tags: ['開発'], assignee: '伊藤', lane: '開発チーム' },
+];
+
+const statusEl = document.querySelector('#status');
+const laneToggle = document.querySelector('#lane-toggle');
+
+let board;
+function build() {
+    board?.destroy();
+    board = createRSKanban('#board', {
+        columns: [
+            { id: 'todo', title: 'ToDo' },
+            { id: 'doing', title: '進行中', wip: 3, color: '#2563eb' },
+            { id: 'review', title: 'レビュー', wip: 2, color: '#d97706' },
+            { id: 'done', title: '完了', color: '#16a34a' },
+        ],
+        cards: laneToggle.checked ? CARDS : CARDS.map(({ lane, ...c }) => c),
+        onCardMove: ({ card, from, to }) => {
+            statusEl.textContent = `「${card.title}」を ${from.columnId} → ${to.columnId} へ移動`;
+        },
+        onBlocked: ({ card, reason }) => {
+            statusEl.textContent = reason === 'wip'
+                ? `WIP制限: 「${card.title}」はこれ以上進行中に置けません`
+                : `移動できません（${reason}）`;
+        },
+        onCardClick: ({ card }) => { statusEl.textContent = `クリック: ${card.title}`; },
+    });
+}
+build();
+laneToggle.addEventListener('change', build);
+
+document.querySelector('#btn-undo').addEventListener('click', () => board.undo());
+
+const q = document.querySelector('#q');
+const tagSel = document.querySelector('#tag-filter');
+const applyFilter = () => board.setFilter({ text: q.value, tag: tagSel.value || undefined });
+q.addEventListener('input', applyFilter);
+tagSel.addEventListener('change', applyFilter);
+</script>
+</body>
+</html>

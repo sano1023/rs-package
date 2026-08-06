@@ -1,0 +1,50 @@
+{
+    "name": "@parelabo/rs-notify",
+    "version": "0.1.0",
+    "description": "依存ゼロのトースト通知＋Promiseベースの confirm / alert / prompt ダイアログ",
+    "type": "module",
+    "main": "./dist/rs-notify.esm.min.js",
+    "module": "./dist/rs-notify.esm.min.js",
+    "unpkg": "./dist/rs-notify.min.js",
+    "jsdelivr": "./dist/rs-notify.min.js",
+    "exports": {
+        ".": {
+            "types": "./dist/types/index.d.ts",
+            "import": "./dist/rs-notify.esm.min.js",
+            "default": "./dist/rs-notify.esm.min.js"
+        },
+        "./dist/*": "./dist/*",
+        "./rs-notify.css": "./dist/rs-notify.css"
+    },
+    "files": [
+        "dist"
+    ],
+    "keywords": [
+        "toast",
+        "notification",
+        "snackbar",
+        "dialog",
+        "confirm",
+        "alert",
+        "prompt",
+        "sweetalert",
+        "通知"
+    ],
+    "author": "ryusuke.sano <ryusuke.sano@parelabo.com>",
+    "license": "SEE LICENSE IN LICENSE.txt",
+    "homepage": "https://github.com/sano1023/rs-package/tree/main/rs-notify#readme",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/sano1023/rs-package.git",
+        "directory": "rs-notify"
+    },
+    "bugs": {
+        "url": "https://parelabo.com",
+        "email": "contact@parelabo.com"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
+    "types": "./dist/types/index.d.ts",
+    "style": "./dist/rs-notify.css"
+}

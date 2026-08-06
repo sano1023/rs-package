@@ -1,0 +1,43 @@
+# RS Packages 無償利用ライセンス / RS Packages Free-Use License (v1.0)
+
+Copyright (c) ryusuke.sano
+
+## 日本語
+
+本ソフトウェア（ビルド済みの配布ファイル一式。以下「本ソフトウェア」）について、以下の条件で無償の利用を許諾します。
+
+**できること**
+1. 個人・法人を問わず、商用を含むあらゆるプロジェクトで本ソフトウェアを**無償で利用**できます（Webサイト・Webアプリへの組み込み、社内システムでの利用を含む）。
+2. 利用するプロジェクトの配布物・デプロイ物の一部として、本ソフトウェアを**改変せずそのまま**含めることができます。
+
+**できないこと**
+3. 本ソフトウェアの**改変**（コードの書き換え・パッチ・派生物の作成）。
+4. 本ソフトウェア単体または実質的に単体とみなせる形での**再配布・再販売・再ライセンス**（ライブラリ集・CDNミラー・パッケージレジストリへの再登録を含む）。
+5. **リバースエンジニアリング**、逆難読化、ソースコードの復元・抽出（法令により許容される範囲を除く）。
+6. 著作権表示・本ライセンス表記の削除または改変。
+
+**その他**
+7. 本ソフトウェアは**現状有姿（AS IS）**で提供され、明示・黙示を問わずいかなる保証もありません。本ソフトウェアの利用により生じたいかなる損害についても、作者は責任を負いません。
+8. 機能追加・改修・カスタマイズ・組み込み支援をご希望の場合は、**作者への有償依頼**として承ります（連絡先は README を参照）。
+9. 本ライセンスに違反した場合、本許諾は自動的に終了します。
+10. 本ライセンスは日本法に準拠します。
+
+## English
+
+Permission is granted, free of charge, to use this software (the built distribution files, the "Software") under the following terms.
+
+**You may:**
+1. Use the Software free of charge in any project, commercial or non-commercial, including embedding it in websites, web applications, and internal systems.
+2. Include the Software, **unmodified**, as part of your project's deliverables or deployments.
+
+**You may not:**
+3. **Modify** the Software (rewriting, patching, or creating derivative works).
+4. **Redistribute, resell, or relicense** the Software on its own or in any form that is substantially the Software itself (including library collections, CDN mirrors, or re-publishing to package registries).
+5. **Reverse engineer**, de-obfuscate, or attempt to recover or extract source code (except to the extent permitted by applicable law).
+6. Remove or alter copyright or license notices.
+
+**Other terms:**
+7. THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY ARISING FROM THE USE OF THE SOFTWARE.
+8. Feature additions, fixes, and customization are available as **paid services from the author** (see README for contact).
+9. This license terminates automatically upon violation of its terms.
+10. This license is governed by the laws of Japan.

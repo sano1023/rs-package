@@ -221,7 +221,8 @@
     color: #64748b;
 }
 
-.rse-dialog-row input {
+.rse-dialog-row input,
+.rse-dialog-row select {
     display: block;
     width: 100%;
     box-sizing: border-box;
@@ -229,12 +230,19 @@
     padding: 7px 10px;
     font-size: 14px;
     color: var(--rse-text);
+    background: var(--rse-bg);
     border: 1px solid var(--rse-border);
     border-radius: 6px;
     outline: none;
 }
 
-.rse-dialog-row input:focus {
+.rse-dialog-row input[type="color"] {
+    padding: 2px;
+    height: 34px;
+}
+
+.rse-dialog-row input:focus,
+.rse-dialog-row select:focus {
     border-color: var(--rse-accent);
 }
 
@@ -914,3 +922,47 @@
     padding: 8px 4px;
 }
 .rse-tategaki-body p { margin: 0 0.6em 0 0; }
+
+/* ============================================================ v0.6 追加分 */
+
+/* ---- 区切り線（divider プラグイン） */
+.rse hr {
+    box-sizing: content-box;
+    height: 0;
+    width: 100%;
+    border: 0;
+    border-top: 1px solid var(--rse-divider-color, var(--rse-border, #cbd5e1));
+    /* 線は上辺に描かれるので、padding分をマージンで相殺して上下の余白を揃える */
+    margin: calc(1.1em + 6px) auto calc(1.1em - 6px);
+    padding: 6px 0; /* 細い線でもクリックしやすいよう当たり判定を広げる */
+}
+.rse-content hr {
+    cursor: pointer;
+}
+.rse-content hr.rse-hr-selected {
+    outline: 2px solid var(--rse-accent, #0284c7);
+    outline-offset: 1px;
+    border-radius: 2px;
+}
+
+/* ダイアログのプレビュー */
+.rse-divider-preview {
+    border: 1px solid var(--rse-border, #cbd5e1);
+    border-radius: 6px;
+    background: var(--rse-toolbar-bg, #f8fafc);
+    padding: 2px 14px;
+    margin-bottom: 12px;
+}
+.rse-divider-preview hr {
+    margin: 14px auto;
+    padding: 0;
+}
+
+/* メニュー項目の線プレビュー */
+.rse-menu-line {
+    display: inline-block;
+    width: 26px;
+    height: 0;
+    vertical-align: middle;
+    border-top: 1px solid currentColor;
+}

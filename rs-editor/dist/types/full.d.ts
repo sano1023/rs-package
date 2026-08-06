@@ -26,6 +26,7 @@ export namespace plugins {
     export { jpconvert };
     export { proofread };
     export { tategaki };
+    export { divider };
 }
 import { charmap } from './plugins/charmap.js';
 import { emoticons } from './plugins/emoticons.js';
@@ -53,3 +54,4 @@ import { ruby } from './plugins/ruby.js';
 import { jpconvert } from './plugins/jpconvert.js';
 import { proofread } from './plugins/proofread.js';
 import { tategaki } from './plugins/tategaki.js';
+import { divider } from './plugins/divider.js';

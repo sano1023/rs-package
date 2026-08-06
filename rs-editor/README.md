@@ -12,7 +12,7 @@ npm install @parelabo/rs-editor
 <summary>npm レジストリを使わない場合（GitHub tarball 直指定）</summary>
 
 ```bash
-npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-editor-0.5.0.tgz
+npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-editor-0.6.0.tgz
 ```
 </details>
 
@@ -30,8 +30,8 @@ createRSEditor(document.querySelector('#app'), { /* オプション */ });
 ### `<script>` タグ（CDN・ビルド環境不要）
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@parelabo/rs-editor@0.5.0/dist/rs-editor.css">
-<script src="https://cdn.jsdelivr.net/npm/@parelabo/rs-editor@0.5.0/dist/rs-editor.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@parelabo/rs-editor@0.6.0/dist/rs-editor.css">
+<script src="https://cdn.jsdelivr.net/npm/@parelabo/rs-editor@0.6.0/dist/rs-editor.min.js"></script>
 <script>
   // 公開APIはグローバル RSEditor に載る
   RSEditor.createRSEditor(document.querySelector('#app'), { /* オプション */ });
@@ -68,7 +68,7 @@ export default function App() {
 
 # rs-editor
 
-プラグインアーキテクチャを持つ、依存ゼロのWYSIWYGエディタライブラリです（現在 v0.5）。
+プラグインアーキテクチャを持つ、依存ゼロのWYSIWYGエディタライブラリです（現在 v0.6）。
 
 - **依存ゼロ**: ランタイム依存なし。ビルド不要で `src/` から直接 import できる ESモジュール
 - **プラグインアーキテクチャ**: 太字などの組み込み機能もすべて同じプラグインAPIで実装（利用者が数行で機能を追加できる）
@@ -79,6 +79,7 @@ export default function App() {
 - **v0.3 の拡張プラグイン（opt-in）**: 定番の拡張機能を13本収録（下記）。すべて公開プラグインAPIだけで実装されており、同じ書き方で独自プラグインを作れる
 - **v0.5 のブロック体験（opt-in）**: **スラッシュコマンド**（空段落で `/` → ブロック挿入メニュー・文字入力で絞り込み・↑↓Enter操作）／**チェックリスト**（☑クリックでトグル）／**コールアウト**（💡情報・⚠️注意・✅成功・📝メモの色付きボックス）／**ブロックのドラッグ並べ替え**（⠿ハンドル・undo対応）
 - **v0.5 の上位プラグイン（opt-in）**: **コメント**（選択範囲にアンカー・サイドパネルで一覧/解決・HTML属性だけで保存されるので外部ストア不要）／**脚注**（自動採番・文末リストに自動同期）／**フォーマットペインター**（書式コピー→次の選択に適用）／**リビジョン履歴**（版の保存・単語レベル差分・復元）— いずれも opt-in で追加できます
+- **v0.6 の追加（opt-in）**: **区切り線（divider）** — 色・太さ・線種（実線/破線/点線/二重線）・幅を指定できる `<hr>`。プリセットのドロップダウン＋プレビュー付きダイアログ、本文の区切り線はクリック選択→ダブルクリックで編集・Backspaceで削除
 - **v0.5 の日本語特化（opt-in）**: **ルビ**（ふりがな挿入・クリック編集）／**文字種変換**（全半角・ひらカタ・半角カナ→全角）／**かんたん校正**（全角英数・半角カナ・句読点混在・カタカナ長音ゆれ・ら抜き言葉を辞書レスで検出、ワンクリック/一括修正）／**縦書きプレビュー**
 - **ライセンス**: MIT
 
@@ -226,6 +227,39 @@ createRSEditor('#content', {
 | `proofread` | `proofread` | 日本語かんたん校正。全角英数/半角カナ/句読点スタイル混在/カタカナ長音ゆれ/ら抜き言葉/連続空白を辞書レスで検出し、パネルからジャンプ・個別修正・一括修正 |
 | `tategaki` | `tategaki` | 縦書きプレビュー（writing-mode: vertical-rl のオーバーレイ表示） |
 
+### 拡張プラグイン（v0.6・opt-in）
+
+| プラグイン | ボタン | 内容 |
+|---|---|---|
+| `divider` | `divider` | 区切り線（水平線）。**色・太さ・線種・幅**を指定できる。ドロップダウンからプリセット挿入／「スタイルを指定して挿入…」でプレビュー付きダイアログ |
+
+```js
+import { divider } from 'rs-editor/plugins/divider';
+
+createRSEditor('#content', {
+    toolbar: '… | divider',
+    plugins: [divider],
+    pluginOptions: {
+        divider: {
+            // すべての挿入に効く既定スタイル
+            defaults: { color: '#94a3b8', thickness: 2 },
+            // ドロップダウンの内容（省略時は 標準/太線/破線/点線/二重線/短い線）
+            presets: [
+                { label: '細い線', attrs: {} },
+                { label: '赤い太線', attrs: { color: '#ef4444', thickness: 4 } },
+                { label: '区切り（40%）', attrs: { width: 40, lineStyle: 'dashed' } },
+            ],
+        },
+    },
+});
+```
+
+- 属性: `color`（CSS色）/ `thickness`（1〜20 px）/ `lineStyle`（`solid` `dashed` `dotted` `double`）/ `width`（5〜100 %・中央寄せ）。既定値（`#cbd5e1` / 1px / solid / 100%）と同じ指定は出力から省かれ、CSS変数 `--rse-divider-color` などテーマ側の指定が活きる
+- 保存形式は `<hr class="rse-hr" data-rse-color="…" data-rse-thickness="…" data-rse-line="…" data-rse-width="…" style="…">`。**data属性がモデルの正**で、`style` は保存したHTMLを rs-editor のCSS無しで表示しても同じ見た目になるように併記される（読み込み時は属性から再構築されるので往復しても壊れない）
+- 本文の区切り線は**クリックで選択**（青枠）→ ツールバーのメニューから編集/削除、**ダブルクリック**で直接編集、**Backspace / Delete** で削除。いずれも undo 可
+- プレーンな `<hr>`（他エディタやMarkdown由来）も既定スタイルの区切り線として取り込まれる。※このプラグイン未読込のときは従来どおり `<hr>` は破棄される
+- JSONでは `{ "type": "divider", "attrs": { "color": "#ef4444", "thickness": 3 } }`。不正な値（`url(...)` を含む色など）は読み込み時・出力時に落とされる
+
 ### メニューのカスタマイズ — `pluginOptions`
 
 ドロップダウンメニューの中身はプラグイン別オプションで差し替えられます。選択肢が1つだけになった場合はメニューを出さず直接実行されます。
@@ -237,6 +271,8 @@ createRSEditor('#content', {
         table: { menu: ['rowBelow', 'deleteTable'] },     // rowAbove/rowBelow/colLeft/colRight/deleteRow/deleteCol/deleteTable/'|'
         color: { palette: ['#000000', '#e06666'],         // 共通パレット（forePalette/backPaletteで個別指定も可）
                  allowClear: false },                      // 「色を解除」を出さない
+        divider: { defaults: { color: '#94a3b8' },        // 色/太さ/線種/幅の既定値
+                   presets: [{ label: '太線', attrs: { thickness: 4 } }] },
         charmap: { chars: ['©', '™', '→'] },
         emoticons: { emoji: ['🍣', '🍜'] },
         insertdatetime: { formats: ['YYYY-MM-DD', 'HH:mm'] }, // トークン: YYYY MM DD M D HH mm ss
@@ -324,7 +360,7 @@ createRSEditor('#content', { toolbar: '… | stamp', plugins: [stamp] });
 - **キャレット書式トグル**: 選択なしで太字等を押した場合はゼロ幅スペース（ZWSP）入りのマーク要素を置いて入力を誘導し、入力後に掃除する。ZWSPはすべての出力（HTML/JSON）から除去される
 - **サニタイズ**: `setHTML` / ペースト / `insertContent` はホワイトリスト方式で浄化。style 属性は色・配置・インデントのプロパティのみ許可し、`javascript:` 等のスキームを拒否。Word / Googleドキュメント由来のHTMLはプリパスで「スタイル装飾 → 意味タグ（strong/em/u/s）」へ変換し、Wordのリストマーカーや `font-weight:normal` の `<b>` ラッパー（Google Docs）も正しく処理する
 
-## 既知の制限（v0.5 時点）
+## 既知の制限（v0.6 時点）
 
 - 折りたたみ（details/summary）ブロックは未実装（カスタムブロックは編集不可アトムになる位置モデルのため、編集可能な折りたたみはコア拡張が必要）
 - ライブの変更履歴（Track Changes）は未実装。コアの入力パスへのフックが必要なため、代替として **revisions プラグイン（版の保存＋単語レベル差分＋復元）** を提供
@@ -338,12 +374,13 @@ createRSEditor('#content', { toolbar: '… | stamp', plugins: [stamp] });
 - ブロック要素を含むHTMLを段落の途中に `insertContent` すると、現在のブロックの直後に挿入される
 - アンカーは出力HTMLに `contenteditable="false"` とZWSPフィラーを含む
 - toc プラグインは h1〜h3 の id を見出しテキスト由来のスラッグで管理する（手書きの id は上書きされる）
+- divider のダイアログの色はブラウザ標準のカラーピッカー（16進のみ）。`rgb()` や色名を使う場合は `pluginOptions.divider` / `setJSON` で指定する
 - 末尾がテーブルやカスタムブロックの場合、続きを書けるように空段落を自動で維持する（出力HTMLにも `<p><br></p>` が含まれる）
 - codesample（シンタックスハイライト・要ハイライタ）、pagebreak、directionality、help は未実装。必要なAPIサーフェス（カスタムノード・UI拡張・キーマップ）は実装済みプラグインで証明済みで、同じ書き方で追加できる
 
 ## 検証
 
-Playwright による自動テスト（v0.1: 29項目 + v0.2: 21項目 + v0.3: 16項目 + toc: 9項目 + ブロック脱出UX: 12項目 + pluginOptions: 8項目 + v0.5: 18項目）で、基本操作・HTML/JSONラウンドトリップ・ペースト浄化・undo/redo・テーブル操作・色/配置/インデント・Markdownショートカット・フローティングツールバー・画像アップロード/リサイズ・全拡張プラグイン（v0.5の12本は実クリック/実ドラッグ/実キー入力で検証）に加え、日本語IME受け入れテスト（変換中の change 抑制 / 1変換=1履歴 / 太字継続 / リスト内変換→Enter）を CDP の IME エミュレーションで確認済み。
+`node --test rs-editor/test/` によるモデルレベルのテスト（divider: 17項目 — 属性の正規化・HTML/JSON往復・サニタイズ・挿入/編集/削除の変形）に加え、Playwright による自動テスト（v0.1: 29項目 + v0.2: 21項目 + v0.3: 16項目 + toc: 9項目 + ブロック脱出UX: 12項目 + pluginOptions: 8項目 + v0.5: 18項目）で、基本操作・HTML/JSONラウンドトリップ・ペースト浄化・undo/redo・テーブル操作・色/配置/インデント・Markdownショートカット・フローティングツールバー・画像アップロード/リサイズ・全拡張プラグイン（v0.5の12本は実クリック/実ドラッグ/実キー入力で検証）に加え、日本語IME受け入れテスト（変換中の change 抑制 / 1変換=1履歴 / 太字継続 / リスト内変換→Enter）を CDP の IME エミュレーションで確認済み。
 
 ## ライセンス
 

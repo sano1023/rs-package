@@ -1,0 +1,70 @@
+{
+    "name": "@parelabo/rs-tree",
+    "version": "0.2.0",
+    "description": "依存ゼロのツリービュー（三態チェック・D&D移動・遅延読込・検索・仮想スクロール・キーボード完備）",
+    "type": "module",
+    "main": "./dist/rs-tree.esm.min.js",
+    "module": "./dist/rs-tree.esm.min.js",
+    "unpkg": "./dist/rs-tree.min.js",
+    "jsdelivr": "./dist/rs-tree.min.js",
+    "exports": {
+        ".": {
+            "types": "./dist/types/index.d.ts",
+            "import": "./dist/rs-tree.esm.min.js",
+            "default": "./dist/rs-tree.esm.min.js"
+        },
+        "./dist/*": "./dist/*",
+        "./rs-tree.css": "./dist/rs-tree.css",
+        "./vue": {
+            "types": "./dist/types/vue.d.ts",
+            "import": "./dist/rs-tree.vue.esm.min.js"
+        },
+        "./react": {
+            "types": "./dist/types/react.d.ts",
+            "import": "./dist/rs-tree.react.esm.min.js"
+        }
+    },
+    "files": [
+        "dist"
+    ],
+    "keywords": [
+        "tree",
+        "treeview",
+        "jstree",
+        "hierarchy",
+        "checkbox-tree",
+        "drag-and-drop",
+        "lazy-load",
+        "virtual-scroll",
+        "ツリー"
+    ],
+    "author": "ryusuke.sano <ryusuke.sano@parelabo.com>",
+    "license": "SEE LICENSE IN LICENSE.txt",
+    "homepage": "https://github.com/sano1023/rs-package/tree/main/rs-tree#readme",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/sano1023/rs-package.git",
+        "directory": "rs-tree"
+    },
+    "bugs": {
+        "url": "https://parelabo.com",
+        "email": "contact@parelabo.com"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
+    "types": "./dist/types/index.d.ts",
+    "style": "./dist/rs-tree.css",
+    "peerDependencies": {
+        "vue": "^3.0.0",
+        "react": ">=18"
+    },
+    "peerDependenciesMeta": {
+        "vue": {
+            "optional": true
+        },
+        "react": {
+            "optional": true
+        }
+    }
+}

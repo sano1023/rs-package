@@ -1,0 +1,76 @@
+{
+    "name": "@parelabo/rs-report",
+    "version": "0.5.0",
+    "description": "依存ゼロの帳票（レポート）エンジン。mm精度のバンドレイアウト・自動改ページ・グループ集計・繰越・和暦/大字漢数字・実寸印刷。SVF / ActiveReports JS / Stimulsoft 代替。",
+    "type": "module",
+    "main": "./dist/esm/index.js",
+    "module": "./dist/esm/index.js",
+    "unpkg": "./dist/rs-report.min.js",
+    "jsdelivr": "./dist/rs-report.min.js",
+    "exports": {
+        ".": {
+            "types": "./dist/types/index.d.ts",
+            "import": "./dist/esm/index.js",
+            "default": "./dist/esm/index.js"
+        },
+        "./dist/*": "./dist/*",
+        "./rs-report.css": "./dist/rs-report.css",
+        "./rs-report-designer.css": "./dist/rs-report-designer.css",
+        "./vue": {
+            "types": "./dist/types/vue.d.ts",
+            "import": "./dist/rs-report.vue.esm.min.js"
+        },
+        "./react": {
+            "types": "./dist/types/react.d.ts",
+            "import": "./dist/rs-report.react.esm.min.js"
+        },
+        "./designer": {
+            "types": "./dist/types/designer.d.ts",
+            "import": "./dist/esm/designer.js"
+        }
+    },
+    "files": [
+        "dist"
+    ],
+    "keywords": [
+        "report",
+        "reporting",
+        "invoice",
+        "print",
+        "pdf",
+        "帳票",
+        "請求書",
+        "banded-report",
+        "svf",
+        "activereports"
+    ],
+    "author": "ryusuke.sano <ryusuke.sano@parelabo.com>",
+    "license": "SEE LICENSE IN LICENSE.txt",
+    "homepage": "https://github.com/sano1023/rs-package/tree/main/rs-report#readme",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/sano1023/rs-package.git",
+        "directory": "rs-report"
+    },
+    "bugs": {
+        "url": "https://parelabo.com",
+        "email": "contact@parelabo.com"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
+    "types": "./dist/types/index.d.ts",
+    "style": "./dist/rs-report.css",
+    "peerDependencies": {
+        "vue": "^3.0.0",
+        "react": ">=18"
+    },
+    "peerDependenciesMeta": {
+        "vue": {
+            "optional": true
+        },
+        "react": {
+            "optional": true
+        }
+    }
+}

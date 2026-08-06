@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>rs-tree デモ — 依存ゼロのツリービュー</title>
+<link rel="stylesheet" href="../dist/rs-tree.css">
+<style>
+    body {
+        font-family: system-ui, -apple-system, "Segoe UI", "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+        margin: 0; background: #f8fafc; color: #1e293b;
+    }
+    .page { max-width: 1000px; margin: 0 auto; padding: 28px 20px 80px; }
+    h1 { font-size: 22px; }
+    h1 small { font-size: 13px; color: #64748b; font-weight: 400; margin-left: 10px; }
+    .lead { color: #475569; font-size: 13px; margin-bottom: 14px; line-height: 1.7; }
+    .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    @media (max-width: 800px) { .cols { grid-template-columns: 1fr; } }
+    .panel { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px; }
+    h2 { font-size: 14px; margin: 0 0 10px; }
+    input[type="search"] {
+        width: 100%; box-sizing: border-box; border: 1px solid #cbd5e1; border-radius: 8px;
+        font: inherit; font-size: 13px; padding: 7px 12px; margin-bottom: 10px;
+    }
+    .note { color: #64748b; font-size: 12px; margin-top: 10px; }
+    #virtual-tree { height: 380px; }
+</style>
+</head>
+<body>
+<div class="page">
+    <h1>rs-tree <small>依存ゼロのツリービュー — 三態チェック・D&D・遅延読込・仮想スクロール</small></h1>
+    <p class="lead">
+        キーボード（↑↓←→・Space・Enter）で操作できます。左は組織ツリー（チェック + D&D 移動 + 検索）、
+        右は 10,000 ノードの仮想スクロールと遅延読込です。
+    </p>
+    <div class="cols">
+        <div class="panel">
+            <h2>組織ツリー（checkboxes + draggable）</h2>
+            <input type="search" id="q" placeholder="部署名で検索…">
+            <div id="org-tree"></div>
+            <div class="note" id="org-status">行をドラッグ: 上下=並べ替え・中央=子にする（循環は拒否）</div>
+        </div>
+        <div class="panel">
+            <h2>10,000 ノード仮想スクロール + 遅延読込</h2>
+            <div id="virtual-tree"></div>
+            <div class="note">「サーバフォルダ」は展開時に loadChildren で子を取得（800ms 疑似遅延）</div>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+import { createRSTree } from '../dist/rs-tree.esm.min.js';
+
+// ---- 組織ツリー
+const org = createRSTree('#org-tree', {
+    checkboxes: true,
+    draggable: true,
+    multiple: true,
+    nodes: [
+        { id: 'ceo', label: '🏢 経営企画室', expanded: true, children: [
+            { id: 'sales', label: '営業部', expanded: true, children: [
+                { id: 's1', label: '第一課' },
+                { id: 's2', label: '第二課', children: [{ id: 's2a', label: '東京チーム' }, { id: 's2b', label: '大阪チーム' }] },
+            ]},
+            { id: 'dev', label: '開発部', children: [
+                { id: 'd1', label: 'フロントエンド' },
+                { id: 'd2', label: 'バックエンド' },
+                { id: 'd3', label: 'QA', disabled: true },
+            ]},
+            { id: 'hr', label: '人事部' },
+        ]},
+    ],
+    onCheck: ({ checkedIds }) => { document.querySelector('#org-status').textContent = `チェック中: ${checkedIds.length} 件`; },
+    onNodeMove: ({ node }) => { document.querySelector('#org-status').textContent = `移動: ${node.label}`; },
+    onBlocked: ({ reason }) => { document.querySelector('#org-status').textContent = reason === 'cycle' ? '自分の配下へは移動できません' : '移動できません'; },
+});
+document.querySelector('#q').addEventListener('input', (e) => org.search(e.target.value));
+
+// ---- 仮想スクロール + 遅延読込
+const bigNodes = [
+    { id: 'server', label: '📁 サーバフォルダ（遅延読込）', lazy: true },
+];
+for (let i = 0; i < 200; i++) {
+    bigNodes.push({
+        id: `dir${i}`,
+        label: `📁 フォルダ ${i + 1}`,
+        children: Array.from({ length: 49 }, (_, j) => ({ id: `f${i}-${j}`, label: `📄 ファイル ${i + 1}-${j + 1}` })),
+    });
+}
+const big = createRSTree('#virtual-tree', {
+    nodes: bigNodes,
+    rowHeight: 26,
+    loadChildren: (node) => new Promise((resolve) => {
+        setTimeout(() => resolve(Array.from({ length: 8 }, (_, i) => ({ id: `srv-${i}`, label: `📄 リモートファイル ${i + 1}` }))), 800);
+    }),
+});
+</script>
+</body>
+</html>

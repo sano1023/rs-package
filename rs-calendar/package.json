@@ -1,0 +1,70 @@
+{
+    "name": "@parelabo/rs-calendar",
+    "version": "0.5.0",
+    "description": "依存ゼロのイベントカレンダー（月/週/日/リストビュー・日本の祝日内蔵・RRULE繰り返し・ICS入出力・ドラッグ編集）",
+    "type": "module",
+    "main": "./dist/rs-calendar.esm.min.js",
+    "module": "./dist/rs-calendar.esm.min.js",
+    "unpkg": "./dist/rs-calendar.min.js",
+    "jsdelivr": "./dist/rs-calendar.min.js",
+    "exports": {
+        ".": {
+            "types": "./dist/types/index.d.ts",
+            "import": "./dist/rs-calendar.esm.min.js",
+            "default": "./dist/rs-calendar.esm.min.js"
+        },
+        "./dist/*": "./dist/*",
+        "./rs-calendar.css": "./dist/rs-calendar.css",
+        "./vue": {
+            "types": "./dist/types/vue.d.ts",
+            "import": "./dist/rs-calendar.vue.esm.min.js"
+        },
+        "./react": {
+            "types": "./dist/types/react.d.ts",
+            "import": "./dist/rs-calendar.react.esm.min.js"
+        }
+    },
+    "files": [
+        "dist"
+    ],
+    "keywords": [
+        "calendar",
+        "event-calendar",
+        "scheduler",
+        "rrule",
+        "ics",
+        "icalendar",
+        "japanese-holidays",
+        "祝日",
+        "カレンダー"
+    ],
+    "author": "ryusuke.sano <ryusuke.sano@parelabo.com>",
+    "license": "SEE LICENSE IN LICENSE.txt",
+    "homepage": "https://github.com/sano1023/rs-package/tree/main/rs-calendar#readme",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/sano1023/rs-package.git",
+        "directory": "rs-calendar"
+    },
+    "bugs": {
+        "url": "https://parelabo.com",
+        "email": "contact@parelabo.com"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
+    "types": "./dist/types/index.d.ts",
+    "style": "./dist/rs-calendar.css",
+    "peerDependencies": {
+        "vue": "^3.0.0",
+        "react": ">=18"
+    },
+    "peerDependenciesMeta": {
+        "vue": {
+            "optional": true
+        },
+        "react": {
+            "optional": true
+        }
+    }
+}

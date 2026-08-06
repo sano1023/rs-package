@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>rs-report デモ — 依存ゼロの帳票エンジン</title>
+<link rel="stylesheet" href="../dist/rs-report.css">
+<style>
+    body {
+        font-family: system-ui, -apple-system, "Segoe UI", "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+        margin: 0; background: #f1f5f9; color: #1e293b;
+    }
+    .page { max-width: 1100px; margin: 0 auto; padding: 32px 20px 120px; }
+    h1 { font-size: 24px; }
+    h1 small { font-size: 13px; color: #64748b; font-weight: 400; margin-left: 10px; }
+    .lead { color: #475569; font-size: 14px; margin-bottom: 24px; line-height: 1.7; }
+    h2 { font-size: 15px; margin: 32px 0 12px; }
+    .controls { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 12px; align-items: center; }
+    button, select {
+        appearance: none; border: 1px solid #cbd5e1; background: #fff; color: #334155;
+        padding: 8px 16px; border-radius: 8px; font-size: 13px; cursor: pointer; font-family: inherit;
+    }
+    button:hover { background: #f8fafc; }
+    button.primary { background: #2563eb; border-color: #2563eb; color: #fff; }
+    button.primary:hover { background: #1d4ed8; }
+    .note { color: #64748b; font-size: 12px; margin-top: 6px; }
+    #preview { height: 760px; }
+    #custom-preview { height: 560px; }
+    .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 900px) { .cols { grid-template-columns: 1fr; } }
+    textarea {
+        width: 100%; box-sizing: border-box; height: 200px; font: 12px/1.5 ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+        border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px; resize: vertical; background: #fff;
+    }
+</style>
+</head>
+<body>
+<div class="page">
+    <h1>rs-report <small>依存ゼロの帳票エンジン — SVF / ActiveReports JS 代替　|　<a href="./designer.html">GUI デザイナを開く →</a></small></h1>
+    <p class="lead">
+        帳票定義（JSON）＋データ配列から、mm 精度のバンドレイアウトで自動改ページ・グループ集計・ページ繰越つきの帳票を組版します。
+        「印刷」ボタンで <code>@page</code> 実寸のまま印刷できます（PDF に保存すればそのまま PDF 出力）。
+    </p>
+
+    <h2>1. 請求書（適格請求書対応・80行の自動改ページと繰越）</h2>
+    <div class="controls">
+        <select id="doc-kind">
+            <option value="invoice">請求書</option>
+            <option value="estimate">見積書</option>
+            <option value="delivery">納品書</option>
+            <option value="receipt">領収書</option>
+        </select>
+        <select id="row-count">
+            <option value="3">明細 3 行</option>
+            <option value="15">明細 15 行</option>
+            <option value="80" selected>明細 80 行（複数ページ+繰越）</option>
+            <option value="300">明細 300 行</option>
+        </select>
+        <button class="primary" id="btn-print">この帳票を印刷</button>
+        <button id="btn-pdf">PDFダウンロード（300dpi）</button>
+        <span class="note">キーボード: PageUp/PageDown でページ送り、+/− でズーム、0 で幅に合わせる</span>
+    </div>
+    <div id="preview"></div>
+
+    <h2>2. 宛名ラベル・タックシール面付け（v0.2 多段組）</h2>
+    <div class="controls">
+        <select id="label-preset">
+            <option value="a4-24" selected>24面（3×8・70×33.9mm）</option>
+            <option value="a4-21">21面（3×7・63.5×38.1mm）</option>
+            <option value="a4-12">12面（2×6・86.4×42.3mm）</option>
+            <option value="a4-10">10面（2×5・86.4×50.8mm）</option>
+            <option value="a4-44">44面（4×11・48.3×25.4mm）</option>
+            <option value="a4-65">65面（5×13・38.1×21.2mm）</option>
+        </select>
+        <label style="font-size:13px;"><input type="checkbox" id="label-outline" checked> 枠線（位置合わせ用）</label>
+        <label style="font-size:13px;"><input type="checkbox" id="label-qr"> QRコード入り荷札にする（rs-qrcode 連携）</label>
+        <button class="primary" id="btn-label-print">ラベルを印刷</button>
+    </div>
+    <div id="label-preview" style="height:560px;"></div>
+    <p class="note">1データ行 = 1ラベル。`columns` 指定で detail バンドが左→右に面付けされます。プリンタ側は「実際のサイズ」で印刷してください。</p>
+
+    <h2>3. 帳票定義を JSON で編集 → ライブ反映（グループ集計の例）</h2>
+    <div class="cols">
+        <div>
+            <textarea id="tpl-editor" spellcheck="false"></textarea>
+            <div class="controls" style="margin-top:8px;">
+                <button class="primary" id="btn-apply">反映する</button>
+                <span class="note" id="tpl-error"></span>
+            </div>
+        </div>
+        <div id="custom-preview"></div>
+    </div>
+</div>
+
+<script type="module">
+import { createRSReport, createDocumentTemplate } from '../dist/esm/index.js';
+import { prepareDocumentRows } from '../dist/esm/index.js';
+
+// ============================================================ 1. 証憑デモ
+
+const NAMES = ['Webサイト制作', 'サーバ保守（月額）', 'デザイン修正', 'SSL証明書', 'ドメイン更新', 'CMS導入支援', '写真撮影', 'ライティング'];
+const FOODS = ['お茶菓子詰め合わせ', 'コーヒー豆', 'ミネラルウォーター'];
+
+function makeRows(n) {
+    return prepareDocumentRows(Array.from({ length: n }, (_, i) => {
+        const food = i % 7 === 3;   // 時々軽減税率の品目を混ぜる
+        return {
+            name: (food ? FOODS[i % FOODS.length] : NAMES[i % NAMES.length]) + (n > 20 ? ` #${i + 1}` : ''),
+            qty: (i % 4) + 1,
+            unit: food ? '箱' : '式',
+            unitPrice: food ? 800 : [50000, 12000, 8000, 30000][i % 4],
+            taxRate: food ? 8 : 10,
+        };
+    }));
+}
+
+const params = {
+    no: 'INV-2026-0042',
+    issuedAt: '2026年7月28日',
+    dueAt: '2026年8月31日',
+    customer: { name: '株式会社ぱれ', zip: '150-0001', address: '東京都渋谷区神宮前1-1-1 ぱれビル 5F' },
+    issuer: {
+        name: 'サンプル商事株式会社',
+        zip: '100-0001', address: '東京都千代田区丸の内1-1-1',
+        tel: '03-1234-5678', regNo: 'T1234567890123',
+    },
+    bank: 'サンプル銀行 本店営業部\n普通 1234567\nサンプルショウジ（カ',
+    note: 'お振込手数料は貴社にてご負担くださいますようお願いいたします。',
+    proviso: 'お品代',
+};
+
+const kindSel = document.querySelector('#doc-kind');
+const countSel = document.querySelector('#row-count');
+
+let report = createRSReport('#preview', {
+    template: createDocumentTemplate(kindSel.value),
+    data: { rows: makeRows(Number(countSel.value)), params },
+});
+
+function refresh() {
+    report.setTemplate(createDocumentTemplate(kindSel.value));
+    report.setData({ rows: makeRows(Number(countSel.value)), params });
+}
+kindSel.addEventListener('change', refresh);
+countSel.addEventListener('change', refresh);
+document.querySelector('#btn-print').addEventListener('click', () => report.print());
+document.querySelector('#btn-pdf').addEventListener('click', async (e) => {
+    const btn = e.currentTarget;
+    btn.disabled = true;
+    try {
+        await report.downloadPDF(undefined, {
+            dpi: 300,
+            onProgress: (done, total) => { btn.textContent = `PDF生成中… ${done}/${total}`; },
+        });
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'PDFダウンロード（300dpi）';
+    }
+});
+
+// ============================================================ 2. 宛名ラベルデモ
+
+import { createLabelTemplate, registerQRElements } from '../dist/esm/index.js';
+
+// rs-qrcode があれば QR 荷札モードを有効化（無くてもラベル自体は動く）
+let hasQR = false;
+try {
+    registerQRElements(await import('../../rs-qrcode/dist/rs-qrcode.esm.min.js'));
+    hasQR = true;
+} catch { document.querySelector('#label-qr').disabled = true; }
+
+const LAST = ['佐藤', '鈴木', '高橋', '田中', '伊藤', '渡辺', '山本', '中村', '小林', '加藤'];
+const FIRST = ['翔太', '陽菜', '大輝', '結衣', '悠斗', '美咲', '蓮', '葵', '大和', '凛'];
+const CITIES = ['東京都渋谷区神宮前', '大阪府大阪市北区梅田', '愛知県名古屋市中村区名駅', '福岡県福岡市博多区博多駅前'];
+const addresses = Array.from({ length: 30 }, (_, i) => ({
+    zip: `${100 + i}-000${i % 10}`,
+    address: `${CITIES[i % CITIES.length]}${(i % 9) + 1}-${(i % 20) + 1}-${(i % 12) + 1}`,
+    building: i % 3 === 0 ? `サンプルビル ${(i % 8) + 2}F` : '',
+    name: `${LAST[i % 10]} ${FIRST[(i * 3) % 10]}`,
+    code: `PKG-2026-${String(i + 1).padStart(4, '0')}`,
+}));
+
+const presetSel = document.querySelector('#label-preset');
+const outlineChk = document.querySelector('#label-outline');
+const qrChk = document.querySelector('#label-qr');
+
+function labelTemplate() {
+    const withQR = hasQR && qrChk.checked;
+    return createLabelTemplate(presetSel.value, {
+        outline: outlineChk.checked,
+        elements: withQR ? [
+            { type: 'qrcode', value: '{{ code }}', x: 2, y: 2, w: 16, h: 16 },
+            { type: 'text', text: '{{ code }}', x: 2, y: 18.5, w: 16, h: 3.5, fontSize: 4.5, align: 'center' },
+            { type: 'text', text: '〒{{ zip }}\n{{ address }}{{ building ? " " + building : "" }}', x: 20, y: 2.5, w: 46, h: 14, fontSize: 7, wrap: true, valign: 'top' },
+            { type: 'text', text: '{{ name }}　様', x: 20, y: 17, w: 46, h: 8, bold: true, fontSize: 10 },
+        ] : undefined,
+    });
+}
+
+const labelReport = createRSReport('#label-preview', {
+    template: labelTemplate(),
+    data: { rows: addresses },
+    theme: 'light',
+});
+const refreshLabels = () => labelReport.setTemplate(labelTemplate());
+presetSel.addEventListener('change', refreshLabels);
+outlineChk.addEventListener('change', refreshLabels);
+qrChk.addEventListener('change', refreshLabels);
+document.querySelector('#btn-label-print').addEventListener('click', () => labelReport.print());
+
+// ============================================================ 3. JSON ライブ編集デモ
+
+const customTemplate = {
+    title: '部門別 経費集計',
+    paper: 'A4',
+    margin: 12,
+    groups: [{ by: 'dept' }],
+    bands: {
+        reportHeader: {
+            height: 16,
+            elements: [
+                { type: 'text', text: '部門別 経費集計表', w: 186, h: 10, align: 'center', fontSize: 15, bold: true },
+                { type: 'text', text: '出力日: {{ $.today }}', y: 10, w: 186, h: 5, align: 'right', fontSize: 8 },
+            ],
+        },
+        pageHeader: {
+            height: 7,
+            elements: [
+                { type: 'text', text: '日付', x: 0, w: 30, h: 7, align: 'center', bold: true, fill: '#eef2f7', border: true },
+                { type: 'text', text: '摘要', x: 30, w: 96, h: 7, align: 'center', bold: true, fill: '#eef2f7', border: true },
+                { type: 'text', text: '金額', x: 126, w: 30, h: 7, align: 'center', bold: true, fill: '#eef2f7', border: true },
+                { type: 'text', text: '構成比', x: 156, w: 30, h: 7, align: 'center', bold: true, fill: '#eef2f7', border: true },
+            ],
+        },
+        groupHeader: [{
+            height: 8,
+            elements: [{ type: 'text', text: '■ {{ dept }}{{ #repeated ? "（続き）" : "" }}', w: 186, h: 8, bold: true, fontSize: 10 }],
+        }],
+        detail: {
+            height: 6.5,
+            zebra: '#f8fafc',
+            elements: [
+                { type: 'field', field: 'date', format: 'date:M/D', x: 0, w: 30, h: 6.5, align: 'center', border: true },
+                { type: 'field', field: 'title', x: 30, w: 96, h: 6.5, border: true, padding: 1.5 },
+                { type: 'field', field: 'amount', format: '#,##0', x: 126, w: 30, h: 6.5, align: 'right', border: true, padding: 1.5 },
+                { type: 'text', text: "{{ round(amount / @sum(amount, 'report') * 100, 1) }}%", x: 156, w: 30, h: 6.5, align: 'right', border: true, padding: 1.5 },
+            ],
+        },
+        groupFooter: [{
+            height: 7,
+            elements: [
+                { type: 'text', text: '{{ dept }} 計（{{ @count() }}件）', x: 30, w: 96, h: 7, align: 'right', bold: true, padding: 1.5 },
+                { type: 'text', text: '{{ @sum(amount) }}', format: '#,##0', x: 126, w: 30, h: 7, align: 'right', bold: true, border: true, fill: '#eef2f7', padding: 1.5 },
+            ],
+        }],
+        reportFooter: {
+            height: 9,
+            elements: [
+                { type: 'text', text: '総合計', x: 30, w: 96, h: 9, align: 'right', bold: true, fontSize: 11, padding: 1.5 },
+                { type: 'text', text: "{{ @sum(amount, 'report') }}", format: '¥#,##0', x: 126, w: 30, h: 9, align: 'right', bold: true, fontSize: 11, border: true, fill: '#dde7f3', padding: 1.5 },
+            ],
+        },
+        pageFooter: {
+            height: 8,
+            elements: [{ type: 'text', text: '{{ #page }} / {{ #pages }}', w: 186, h: 6, align: 'center', fontSize: 8, color: '#64748b' }],
+        },
+    },
+};
+
+const expenses = [
+    { dept: '営業部', date: '2026-07-02', title: '交通費（客先訪問）', amount: 1840 },
+    { dept: '営業部', date: '2026-07-10', title: '会食費', amount: 24000 },
+    { dept: '営業部', date: '2026-07-15', title: '展示会ブース装飾', amount: 88000 },
+    { dept: '開発部', date: '2026-07-03', title: 'SaaS利用料', amount: 15400 },
+    { dept: '開発部', date: '2026-07-08', title: '技術書籍', amount: 6600 },
+    { dept: '開発部', date: '2026-07-20', title: '検証用端末', amount: 54800 },
+    { dept: '総務部', date: '2026-07-01', title: 'オフィス消耗品', amount: 12300 },
+    { dept: '総務部', date: '2026-07-18', title: '来客用お茶', amount: 3200 },
+];
+
+const editor = document.querySelector('#tpl-editor');
+const errorEl = document.querySelector('#tpl-error');
+editor.value = JSON.stringify(customTemplate, null, 2);
+
+const customReport = createRSReport('#custom-preview', {
+    template: customTemplate,
+    data: { rows: expenses, params: { today: '2026/07/28' } },
+    theme: 'light',
+});
+
+document.querySelector('#btn-apply').addEventListener('click', () => {
+    try {
+        customReport.setTemplate(JSON.parse(editor.value));
+        errorEl.textContent = '反映しました';
+        errorEl.style.color = '#16a34a';
+    } catch (err) {
+        errorEl.textContent = err.message;
+        errorEl.style.color = '#dc2626';
+    }
+});
+</script>
+</body>
+</html>

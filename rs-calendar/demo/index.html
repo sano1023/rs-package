@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>rs-calendar デモ — 依存ゼロのイベントカレンダー</title>
+<link rel="stylesheet" href="../dist/rs-calendar.css">
+<style>
+    body {
+        font-family: system-ui, -apple-system, "Segoe UI", "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+        margin: 0; background: #f1f5f9; color: #1e293b;
+    }
+    .page { max-width: 1100px; margin: 0 auto; padding: 28px 20px 80px; }
+    h1 { font-size: 22px; }
+    h1 small { font-size: 13px; color: #64748b; font-weight: 400; margin-left: 10px; }
+    .lead { color: #475569; font-size: 13px; margin-bottom: 14px; line-height: 1.7; }
+    #calendar { height: 74vh; min-height: 560px; }
+    .controls { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; align-items: center; }
+    button {
+        appearance: none; border: 1px solid #cbd5e1; background: #fff; color: #334155;
+        padding: 7px 14px; border-radius: 8px; font-size: 13px; cursor: pointer; font-family: inherit;
+    }
+    button:hover { background: #f8fafc; }
+    .note { color: #64748b; font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="page">
+    <h1>rs-calendar <small>依存ゼロのイベントカレンダー（祝日・RRULE・ICS 内蔵）</small></h1>
+    <p class="lead">
+        月ビューのイベントをドラッグで別の日へ、週/日ビューでは移動＋下端リサイズ、空き枠をドラッグすると予定を作成できます。
+        日本の祝日（振替休日・国民の休日込み）は計算式で内蔵しており、データ取得は一切ありません。
+    </p>
+    <div id="calendar"></div>
+    <div class="controls">
+        <button id="btn-export">ICS 書き出し（.ics ダウンロード）</button>
+        <label><input type="file" id="ics-file" accept=".ics" hidden><button id="btn-import">ICS 読み込み</button></label>
+        <span class="note" id="status"></span>
+    </div>
+</div>
+
+<script type="module">
+import { createRSCalendar, formatDateTime } from '../dist/rs-calendar.esm.min.js';
+
+// 今月を基準にサンプル予定を組む
+const now = new Date();
+const Y = now.getFullYear();
+const M = String(now.getMonth() + 1).padStart(2, '0');
+const day = (d, t = '') => `${Y}-${M}-${String(d).padStart(2, '0')}${t ? ` ${t}` : ''}`;
+
+const cal = createRSCalendar('#calendar', {
+    view: 'month',
+    resources: [
+        { id: 'roomA', title: '会議室A', color: '#16a34a' },
+        { id: 'roomB', title: '会議室B', color: '#d97706' },
+        { id: 'roomC', title: '応接室', color: '#7c3aed' },
+    ],
+    businessHours: { start: '9:00', end: '18:00' },
+    events: [
+        { title: '設備点検', start: day(16, '09:00'), end: day(16, '10:00'), resourceId: 'roomA', color: '#16a34a' },
+        { title: '来客対応', start: day(16, '10:30'), end: day(16, '12:00'), resourceId: 'roomC', color: '#7c3aed' },
+        { title: 'キックオフ', start: day(2, '10:00'), end: day(2, '12:00'), color: '#16a34a' },
+        { title: '大阪出張', start: day(9), end: day(11), color: '#d97706' },
+        { title: 'デザインレビュー', start: day(16, '15:00'), end: day(16, '16:30') },
+        { title: '週次定例', start: day(1, '09:30'), end: day(1, '10:00'), rrule: 'FREQ=WEEKLY;BYDAY=MO', color: '#7c3aed' },
+        { title: '月次締め', start: day(25), rrule: 'FREQ=MONTHLY;BYMONTHDAY=25', color: '#dc2626' },
+        { title: '1on1', start: day(5, '13:00'), end: day(5, '13:30'), rrule: 'FREQ=WEEKLY;INTERVAL=2;BYDAY=TH' },
+        { title: 'リリース', start: day(20, '17:00'), end: day(20, '18:00'), color: '#0891b2' },
+        { title: '英会話', start: day(3, '19:00'), end: day(3, '20:00'), rrule: 'FREQ=WEEKLY;BYDAY=WE;COUNT=8', color: '#65a30d' },
+    ],
+    onEventClick: ({ event }) => {
+        status(`クリック: ${event.title}`);
+    },
+    onDateClick: ({ date }) => status(`日付クリック: ${date}`),
+    onSelect: ({ startTime, endTime, start, end }) => {
+        const title = prompt(`予定を作成（${startTime} 〜 ${endTime.slice(-5)}）`, '新しい予定');
+        if (title) cal.addEvent({ title, start, end, allDay: false });
+    },
+    onEventChange: ({ event, revert }) => {
+        status(`移動: ${event.title} → ${formatDateTime(event.start)}（元に戻すは console から revert()）`);
+        window.lastRevert = revert;
+    },
+});
+
+const statusEl = document.querySelector('#status');
+function status(text) { statusEl.textContent = text; }
+
+document.querySelector('#btn-export').addEventListener('click', () => {
+    const blob = new Blob([cal.exportICS({ calName: 'rs-calendar デモ' })], { type: 'text/calendar' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'rs-calendar.ics';
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+});
+
+const fileInput = document.querySelector('#ics-file');
+document.querySelector('#btn-import').addEventListener('click', () => fileInput.click());
+fileInput.addEventListener('change', () => {
+    const file = fileInput.files?.[0];
+    if (!file) return;
+    file.text().then((text) => {
+        const count = cal.importICS(text);
+        status(`${count} 件の予定を取り込みました`);
+    });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,71 @@
+{
+    "name": "@parelabo/rs-select",
+    "version": "0.1.0",
+    "description": "依存ゼロの高機能セレクトボックス（日本語ファースト検索・複数選択タグ・非同期候補・仮想リスト・WAI-ARIA combobox）",
+    "type": "module",
+    "main": "./dist/rs-select.esm.min.js",
+    "module": "./dist/rs-select.esm.min.js",
+    "unpkg": "./dist/rs-select.min.js",
+    "jsdelivr": "./dist/rs-select.min.js",
+    "exports": {
+        ".": {
+            "types": "./dist/types/index.d.ts",
+            "import": "./dist/rs-select.esm.min.js",
+            "default": "./dist/rs-select.esm.min.js"
+        },
+        "./dist/*": "./dist/*",
+        "./rs-select.css": "./dist/rs-select.css",
+        "./vue": {
+            "types": "./dist/types/vue.d.ts",
+            "import": "./dist/rs-select.vue.esm.min.js"
+        },
+        "./react": {
+            "types": "./dist/types/react.d.ts",
+            "import": "./dist/rs-select.react.esm.min.js"
+        }
+    },
+    "files": [
+        "dist"
+    ],
+    "keywords": [
+        "select",
+        "combobox",
+        "dropdown",
+        "autocomplete",
+        "select2",
+        "multiselect",
+        "tags",
+        "japanese",
+        "kana-search",
+        "セレクトボックス"
+    ],
+    "author": "ryusuke.sano <ryusuke.sano@parelabo.com>",
+    "license": "SEE LICENSE IN LICENSE.txt",
+    "homepage": "https://github.com/sano1023/rs-package/tree/main/rs-select#readme",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/sano1023/rs-package.git",
+        "directory": "rs-select"
+    },
+    "bugs": {
+        "url": "https://parelabo.com",
+        "email": "contact@parelabo.com"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
+    "types": "./dist/types/index.d.ts",
+    "style": "./dist/rs-select.css",
+    "peerDependencies": {
+        "vue": "^3.0.0",
+        "react": ">=18"
+    },
+    "peerDependenciesMeta": {
+        "vue": {
+            "optional": true
+        },
+        "react": {
+            "optional": true
+        }
+    }
+}

@@ -1,0 +1,48 @@
+{
+    "name": "@parelabo/rs-splitter",
+    "version": "0.1.0",
+    "description": "依存ゼロの分割ペイン（ドラッグリサイズ・折りたたみ・キーボード操作・レイアウト保存）",
+    "type": "module",
+    "main": "./dist/rs-splitter.esm.min.js",
+    "module": "./dist/rs-splitter.esm.min.js",
+    "unpkg": "./dist/rs-splitter.min.js",
+    "jsdelivr": "./dist/rs-splitter.min.js",
+    "exports": {
+        ".": {
+            "types": "./dist/types/index.d.ts",
+            "import": "./dist/rs-splitter.esm.min.js",
+            "default": "./dist/rs-splitter.esm.min.js"
+        },
+        "./dist/*": "./dist/*",
+        "./rs-splitter.css": "./dist/rs-splitter.css"
+    },
+    "files": [
+        "dist"
+    ],
+    "keywords": [
+        "splitter",
+        "split-pane",
+        "resizable",
+        "layout",
+        "panel",
+        "split.js",
+        "分割"
+    ],
+    "author": "ryusuke.sano <ryusuke.sano@parelabo.com>",
+    "license": "SEE LICENSE IN LICENSE.txt",
+    "homepage": "https://github.com/sano1023/rs-package/tree/main/rs-splitter#readme",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/sano1023/rs-package.git",
+        "directory": "rs-splitter"
+    },
+    "bugs": {
+        "url": "https://parelabo.com",
+        "email": "contact@parelabo.com"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
+    "types": "./dist/types/index.d.ts",
+    "style": "./dist/rs-splitter.css"
+}

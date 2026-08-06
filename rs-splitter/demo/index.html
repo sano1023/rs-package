@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>rs-splitter デモ — 分割ペイン</title>
+<link rel="stylesheet" href="../dist/rs-splitter.css">
+<style>
+    body {
+        font-family: system-ui, -apple-system, "Segoe UI", "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+        margin: 0; background: #f8fafc; color: #1e293b;
+    }
+    .page { max-width: 1100px; margin: 0 auto; padding: 28px 20px 80px; }
+    h1 { font-size: 22px; }
+    h1 small { font-size: 13px; color: #64748b; font-weight: 400; margin-left: 10px; }
+    .lead { color: #475569; font-size: 13px; margin-bottom: 14px; line-height: 1.7; }
+    #layout { height: 480px; border: 1px solid #e2e8f0; border-radius: 10px; background: #fff; overflow: hidden; }
+    .pane { padding: 14px; font-size: 13px; }
+    .pane h3 { margin: 0 0 6px; font-size: 13px; }
+    .pane p { color: #64748b; font-size: 12px; line-height: 1.7; }
+    .controls { display: flex; gap: 8px; margin: 12px 0; flex-wrap: wrap; align-items: center; }
+    button {
+        appearance: none; border: 1px solid #cbd5e1; background: #fff; color: #334155;
+        padding: 7px 14px; border-radius: 8px; font-size: 13px; cursor: pointer; font-family: inherit;
+    }
+    button:hover { background: #f8fafc; }
+    .note { color: #64748b; font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="page">
+    <h1>rs-splitter <small>依存ゼロの分割ペイン — ドラッグ・キーボード・レイアウト保存</small></h1>
+    <p class="lead">
+        境界をドラッグ（ダブルクリックで均等化）。境界に Tab でフォーカスして ←→（Shiftで5%）でも動かせます。
+        サイズは localStorage に保存され、リロードしても復元されます。右上ペインは縦分割のネストです。
+    </p>
+    <div class="controls">
+        <button id="collapse-left">左を折りたたむ</button>
+        <button id="restore-left">左を戻す</button>
+        <button id="reset">均等に戻す</button>
+        <span class="note" id="sizes"></span>
+    </div>
+    <div id="layout">
+        <div class="pane">
+            <h3>📁 サイドバー</h3>
+            <p>ファイルツリーやナビゲーションを置くペイン。最小 120px。ドラッグで押し込むと 0 に吸着します。</p>
+        </div>
+        <div id="right">
+            <div class="pane">
+                <h3>📝 エディタ</h3>
+                <p>縦分割のネスト例。この境界（上下）もドラッグ・キーボードで動きます。</p>
+            </div>
+            <div class="pane">
+                <h3>🖥 コンソール</h3>
+                <p>下側のペイン。</p>
+            </div>
+        </div>
+        <div class="pane">
+            <h3>🔍 プロパティ</h3>
+            <p>右ペイン。</p>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+import { createRSSplitter } from '../dist/rs-splitter.esm.min.js';
+
+const split = createRSSplitter('#layout', {
+    sizes: [22, 53, 25],
+    minSizes: [120, 200, 140],
+    storageKey: 'rs-splitter-demo',
+    onResize: (sizes) => {
+        document.querySelector('#sizes').textContent = `sizes: [${sizes.map((s) => s.toFixed(1)).join('%, ')}%]`;
+    },
+});
+
+// ネスト（縦）
+createRSSplitter('#right', { direction: 'vertical', sizes: [65, 35], minSizes: 80 });
+
+document.querySelector('#collapse-left').onclick = () => split.collapse(0);
+document.querySelector('#restore-left').onclick = () => split.collapse(0, false);
+document.querySelector('#reset').onclick = () => split.reset();
+</script>
+</body>
+</html>

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>rs-notify デモ — トースト通知＋ダイアログ</title>
+<link rel="stylesheet" href="../dist/rs-notify.css">
+<style>
+    body {
+        font-family: system-ui, -apple-system, "Segoe UI", "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+        margin: 0; background: #f8fafc; color: #1e293b;
+    }
+    .page { max-width: 860px; margin: 0 auto; padding: 28px 20px 80px; }
+    h1 { font-size: 22px; }
+    h1 small { font-size: 13px; color: #64748b; font-weight: 400; margin-left: 10px; }
+    .lead { color: #475569; font-size: 13px; margin-bottom: 18px; line-height: 1.7; }
+    h2 { font-size: 14px; margin: 24px 0 8px; }
+    .row { display: flex; flex-wrap: wrap; gap: 8px; }
+    button {
+        appearance: none; border: 1px solid #cbd5e1; background: #fff; color: #334155;
+        padding: 8px 16px; border-radius: 8px; font-size: 13px; cursor: pointer; font-family: inherit;
+    }
+    button:hover { background: #f8fafc; }
+    .out { font-size: 12px; color: #2563eb; margin-top: 8px; min-height: 1.2em; }
+</style>
+</head>
+<body>
+<div class="page">
+    <h1>rs-notify <small>依存ゼロのトースト通知＋ダイアログ</small></h1>
+    <p class="lead">トーストはホバーで一時停止し、進捗バーが残り時間を示します。ダイアログは Promise を返すので `await confirm(...)` と書けます。</p>
+
+    <h2>トースト</h2>
+    <div class="row">
+        <button id="t-success">success</button>
+        <button id="t-error">error（消えない）</button>
+        <button id="t-warning">warning</button>
+        <button id="t-action">アクション付き</button>
+        <button id="t-promise">promise（保存を模擬）</button>
+        <button id="t-bottom">bottom-center</button>
+        <button id="t-clear">全部消す</button>
+    </div>
+
+    <h2>ダイアログ</h2>
+    <div class="row">
+        <button id="d-confirm">confirm</button>
+        <button id="d-danger">confirm（danger）</button>
+        <button id="d-alert">alert</button>
+        <button id="d-prompt">prompt</button>
+    </div>
+    <div class="out" id="out"></div>
+</div>
+
+<script type="module">
+import { toast, confirm, alert, prompt } from '../dist/rs-notify.esm.min.js';
+
+const out = (text) => { document.querySelector('#out').textContent = text; };
+
+document.querySelector('#t-success').onclick = () => toast.success('保存しました');
+document.querySelector('#t-error').onclick = () => toast.error('保存に失敗しました。ネットワークを確認してください', { duration: 0 });
+document.querySelector('#t-warning').onclick = () => toast.warning('未保存の変更があります');
+document.querySelector('#t-action').onclick = () => toast.success('3件のタスクを削除しました', {
+    duration: 8000,
+    action: { label: '元に戻す', onClick: () => toast.info('復元しました') },
+});
+document.querySelector('#t-promise').onclick = () => {
+    const save = new Promise((resolve, reject) => setTimeout(() => (Math.random() > 0.3 ? resolve(5) : reject(new Error('timeout'))), 1500));
+    toast.promise(save, {
+        loading: 'サーバへ保存中…',
+        success: (n) => `${n} 件保存しました`,
+        error: (e) => `保存失敗: ${e.message}`,
+    }).catch(() => {});
+};
+document.querySelector('#t-bottom').onclick = () => toast.info('画面下にも出せます', { position: 'bottom-center' });
+document.querySelector('#t-clear').onclick = () => toast.dismissAll();
+
+document.querySelector('#d-confirm').onclick = async () => {
+    out(`confirm → ${await confirm('この操作を実行しますか？', { title: '確認' })}`);
+};
+document.querySelector('#d-danger').onclick = async () => {
+    const ok = await confirm('請求書 INV-0042 を完全に削除します。この操作は取り消せません。', {
+        title: '請求書の削除', danger: true, okLabel: '削除する',
+    });
+    out(`danger confirm → ${ok}`);
+    if (ok) toast.success('削除しました');
+};
+document.querySelector('#d-alert').onclick = async () => {
+    await alert('処理が完了しました。', { title: 'お知らせ' });
+    out('alert 閉じた');
+};
+document.querySelector('#d-prompt').onclick = async () => {
+    const name = await prompt('テンプレート名を入力してください', { title: '名前を付けて保存', value: '新しい帳票' });
+    out(name === null ? 'prompt → キャンセル' : `prompt → 「${name}」`);
+};
+</script>
+</body>
+</html>

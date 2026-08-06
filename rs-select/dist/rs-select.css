@@ -1,0 +1,128 @@
+/**
+ * rs-select スタイル（CSS 変数でテーマ変更可）
+ */
+
+.rssel {
+    --rssel-border: #cbd5e1;
+    --rssel-accent: #2563eb;
+    --rssel-text: #1e293b;
+    --rssel-muted: #94a3b8;
+    --rssel-bg: #ffffff;
+    --rssel-hover: #f1f5f9;
+    --rssel-radius: 8px;
+
+    position: relative;
+    display: inline-block;
+    min-width: 220px;
+    font-family: system-ui, -apple-system, "Segoe UI", "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+    font-size: 13px;
+    color: var(--rssel-text);
+}
+
+.rssel-control {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+    min-height: 36px;
+    padding: 4px 28px 4px 10px;
+    background: var(--rssel-bg);
+    border: 1px solid var(--rssel-border);
+    border-radius: var(--rssel-radius);
+    cursor: pointer;
+    box-sizing: border-box;
+}
+.rssel-control:focus-visible,
+.rssel-control[aria-expanded="true"] { outline: none; border-color: var(--rssel-accent); box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15); }
+.rssel-control.is-disabled { opacity: 0.55; cursor: default; background: #f8fafc; }
+
+.rssel-placeholder { color: var(--rssel-muted); }
+.rssel-single { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.rssel-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #e0e7ff;
+    color: #3730a3;
+    border-radius: 6px;
+    padding: 2px 4px 2px 8px;
+    font-size: 12px;
+}
+.rssel-tag-remove {
+    appearance: none; border: 0; background: transparent; cursor: pointer;
+    font: inherit; color: inherit; opacity: 0.6; padding: 0 3px; border-radius: 4px;
+}
+.rssel-tag-remove:hover { opacity: 1; background: rgba(0, 0, 0, 0.08); }
+
+.rssel-clear {
+    appearance: none; border: 0; background: transparent; cursor: pointer;
+    color: var(--rssel-muted); font-size: 14px; padding: 0 4px; margin-left: auto;
+}
+.rssel-clear:hover { color: var(--rssel-text); }
+
+.rssel-arrow {
+    position: absolute;
+    right: 10px;
+    color: var(--rssel-muted);
+    font-size: 11px;
+    pointer-events: none;
+}
+
+/* ============================================================ ドロップダウン */
+
+.rssel-dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    z-index: 8000;
+    background: var(--rssel-bg);
+    border: 1px solid var(--rssel-border);
+    border-radius: var(--rssel-radius);
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.14);
+    padding: 6px;
+}
+
+.rssel-search {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid var(--rssel-border);
+    border-radius: 6px;
+    font: inherit;
+    padding: 6px 10px;
+    margin-bottom: 6px;
+}
+.rssel-search:focus { outline: none; border-color: var(--rssel-accent); }
+
+.rssel-list { overflow-y: auto; }
+
+.rssel-group {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--rssel-muted);
+    padding: 6px 8px 2px;
+}
+
+.rssel-option {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    box-sizing: border-box;
+    white-space: nowrap;
+    overflow: hidden;
+}
+.rssel-option:hover { background: var(--rssel-hover); }
+.rssel-option.is-active { background: var(--rssel-hover); outline: 1px solid var(--rssel-accent); outline-offset: -1px; }
+.rssel-option.is-selected { color: var(--rssel-accent); font-weight: 600; }
+.rssel-option.is-disabled { opacity: 0.45; cursor: default; }
+
+.rssel-kana { color: var(--rssel-muted); font-size: 10px; }
+.rssel-checkmark { margin-left: auto; }
+
+.rssel-create { color: var(--rssel-accent); border-top: 1px dashed var(--rssel-border); border-radius: 0; }
+
+.rssel-notice { color: var(--rssel-muted); text-align: center; padding: 10px; font-size: 12px; }

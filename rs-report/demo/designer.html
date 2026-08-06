@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>rs-report デザイナ — GUI で帳票を作る</title>
+<link rel="stylesheet" href="../dist/rs-report.css">
+<link rel="stylesheet" href="../dist/rs-report-designer.css">
+<style>
+    body {
+        font-family: system-ui, -apple-system, "Segoe UI", "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+        margin: 0; background: #f1f5f9; color: #1e293b;
+    }
+    .page { max-width: 1280px; margin: 0 auto; padding: 24px 20px 80px; }
+    h1 { font-size: 22px; }
+    h1 small { font-size: 13px; color: #64748b; font-weight: 400; margin-left: 10px; }
+    .lead { color: #475569; font-size: 13px; margin-bottom: 16px; line-height: 1.7; }
+    #designer { height: 78vh; min-height: 560px; }
+    .links { margin-top: 10px; font-size: 13px; }
+    .links a { color: #2563eb; }
+</style>
+</head>
+<body>
+<div class="page">
+    <h1>rs-report デザイナ <small>パレットから要素を追加 → ドラッグで配置 → プレビュー/印刷</small></h1>
+    <p class="lead">
+        要素をクリックで選択中のバンドに追加し、ドラッグで移動（1mm スナップ）、右下ハンドルでリサイズ、
+        バンド下端のドラッグで高さ変更。右パネルでテキスト・書式・式を編集し、「プレビュー」で実データを流し込んだ帳票を確認できます。
+        JSON で書き出したテンプレートは <code>createRSReport({ template })</code> にそのまま渡せます。
+    </p>
+    <div id="designer"></div>
+    <p class="links"><a href="./index.html">← ランタイムのデモへ戻る</a></p>
+</div>
+
+<script type="module">
+import { createRSReportDesigner } from '../dist/esm/designer.js';
+import { registerQRElements } from '../dist/esm/index.js';
+
+// rs-qrcode があれば QR/バーコード要素もパレットに出る
+try { registerQRElements(await import('../../rs-qrcode/dist/rs-qrcode.esm.min.js')); } catch {}
+
+const sampleRows = [
+    { date: '2026-07-01', name: 'Webサイト制作', qty: 1, unitPrice: 300000, amount: 300000, dept: '制作部' },
+    { date: '2026-07-05', name: '保守（月額）', qty: 3, unitPrice: 20000, amount: 60000, dept: '運用部' },
+    { date: '2026-07-12', name: 'バナーデザイン', qty: 5, unitPrice: 8000, amount: 40000, dept: '制作部' },
+    { date: '2026-07-20', name: 'アクセス解析レポート', qty: 1, unitPrice: 45000, amount: 45000, dept: '運用部' },
+];
+
+const initial = {
+    title: '作業報告書',
+    paper: 'A4',
+    margin: { top: 12, right: 14, bottom: 12, left: 14 },
+    bands: {
+        reportHeader: {
+            height: 18,
+            elements: [
+                { type: 'text', text: '作業報告書', w: 182, h: 10, align: 'center', fontSize: 16, bold: true },
+                { type: 'text', text: 'No. {{ $.no }}　発行日: {{ $.issuedAt }}', y: 11, w: 182, h: 5, align: 'right', fontSize: 8 },
+            ],
+        },
+        pageHeader: {
+            height: 7,
+            elements: [
+                { type: 'text', text: '日付', x: 0, w: 26, h: 7, align: 'center', bold: true, fill: '#eef2f7', border: true },
+                { type: 'text', text: '作業内容', x: 26, w: 92, h: 7, align: 'center', bold: true, fill: '#eef2f7', border: true },
+                { type: 'text', text: '数量', x: 118, w: 18, h: 7, align: 'center', bold: true, fill: '#eef2f7', border: true },
+                { type: 'text', text: '単価', x: 136, w: 22, h: 7, align: 'center', bold: true, fill: '#eef2f7', border: true },
+                { type: 'text', text: '金額', x: 158, w: 24, h: 7, align: 'center', bold: true, fill: '#eef2f7', border: true },
+            ],
+        },
+        detail: {
+            height: 7,
+            zebra: '#fafbfd',
+            elements: [
+                { type: 'field', field: 'date', format: 'date:M/D', x: 0, w: 26, h: 7, align: 'center', border: true },
+                { type: 'field', field: 'name', x: 26, w: 92, h: 7, border: true, padding: 1.5 },
+                { type: 'field', field: 'qty', format: '#,##0', x: 118, w: 18, h: 7, align: 'right', border: true, padding: 1.5 },
+                { type: 'field', field: 'unitPrice', format: '#,##0', x: 136, w: 22, h: 7, align: 'right', border: true, padding: 1.5 },
+                { type: 'field', field: 'amount', format: '#,##0', x: 158, w: 24, h: 7, align: 'right', border: true, padding: 1.5 },
+            ],
+        },
+        reportFooter: {
+            height: 10,
+            elements: [
+                { type: 'text', text: '合計', x: 118, w: 40, h: 8, align: 'center', bold: true, fill: '#dde7f3', border: true },
+                { type: 'text', text: '{{ @sum(amount) }}', format: '¥#,##0', x: 158, w: 24, h: 8, align: 'right', bold: true, border: true, padding: 1.5 },
+            ],
+        },
+        pageFooter: {
+            height: 8,
+            elements: [{ type: 'text', text: '{{ #page }} / {{ #pages }}', w: 182, h: 6, align: 'center', fontSize: 8, color: '#64748b' }],
+        },
+    },
+};
+
+createRSReportDesigner('#designer', {
+    template: initial,
+    data: {
+        rows: sampleRows,
+        params: { no: 'RPT-2026-018', issuedAt: '2026年7月28日' },
+    },
+});
+</script>
+</body>
+</html>

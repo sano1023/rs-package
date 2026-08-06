@@ -1,0 +1,150 @@
+/**
+ * rs-report プレビュー UI のスタイル
+ *
+ * ページの中身（テキスト・罫線など）は render.js が mm 指定のインラインスタイルで組むため、
+ * ここにはプレビューの器（ツールバー・ビューポート・ページの影）だけを置く。
+ * 色・余白は CSS 変数で上書きできる。
+ */
+
+.rsrp {
+    --rsrp-bg: #525659;                    /* ビューポート背景（PDF ビューア風） */
+    --rsrp-toolbar-bg: #323639;
+    --rsrp-toolbar-color: #f1f5f9;
+    --rsrp-btn-hover: rgba(255, 255, 255, 0.12);
+    --rsrp-accent: #4c8dff;
+    --rsrp-page-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
+    --rsrp-page-gap: 5mm;
+
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+    background: var(--rsrp-bg);
+    border-radius: 6px;
+    overflow: hidden;
+    font-family: system-ui, -apple-system, "Segoe UI", "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+}
+
+/* 明るいテーマ */
+.rsrp-theme-light {
+    --rsrp-bg: #e2e8f0;
+    --rsrp-toolbar-bg: #f8fafc;
+    --rsrp-toolbar-color: #334155;
+    --rsrp-btn-hover: rgba(0, 0, 0, 0.06);
+    --rsrp-page-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+}
+
+/* ============================================================ ツールバー */
+
+.rsrp-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 10px;
+    background: var(--rsrp-toolbar-bg);
+    color: var(--rsrp-toolbar-color);
+    flex: 0 0 auto;
+    user-select: none;
+}
+
+.rsrp-btn {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-size: 14px;
+    line-height: 1;
+    min-width: 30px;
+    height: 30px;
+    padding: 0 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.rsrp-btn:hover:not(:disabled) { background: var(--rsrp-btn-hover); }
+.rsrp-btn:focus-visible { outline: 2px solid var(--rsrp-accent); outline-offset: 1px; }
+.rsrp-btn:disabled { opacity: 0.35; cursor: default; }
+
+.rsrp-pagelabel,
+.rsrp-zoomlabel {
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+    min-width: 48px;
+    text-align: center;
+    opacity: 0.9;
+}
+
+.rsrp-sep {
+    width: 1px;
+    height: 18px;
+    background: currentColor;
+    opacity: 0.25;
+    margin: 0 6px;
+}
+
+.rsrp-spacer { flex: 1; }
+
+/* ============================================================ ビューポート・ページ */
+
+.rsrp-viewport {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+    padding: 16px 8px;
+    /* iOS の慣性スクロール */
+    -webkit-overflow-scrolling: touch;
+}
+
+.rsrp-viewport:focus-visible { outline: 2px solid var(--rsrp-accent); outline-offset: -2px; }
+
+.rsrp-stage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--rsrp-page-gap);
+    width: max-content;
+    margin: 0 auto;
+}
+
+.rsrp-page {
+    position: relative;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: var(--rsrp-page-shadow);
+    flex: 0 0 auto;
+}
+
+.rsrp-text,
+.rsrp-rect,
+.rsrp-image {
+    box-sizing: border-box;
+}
+
+.rsrp-image { display: block; }
+
+/* ============================================================ reduced motion */
+
+@media (prefers-reduced-motion: reduce) {
+    .rsrp-viewport { scroll-behavior: auto; }
+}
+
+/* ============================================================ 印刷
+ * プレビューごとホストページを印刷したときも、ページだけが実寸で出るようにする。
+ * （推奨は report.print() だが、Ctrl+P への保険）
+ */
+@media print {
+    .rsrp { background: none; display: block; height: auto; }
+    .rsrp-toolbar { display: none; }
+    .rsrp-viewport { overflow: visible; padding: 0; }
+    .rsrp-stage { transform: none !important; height: auto !important; gap: 0; }
+    .rsrp-page {
+        box-shadow: none;
+        page-break-after: always;
+        break-after: page;
+    }
+    .rsrp-page:last-child { page-break-after: auto; break-after: auto; }
+}

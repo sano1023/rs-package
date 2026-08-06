@@ -59,11 +59,12 @@
 </head>
 <body>
 <div class="page">
-    <h1>rs-editor <small>v0.5 デモ — 依存ゼロ・プラグイン式WYSIWYGエディタ</small></h1>
+    <h1>rs-editor <small>v0.6 デモ — 依存ゼロ・プラグイン式WYSIWYGエディタ</small></h1>
     <p class="lead">
         標準機能（〜v0.2）: undo / redo・書式・文字色 / 背景色・見出し・配置・引用・コードブロック・リスト・インデント・リンク・画像（アップロード / リサイズ）・表・HTMLソース表示・フローティングツールバー・Markdownショートカット。
         <br>v0.3 の opt-in プラグイン: 特殊文字・絵文字・日付挿入・NBSP・検索置換（Ctrl+F）・プレビュー・ブロック可視化・全画面・アンカー・動画埋め込み・目次（見出しから自動生成）・文字数カウント・自動リンク・下書き自動保存。最後の「⭐」はカスタムプラグインの例です。
         <br><strong>v0.5 の新機能</strong>: 空の段落で「/」を押すと<strong>スラッシュコマンド</strong>、段落ホバーで<strong>⠿ドラッグ並べ替え</strong>。ツールバーに<strong>チェックリスト・コールアウト・書式ペインター・脚注・コメント・リビジョン履歴（差分付き）・ルビ・文字種変換・日本語校正・縦書きプレビュー</strong>を追加。
+        <br><strong>v0.6 の新機能</strong>: <strong>区切り線</strong>（ツールバーの ─ ボタン）。プリセットから挿入するか「スタイルを指定して挿入…」で<strong>色・太さ・線種・幅</strong>をプレビューしながら設定できます。挿入した線はクリックで選択、ダブルクリックで再編集、Backspaceで削除。
     </p>
 
     <textarea id="content">
@@ -71,6 +72,8 @@
 &lt;p&gt;これは &lt;strong&gt;依存ゼロ&lt;/strong&gt; の &lt;em&gt;WYSIWYGエディタ&lt;/em&gt; です。&lt;u&gt;下線&lt;/u&gt;や&lt;s&gt;取り消し線&lt;/s&gt;、&lt;a href="https://example.com"&gt;リンク&lt;/a&gt;も使えます。&lt;/p&gt;
 &lt;ul&gt;&lt;li&gt;箇条書き 1&lt;/li&gt;&lt;li&gt;箇条書き 2&lt;/li&gt;&lt;/ul&gt;
 &lt;blockquote&gt;&lt;p&gt;引用ブロックの例。&lt;/p&gt;&lt;/blockquote&gt;
+&lt;hr data-rse-color="#ef4444" data-rse-thickness="3" data-rse-line="dashed"&gt;
+&lt;p&gt;上は区切り線（v0.6）。クリックで選択、ダブルクリックでスタイル編集できます。&lt;/p&gt;
 </textarea>
 
     <div class="panel">
@@ -128,6 +131,8 @@
     import { jpconvert } from '../dist/esm/plugins/jpconvert.js';
     import { proofread } from '../dist/esm/plugins/proofread.js';
     import { tategaki } from '../dist/esm/plugins/tategaki.js';
+    // v0.6: 区切り線（色・太さ・線種・幅）
+    import { divider } from '../dist/esm/plugins/divider.js';
 
     // ---- プラグインAPIの実演: カスタムボタンを数行で追加（REQUIREMENTS の例そのまま）
     const stamp = definePlugin({
@@ -156,9 +161,9 @@
         window.__changes = 0;
         changeCountEl.textContent = '0';
         window.editor = createRSEditor('#content', {
-            toolbar: 'undo redo | bold italic underline strikethrough | forecolor backcolor formatpainter | h1 h2 h3 | alignleft aligncenter alignright | blockquote codeblock callout | bullist numlist checklist | outdent indent | link image table media anchor toc footnote | comment revisions | ruby jpconvert proofread tategaki | charmap emoticons insertdatetime nonbreaking | searchreplace preview visualblocks fullscreen | code | stamp',
+            toolbar: 'undo redo | bold italic underline strikethrough | forecolor backcolor formatpainter | h1 h2 h3 | alignleft aligncenter alignright | blockquote codeblock callout | bullist numlist checklist | outdent indent | link image table media anchor toc footnote | comment revisions | ruby jpconvert proofread tategaki | divider charmap emoticons insertdatetime nonbreaking | searchreplace preview visualblocks fullscreen | code | stamp',
             plugins: [charmap, emoticons, insertdatetime, nonbreaking, searchreplace, preview, visualblocks, fullscreen, anchor, media, toc, wordcount, autolink, autosave, stamp,
-                checklist, callout, slashmenu, dragblock, formatpainter, footnote, comments, revisions, ruby, jpconvert, proofread, tategaki],
+                checklist, callout, slashmenu, dragblock, formatpainter, footnote, comments, revisions, ruby, jpconvert, proofread, tategaki, divider],
             autosaveKey: 'rs-editor-demo-draft',
             placeholder: '本文を入力…',
             // デモ用アップロード: サーバーへ送らず DataURL に変換して埋め込む

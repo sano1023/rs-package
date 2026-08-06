@@ -1,6 +1,6 @@
 {
     "name": "@parelabo/rs-editor",
-    "version": "0.5.0",
+    "version": "0.6.0",
     "description": "プラグインアーキテクチャを持つ、依存ゼロのWYSIWYGエディタライブラリ",
     "type": "module",
     "main": "./dist/esm/index.js",

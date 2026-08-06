@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>rs-select デモ — 依存ゼロの高機能セレクトボックス</title>
+<link rel="stylesheet" href="../dist/rs-select.css">
+<style>
+    body {
+        font-family: system-ui, -apple-system, "Segoe UI", "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+        margin: 0; background: #f8fafc; color: #1e293b;
+    }
+    .page { max-width: 900px; margin: 0 auto; padding: 28px 20px 200px; }
+    h1 { font-size: 22px; }
+    h1 small { font-size: 13px; color: #64748b; font-weight: 400; margin-left: 10px; }
+    .lead { color: #475569; font-size: 13px; margin-bottom: 20px; line-height: 1.7; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    @media (max-width: 720px) { .grid { grid-template-columns: 1fr; } }
+    .panel { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px; }
+    h2 { font-size: 14px; margin: 0 0 4px; }
+    .desc { font-size: 12px; color: #64748b; margin: 0 0 10px; }
+    .rssel { width: 100%; }
+    .out { font-size: 12px; color: #2563eb; margin-top: 8px; min-height: 1.2em; }
+</style>
+</head>
+<body>
+<div class="page">
+    <h1>rs-select <small>依存ゼロの高機能セレクトボックス — 日本語ファースト検索</small></h1>
+    <p class="lead">
+        検索欄に「とうきょう」「トウキョウ」「ﾄｳｷｮｳ」「toukyou」のどれを入れても東京都に当たります
+        （かな正規化 + ローマ字→かな変換）。
+    </p>
+    <div class="grid">
+        <div class="panel">
+            <h2>都道府県（単一選択・グループ・ふりがな検索）</h2>
+            <p class="desc">「osaka」「ほっかい」などで検索してみてください</p>
+            <div id="pref"></div>
+            <div class="out" id="pref-out"></div>
+        </div>
+        <div class="panel">
+            <h2>タグ入力（複数選択 + allowCreate）</h2>
+            <p class="desc">未登録の語を入力すると「◯◯を追加」が出ます。Backspace で末尾を削除</p>
+            <div id="tags"></div>
+            <div class="out" id="tags-out"></div>
+        </div>
+        <div class="panel">
+            <h2>非同期候補（load + debounce）</h2>
+            <p class="desc">入力すると 300ms 疑似 API から候補を取得します</p>
+            <div id="async"></div>
+        </div>
+        <div class="panel">
+            <h2>10,000 件の仮想リスト</h2>
+            <p class="desc">開いても DOM は可視域のみ・スクロールも軽快</p>
+            <div id="big"></div>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+import { createRSSelect } from '../dist/rs-select.esm.min.js';
+
+const PREFS = [
+    ['01','北海道','ほっかいどう','北海道・東北'],['02','青森県','あおもりけん','北海道・東北'],['04','宮城県','みやぎけん','北海道・東北'],
+    ['08','茨城県','いばらきけん','関東'],['11','埼玉県','さいたまけん','関東'],['12','千葉県','ちばけん','関東'],
+    ['13','東京都','とうきょうと','関東'],['14','神奈川県','かながわけん','関東'],
+    ['15','新潟県','にいがたけん','中部'],['17','石川県','いしかわけん','中部'],['20','長野県','ながのけん','中部'],
+    ['22','静岡県','しずおかけん','中部'],['23','愛知県','あいちけん','中部'],
+    ['25','滋賀県','しがけん','近畿'],['26','京都府','きょうとふ','近畿'],['27','大阪府','おおさかふ','近畿'],
+    ['28','兵庫県','ひょうごけん','近畿'],['29','奈良県','ならけん','近畿'],
+    ['33','岡山県','おかやまけん','中国・四国'],['34','広島県','ひろしまけん','中国・四国'],['38','愛媛県','えひめけん','中国・四国'],
+    ['40','福岡県','ふくおかけん','九州・沖縄'],['43','熊本県','くまもとけん','九州・沖縄'],['47','沖縄県','おきなわけん','九州・沖縄'],
+].map(([value, label, kana, group]) => ({ value, label, kana, group }));
+
+createRSSelect('#pref', {
+    items: PREFS,
+    placeholder: '都道府県を選択',
+    onChange: ({ value }) => {
+        const item = PREFS.find((p) => p.value === value);
+        document.querySelector('#pref-out').textContent = value ? `値: ${value}（${item?.label}）` : '';
+    },
+});
+
+createRSSelect('#tags', {
+    multiple: true,
+    allowCreate: true,
+    placeholder: 'タグを追加…',
+    items: ['設計', '開発', 'レビュー', '急ぎ', 'バグ', 'ドキュメント'],
+    onChange: ({ value }) => { document.querySelector('#tags-out').textContent = JSON.stringify(value); },
+});
+
+// 疑似 API（社員検索を想定）
+const STAFF = ['佐藤 翔太', '鈴木 陽菜', '高橋 大輝', '田中 結衣', '伊藤 悠斗', '渡辺 美咲', '山本 蓮', '中村 葵', '小林 大和', '加藤 凛'];
+createRSSelect('#async', {
+    items: [],
+    placeholder: '社員名で検索…',
+    load: (query) => new Promise((resolve) => {
+        setTimeout(() => {
+            const q = query.trim();
+            resolve(STAFF.filter((n) => !q || n.includes(q)).map((n, i) => ({ value: `emp-${i}-${n}`, label: n })));
+        }, 300);
+    }),
+});
+
+createRSSelect('#big', {
+    placeholder: '10,000 件から検索',
+    items: Array.from({ length: 10000 }, (_, i) => ({ value: String(i), label: `商品コード ${String(i).padStart(5, '0')}` })),
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,50 @@
+{
+    "name": "@parelabo/rs-cmdk",
+    "version": "0.1.0",
+    "description": "依存ゼロのコマンドパレット（Ctrl+K・日本語ファジー検索・最近使った順・ネストページ）",
+    "type": "module",
+    "main": "./dist/rs-cmdk.esm.min.js",
+    "module": "./dist/rs-cmdk.esm.min.js",
+    "unpkg": "./dist/rs-cmdk.min.js",
+    "jsdelivr": "./dist/rs-cmdk.min.js",
+    "exports": {
+        ".": {
+            "types": "./dist/types/index.d.ts",
+            "import": "./dist/rs-cmdk.esm.min.js",
+            "default": "./dist/rs-cmdk.esm.min.js"
+        },
+        "./dist/*": "./dist/*",
+        "./rs-cmdk.css": "./dist/rs-cmdk.css"
+    },
+    "files": [
+        "dist"
+    ],
+    "keywords": [
+        "command-palette",
+        "cmdk",
+        "kbar",
+        "ctrl-k",
+        "launcher",
+        "shortcut",
+        "fuzzy-search",
+        "japanese",
+        "コマンドパレット"
+    ],
+    "author": "ryusuke.sano <ryusuke.sano@parelabo.com>",
+    "license": "SEE LICENSE IN LICENSE.txt",
+    "homepage": "https://github.com/sano1023/rs-package/tree/main/rs-cmdk#readme",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/sano1023/rs-package.git",
+        "directory": "rs-cmdk"
+    },
+    "bugs": {
+        "url": "https://parelabo.com",
+        "email": "contact@parelabo.com"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
+    "types": "./dist/types/index.d.ts",
+    "style": "./dist/rs-cmdk.css"
+}

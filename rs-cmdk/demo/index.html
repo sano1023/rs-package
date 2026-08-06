@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>rs-cmdk デモ — コマンドパレット（Ctrl+K）</title>
+<link rel="stylesheet" href="../dist/rs-cmdk.css">
+<style>
+    body {
+        font-family: system-ui, -apple-system, "Segoe UI", "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+        margin: 0; background: #0f172a; color: #e2e8f0; min-height: 100vh;
+        display: flex; align-items: center; justify-content: center;
+    }
+    .hero { text-align: center; padding: 40px 20px; }
+    h1 { font-size: 26px; margin-bottom: 6px; }
+    .lead { color: #94a3b8; font-size: 14px; line-height: 1.8; }
+    kbd {
+        font-family: ui-monospace, Menlo, monospace; font-size: 13px;
+        background: #1e293b; border: 1px solid #334155; border-bottom-width: 3px;
+        border-radius: 6px; padding: 3px 10px; margin: 0 2px;
+    }
+    button {
+        appearance: none; border: 1px solid #334155; background: #1e293b; color: #e2e8f0;
+        padding: 10px 22px; border-radius: 10px; font-size: 14px; cursor: pointer; font-family: inherit;
+        margin-top: 20px;
+    }
+    button:hover { background: #273449; }
+    .out { margin-top: 16px; font-size: 13px; color: #60a5fa; min-height: 1.4em; }
+</style>
+</head>
+<body>
+<div class="hero">
+    <h1>rs-cmdk</h1>
+    <p class="lead">
+        <kbd>Ctrl</kbd>+<kbd>K</kbd>（Mac は <kbd>⌘</kbd>+<kbd>K</kbd>）でコマンドパレットを開けます。<br>
+        「hozon」「シンキ」「てーま」のような揺れた入力でも当たります。実行するほど最近使った順に並びます。
+    </p>
+    <button id="open">パレットを開く</button>
+    <div class="out" id="out"></div>
+</div>
+
+<script type="module">
+import { createRSCmdk } from '../dist/rs-cmdk.esm.min.js';
+
+const out = (text) => { document.querySelector('#out').textContent = text; };
+
+const palette = createRSCmdk({
+    storageKey: 'rs-cmdk-demo',
+    commands: [
+        { id: 'new', label: '新規ドキュメント作成', kana: 'しんきどきゅめんとさくせい', icon: '📄', shortcut: 'Ctrl+N', group: 'ファイル', run: () => out('新規ドキュメントを作成しました') },
+        { id: 'save', label: '保存', kana: 'ほぞん', icon: '💾', shortcut: 'Ctrl+S', group: 'ファイル', run: () => out('保存しました') },
+        { id: 'export', label: 'PDF書き出し', kana: 'ぴーでぃーえふかきだし', icon: '📑', group: 'ファイル', run: () => out('PDFを書き出しました') },
+        { id: 'search', label: '全文検索', kana: 'ぜんぶんけんさく', icon: '🔍', shortcut: 'Ctrl+F', group: '編集', run: () => out('検索を開きました') },
+        { id: 'undo', label: '元に戻す', kana: 'もとにもどす', icon: '↩', shortcut: 'Ctrl+Z', group: '編集', run: () => out('元に戻しました') },
+        { id: 'theme', label: 'テーマ切替', kana: 'てーまきりかえ', icon: '🎨', group: '表示', children: [
+            { id: 'light', label: 'ライトテーマ', kana: 'らいと', run: () => out('ライトテーマにしました') },
+            { id: 'dark', label: 'ダークテーマ', kana: 'だーく', run: () => out('ダークテーマにしました') },
+            { id: 'auto', label: 'システムに合わせる', kana: 'しすてむ', run: () => out('システム設定に追従します') },
+        ]},
+        { id: 'goto', label: 'ページ移動', icon: '🧭', group: '表示', children: [
+            { id: 'home', label: 'ホーム', kana: 'ほーむ', run: () => out('ホームへ移動') },
+            { id: 'reports', label: '帳票一覧', kana: 'ちょうひょういちらん', run: () => out('帳票一覧へ移動') },
+            { id: 'settings', label: '設定', kana: 'せってい', run: () => out('設定へ移動') },
+        ]},
+        { id: 'help', label: 'ヘルプ', kana: 'へるぷ', keywords: ['help', 'manual'], icon: '❓', group: 'その他', run: () => out('ヘルプを開きました') },
+    ],
+});
+
+document.querySelector('#open').addEventListener('click', () => palette.open());
+</script>
+</body>
+</html>

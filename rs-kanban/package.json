@@ -1,0 +1,70 @@
+{
+    "name": "@parelabo/rs-kanban",
+    "version": "0.2.0",
+    "description": "依存ゼロのカンバンボード（ドラッグ移動/並べ替え・スイムレーン・WIP制限・絞り込み・undo/redo）",
+    "type": "module",
+    "main": "./dist/rs-kanban.esm.min.js",
+    "module": "./dist/rs-kanban.esm.min.js",
+    "unpkg": "./dist/rs-kanban.min.js",
+    "jsdelivr": "./dist/rs-kanban.min.js",
+    "exports": {
+        ".": {
+            "types": "./dist/types/index.d.ts",
+            "import": "./dist/rs-kanban.esm.min.js",
+            "default": "./dist/rs-kanban.esm.min.js"
+        },
+        "./dist/*": "./dist/*",
+        "./rs-kanban.css": "./dist/rs-kanban.css",
+        "./vue": {
+            "types": "./dist/types/vue.d.ts",
+            "import": "./dist/rs-kanban.vue.esm.min.js"
+        },
+        "./react": {
+            "types": "./dist/types/react.d.ts",
+            "import": "./dist/rs-kanban.react.esm.min.js"
+        }
+    },
+    "files": [
+        "dist"
+    ],
+    "keywords": [
+        "kanban",
+        "board",
+        "trello",
+        "task-board",
+        "drag-and-drop",
+        "wip-limit",
+        "swimlane",
+        "カンバン",
+        "タスク管理"
+    ],
+    "author": "ryusuke.sano <ryusuke.sano@parelabo.com>",
+    "license": "SEE LICENSE IN LICENSE.txt",
+    "homepage": "https://github.com/sano1023/rs-package/tree/main/rs-kanban#readme",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/sano1023/rs-package.git",
+        "directory": "rs-kanban"
+    },
+    "bugs": {
+        "url": "https://parelabo.com",
+        "email": "contact@parelabo.com"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
+    "types": "./dist/types/index.d.ts",
+    "style": "./dist/rs-kanban.css",
+    "peerDependencies": {
+        "vue": "^3.0.0",
+        "react": ">=18"
+    },
+    "peerDependenciesMeta": {
+        "vue": {
+            "optional": true
+        },
+        "react": {
+            "optional": true
+        }
+    }
+}
