@@ -47,9 +47,13 @@ export const RsImageEditor: import("vue").DefineComponent<import("vue").ExtractP
         type: ObjectConstructor;
         default: undefined;
     };
+    history: {
+        type: ObjectConstructor;
+        default: undefined;
+    };
 }>, () => import("vue").VNode<import("vue").RendererNode, import("vue").RendererElement, {
     [key: string]: any;
-}>, {}, {}, {}, import("vue").ComponentOptionsMixin, import("vue").ComponentOptionsMixin, ("error" | "change" | "init")[], "error" | "change" | "init", import("vue").PublicProps, Readonly<import("vue").ExtractPropTypes<{
+}>, {}, {}, {}, import("vue").ComponentOptionsMixin, import("vue").ComponentOptionsMixin, ("history" | "error" | "change" | "init")[], "history" | "error" | "change" | "init", import("vue").PublicProps, Readonly<import("vue").ExtractPropTypes<{
     src: {
         type: (ObjectConstructor | StringConstructor)[];
         default: null;
@@ -98,7 +102,12 @@ export const RsImageEditor: import("vue").DefineComponent<import("vue").ExtractP
         type: ObjectConstructor;
         default: undefined;
     };
+    history: {
+        type: ObjectConstructor;
+        default: undefined;
+    };
 }>> & Readonly<{
+    onHistory?: ((...args: any[]) => any) | undefined;
     onError?: ((...args: any[]) => any) | undefined;
     onChange?: ((...args: any[]) => any) | undefined;
     onInit?: ((...args: any[]) => any) | undefined;
@@ -107,6 +116,7 @@ export const RsImageEditor: import("vue").DefineComponent<import("vue").ExtractP
     filter: Record<string, any>;
     frame: Record<string, any>;
     shape: Record<string, any>;
+    history: Record<string, any>;
     segmentation: Record<string, any>;
     tools: unknown[];
     crop: Record<string, any>;

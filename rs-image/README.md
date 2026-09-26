@@ -12,7 +12,7 @@ npm install @parelabo/rs-image
 <summary>npm レジストリを使わない場合（GitHub tarball 直指定）</summary>
 
 ```bash
-npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-image-0.6.0.tgz
+npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-image-0.8.0.tgz
 ```
 </details>
 
@@ -30,8 +30,8 @@ createRSImageEditor(document.querySelector('#app'), { /* オプション */ });
 ### `<script>` タグ（CDN・ビルド環境不要）
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@parelabo/rs-image@0.6.0/dist/rs-image.css">
-<script src="https://cdn.jsdelivr.net/npm/@parelabo/rs-image@0.6.0/dist/rs-image.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@parelabo/rs-image@0.8.0/dist/rs-image.css">
+<script src="https://cdn.jsdelivr.net/npm/@parelabo/rs-image@0.8.0/dist/rs-image.min.js"></script>
 <script>
   // 公開APIはグローバル RSImage に載る
   RSImage.createRSImageEditor(document.querySelector('#app'), { /* オプション */ });
@@ -68,7 +68,7 @@ export default function App() {
 
 # rs-image
 
-依存ゼロの画像処理＆合成エディタライブラリ。**多機能なインタラクティブ画像エディタ**（トリミング・ペン切り抜き・マジックワンド・自動切り抜き（MLアダプタ注入）・消しゴム・回転/反転・色調整・**トーンカーブ/レベル補正・色域別HSL調整・コピースタンプ・覆い焼き/焼き込み/ぼかしブラシ**・フィルタ・文字・スタンプ・図形（**ブレンドモード・影/縁取り/グロー・グラデ塗り・破線**対応）・ペン・スポイト・モザイク・フレーム、すべてリアルタイム反映）と、リサイズ・圧縮・WebP変換の処理エンジンをブラウザ完結で提供します。表示する機能は tools オプションで自由に構成できます。ビルド不要・ESモジュール。
+依存ゼロの画像処理＆合成エディタライブラリ。**多機能なインタラクティブ画像エディタ**（トリミング・**自動トリミング**・ペン切り抜き・マジックワンド・自動切り抜き（MLアダプタ注入）・消しゴム・回転/反転・色調整・**トーンカーブ/レベル補正・色域別HSL調整・コピースタンプ・覆い焼き/焼き込み/ぼかしブラシ**・フィルタ・文字・スタンプ・図形（**ブレンドモード・影/縁取り/グロー・グラデ塗り・破線**対応）・ペン・スポイト・モザイク・フレーム、すべてリアルタイム反映）と、リサイズ・圧縮・WebP変換の処理エンジンをブラウザ完結で提供します。表示する機能は tools オプションで自由に構成できます。ビルド不要・ESモジュール。
 
 - **高品質縮小**: 段階縮小（半分ずつ）＋ `imageSmoothingQuality:'high'` で大縮小でもジャギらない
 - **EXIF正立**: スマホ写真の Orientation を読み込み時に自動補正
@@ -151,10 +151,11 @@ const { blob } = await editor.export({ format: 'webp', quality: 0.9 });
 | --- | --- |
 | 選択 | レイヤークリックで選択。ドラッグ移動・四隅ハンドルで拡縮・上部ハンドルで回転・Delete削除。**Shift+クリックで複数選択**（整列・分布・一括移動/削除）、**Alt+ドラッグで複製**、**Shift+ドラッグで水平/垂直拘束**、**移動中はベース/他レイヤーの端・中央にスナップ**（ガイド線表示・Ctrlで無効）、矢印キー微調整（Shiftで10px）・Ctrl+Z/Y |
 | トリミング | ドラッグ枠・8ハンドル・暗転＋三分割グリッド。比率プリセット（`crop.ratios` で構成可）・円形 |
+| 自動トリミング | **対象をクリックするだけ**で、近い色で繋がっている範囲をひとかたまりとして選択。**許容度**で選択範囲をライブ調整し、選択範囲の輪郭と**トリミング予定エリア（外接矩形）を点線でリアルタイム表示**。**内側を残す / 内側を消す**を選んで実行。「余白を切り詰め」ONなら外接矩形まで切り詰めます（＝自動トリミング）。余白・境界ぼかし・「隣接のみ」OFF（画像全体から同系色を拾う）も指定可 |
 | ペン切り抜き | ベジェのペンツール型。クリックでアンカーを置いて囲み、始点クリックで閉じて**内側を残す/消す**。なめらか補間（Catmull-Rom）・境界ぼかし・余白の切り詰め・アンカーのドラッグ調整 |
-| マジックワンド | クリックした場所と**近い色で繋がっている範囲**を透過（許容度スライダ・ソフト境界・1クリック=1履歴） |
+| マジックワンド | クリックした場所と**近い色で繋がっている範囲**を透過（許容度スライダ＋数値入力・ソフト境界・1クリック=1履歴） |
 | 自動切り抜き | セグメンテーションアダプタ（ML）で被写体を自動検出して背景を透過。**反転**（被写体を消す）・境界ぼかし。アダプタは注入式でコアは依存ゼロのまま |
-| 回転 | 90°左右・自由角度スライダ（劣化しない）・**左右/上下反転** |
+| 回転 | 90°左右・自由角度スライダ（劣化しない・数値入力可）・**左右/上下反転** |
 | 調整 | **明るさ・コントラスト・彩度・色相・ぼかし・ビネット**のスライダ（非破壊・`adjust.sliders` で構成可） |
 | トーン補正 | **レベル補正**（黒点/白点/ガンマ）＋**トーンカーブ**（ヒストグラム表示・RGB/R/G/Bチャンネル別・点をクリック追加/ドラッグ/ダブルクリック削除）＋**オートコントラスト・ホワイトバランス**＋**シャープ（アンシャープマスク）**。全部ライブプレビュー→適用で焼き込み |
 | 色域調整 | **8色域別のHSL調整**（レッド〜マゼンタの色域を選んで色相±60/彩度/明度。「赤だけ彩度を下げる」等。無彩色は巻き込まない） |
@@ -172,16 +173,66 @@ const { blob } = await editor.export({ format: 'webp', quality: 0.9 });
 | フレーム | なし/単色/ライン/二重の縁取り（色・太さリアルタイム） |
 
 - スタンプ・画像レイヤーは選択後「この画像をトリミング」で**個別トリミング**（切り抜き後も位置がずれない）
+- **スライダーは数値でも入力できる**: 許容度・太さ・サイズ・角度など**すべてのスライダー**に数値入力欄が並びます。打ち込んで Enter（またはフォーカスを外す）で確定し、範囲外の値は自動でクランプ。スライダーを動かせば数値欄も追従します
 - **透明度スライダ**: どのレイヤーも 5〜100% でリアルタイムに半透明化
 - **ブレンドモード**: どのレイヤーも乗算/スクリーン/オーバーレイ/覆い焼き/焼き込み/差の絶対値/色相/彩度/カラー/輝度など16種で合成できる
 - **レイヤー効果**: 影（色/ぼかし/距離XY）・縁取り（文字/図形/ペン）・グロー を全レイヤーに（チェックひとつ・リアルタイム）
 - **背景透過スライダ**: 画像の**外周から繋がっている背景**をflood-fillで透過（グラデーション背景対応・背景色に似た被写体内部は巻き込まない）。許容度を上げ下げしてもセッション元画像から再計算するので劣化しない
-- レイヤー操作: 前面へ / 背面へ / 削除、元に戻す / やり直す（履歴25件）
+- レイヤー操作: 前面へ / 背面へ / 削除
 - 円形トリミングや自由回転で透過が生じた場合は PNG/WebP で書き出し
+
+### 自動トリミング
+
+「ペン切り抜きを手で囲むのが面倒」「背景を落として被写体の大きさに切り詰めたい」ときの道具です。
+
+1. ツールバーの**自動トリミング**を選ぶ
+2. キャンバス上で**残したい（または消したい）対象をクリック** — 近い色で繋がっている範囲がひとかたまりとして選ばれます
+3. **許容度**を動かすと選択範囲がその場で変わります（オレンジの輪郭＝選択範囲、点線の矩形＝トリミング予定エリア）。残らない側は暗転するので結果を見ながら詰められます
+4. **内側を残す / 内側を消す**を選んで**実行**
+
+| 設定 | 説明 |
+| --- | --- |
+| 許容度 | 0〜100。大きいほど広い色差を「同じ対象」とみなす（数値入力可・ライブ反映） |
+| 余白 | トリミング予定エリアを外側に広げる px 数 |
+| 境界ぼかし | カット境界をぼかす px 数。切り詰め枠もこの分だけ広がる |
+| 隣接のみ | OFF にすると繋がっていなくても画像全体から同系色を拾う（背景が被写体で分断されているとき） |
+| 余白を切り詰め | 「内側を残す」ときだけ有効。選択範囲の外接矩形までキャンバスを切り詰める |
+
+- 適用先は**ベース画像**です（レイヤーを個別に抜くならマジックワンド／ペン切り抜きを使ってください）
+- 実行は1段の履歴になるので「元に戻す」で取り消せます。切り詰めに合わせてレイヤー位置も追従します
+
+```js
+editor.setMode('objtrim');
+editor.objTrimStyle.tol = 40;              // 許容度
+editor.objTrimStyle.trim = true;           // 外接矩形まで切り詰める
+editor.pickObjRegion({ x: 320, y: 240 });  // 対象をクリック（image座標）
+editor.objTrimRect();                      // → トリミング予定エリア { x, y, width, height }
+editor.applyObjTrim(true);                 // true=内側を残す / false=内側を消す
+```
+
+### ヒストリー（編集履歴パネル）
+
+パネル下段に**操作の一覧**が常設され、1段ずつ戻る／進むだけでなく**任意の段をクリックして一気に飛べます**。
+
+- 「元に戻す」「やり直す」は**1クリック＝1段**。ボタンのツールチップに残り段数が出ます
+- ショートカット: **Ctrl+Z**（戻る）/ **Ctrl+Shift+Z**・**Ctrl+Y**（進む）/ **Ctrl+Alt+Z**（一段階戻る）。スライダーにフォーカスがあっても効きます
+- 各段には操作名（「トリミング」「明るさ」「消しゴム」…）が付き、**現在位置が反転表示**、やり直しで進める先は淡色表示
+- 戻ってから新しい操作をすると、その先の段は破棄されます（履歴の分岐）
+- **戻っても道具は持ったまま**（消しゴムで戻しても消しゴムのまま。トリミング等のセッション型ツールだけ選択に戻ります）
+- 連続入力（文字タイプ・スライダードラッグ）は打ち終わりで**1段にまとめて**積まれるので、履歴がスライダーの1目盛りで埋まりません
+- 既定は30段。`history: { max: 60 }` で変更、`history: { open: false }` でパネルを閉じた状態で開始（ツールバーの「ヒストリー」ボタンで開閉）
+
+```js
+const editor = createRSImageEditor('#editor', { history: { max: 60, open: true } });
+editor.on('history', (e) => console.log(e.index, e.label));  // 1段積まれるたび
+editor.historyList();          // [{ index, label, ts, current }]
+await editor.jumpHistory(3);   // 4段目まで一気に戻る/進む
+editor.clearHistory();         // 現在の状態だけ残して捨てる
+```
 
 ### エディタAPI
 
-`setImage(src)` / `addText(text, opts)` / `addImageLayer(src, opts)` / `addShape(kind, opts)`（kind: `rect | ellipse | trapezoid | star | balloon | poly | line | arrow`。台形・星・多角形は `opts.pts` で初期頂点も指定可） / `finishShapePen()` / `convertToPoly(layer)` / `duplicateLayer(layer)` / `alignSelected(mode)` / `flip(axis)` / `export(ops)`（processImage の全オプションが使える） / `flatten()` / `undo()` / `redo()` / `getState()` / `on('change', cb)` / `destroy()`
+`setImage(src)` / `addText(text, opts)` / `addImageLayer(src, opts)` / `addShape(kind, opts)`（kind: `rect | ellipse | trapezoid | star | balloon | poly | line | arrow`。台形・星・多角形は `opts.pts` で初期頂点も指定可） / `finishShapePen()` / `convertToPoly(layer)` / `pickObjRegion(pt)` / `objTrimRect()` / `applyObjTrim(keep)` / `duplicateLayer(layer)` / `alignSelected(mode)` / `flip(axis)` / `export(ops)`（processImage の全オプションが使える） / `flatten()` / `undo()` / `redo()` / `jumpHistory(index)` / `historyList()` / `clearHistory()` / `toggleHistoryPanel(open?)` / `getState()` / `on('change', cb)` / `on('history', cb)` / `destroy()`
 
 レイヤー共通プロパティ: `opacity`（透明度） / `blend`（ブレンドモード） / `fx`（`{ shadow: {color, blur, dx, dy}, outline: {color, width}, glow: {color, blur} }`）。図形はさらに `dash`（`solid|dash|dot|dashdot`）・`fillType`（`solid|linear|radial`）・`fill2`・`gradAngle`・`radius`（角丸）・`smooth`（なめらか曲線）など。
 
@@ -216,7 +267,8 @@ import { RsImageEditor } from 'rs-image/react';
 ```
 
 - `src`（URL / dataURL / File / Blob）の変更を watch して `setImage` します
-- ref 経由で `editor() / setImage / export / flatten / undo / redo / getState / setSegmentation` が使えます
+- ref 経由で `editor() / setImage / export / flatten / undo / redo / jumpHistory / historyList / clearHistory / toggleHistoryPanel / getState / setSegmentation` が使えます
+- `history` プロパティでヒストリー設定（`{ max, open }`）を渡せます。1段積まれるたびに `@history` / `onHistory` が発火します
 - アンマウントで自動 `destroy()`。デモ: `demo/vue.html` / `demo/react.html`
 
 ## 処理エンジンAPI

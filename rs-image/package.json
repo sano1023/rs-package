@@ -1,6 +1,6 @@
 {
     "name": "@parelabo/rs-image",
-    "version": "0.6.0",
+    "version": "0.8.0",
     "description": "依存ゼロの画像処理＆合成エディタ（リサイズ・圧縮・トリミング・円形切り抜き・WebP変換・レイヤー合成）",
     "type": "module",
     "main": "./dist/rs-image.esm.min.js",

@@ -34,6 +34,16 @@ export class ImageEditor {
     layerCropRect: any;
     _history: any[];
     _hIndex: number;
+    _histMax: number;
+    _histChain: Promise<void>;
+    _historyOpen: boolean;
+    _baseCache: {
+        canvas: any;
+        url: any;
+    } | {
+        canvas: HTMLCanvasElement;
+        url: any;
+    } | null;
     _drag: any;
     _rotateSession: {
         src: any;
@@ -124,6 +134,23 @@ export class ImageEditor {
         };
         range: string;
     } | null;
+    objTrimStyle: {
+        tol: number;
+        pad: number;
+        feather: number;
+        contiguous: boolean;
+        trim: boolean;
+        keep: boolean;
+    };
+    _objSession: {
+        img: ImageData;
+        w: any;
+        h: any;
+        pt: null;
+        region: null;
+        edge: null;
+        shade: null;
+    } | null;
     buildDOM(): void;
     root: any;
     toolbar: any;
@@ -131,10 +158,13 @@ export class ImageEditor {
     _toolBtns: {} | undefined;
     _undoBtn: any;
     _redoBtn: any;
+    _histBtn: any;
     stageWrap: any;
     stage: any;
     ctx: any;
+    side: any;
     panel: any;
+    historyPanel: any;
     _fileInput: any;
     loadFonts(): Promise<void>;
     fontNames: string[] | undefined;
@@ -200,6 +230,14 @@ export class ImageEditor {
         session?: boolean | undefined;
     }): void;
     endRotateSession(): void;
+    /**
+     * base の dataURL 化はコストが高いので、キャンバスが差し替わる／描き込まれるまで使い回す。
+     * ピクセルを直に書き換える処理（消しゴム・モザイク・ワンド・コピースタンプ・ブラシ補正）は
+     * 必ず touchBase() を呼ぶこと。
+     */
+    baseDataURL(): any;
+    /** base のピクセルを直接書き換えたときに呼ぶ（dataURL キャッシュを捨てる） */
+    touchBase(): void;
     serialize(): {
         base: any;
         hasAlpha: boolean;
@@ -219,10 +257,39 @@ export class ImageEditor {
         };
         layers: any[];
     };
-    pushHistory(): void;
+    /**
+     * 現在の状態を1段としてヒストリーに積む。
+     * @param {string} [label] ヒストリーパネルに出す操作名（Photoshop のヒストリー項目相当）
+     */
+    pushHistory(label?: string): void;
+    /** ヒストリーの一覧（読み取り用）。[{ label, current, index }] */
+    historyList(): {
+        index: number;
+        label: any;
+        ts: any;
+        current: boolean;
+    }[];
     restore(snap: any): Promise<void>;
+    _bgSession: {
+        layerId: any;
+        src: HTMLCanvasElement;
+    } | null | undefined;
+    /**
+     * ヒストリーの位置を動かす。連打しても復元が交錯しないよう直列化し、
+     * 途中の段は描かずに最終位置だけ反映する（Ctrl+Z 連打が軽い）。
+     */
+    _applyHistory(type: any): Promise<void>;
+    /** 1段戻る */
     undo(): Promise<void>;
+    /** 1段進む */
     redo(): Promise<void>;
+    /** ヒストリーの任意の段へ飛ぶ（ヒストリーパネルのクリック） */
+    jumpHistory(index: any): Promise<void>;
+    /** 今の状態を残して、それ以外のヒストリーを捨てる（Photoshop の「ヒストリーを消去」相当） */
+    clearHistory(): void;
+    toggleHistoryPanel(open?: boolean): void;
+    /** ヒストリーパネルの描画（常設なので renderPanel とは独立） */
+    renderHistory(): void;
     /** ステージ上の表示スケールとオフセット（css px） */
     fit(): {
         s: number;
@@ -386,12 +453,8 @@ export class ImageEditor {
     setCropRatio(ratio: any): void;
     renderPanel(): void;
     _stampCat: any;
-    _bgSession: {
-        layerId: any;
-        src: HTMLCanvasElement;
-    } | null | undefined;
-    /** 連続入力（文字タイプ・スライダ）用の遅延履歴 */
-    scheduleHistory(): void;
+    /** 連続入力（文字タイプ・スライダ）用の遅延履歴。打ち終わりで1段にまとめる */
+    scheduleHistory(label: any): void;
     _historyTimer: number | undefined;
     /** 画像レイヤーの drawable を編集可能な canvas に置き換える（消しゴム・マジックワンド共用） */
     ensureLayerCanvas(layer: any): void;
@@ -422,6 +485,53 @@ export class ImageEditor {
     drawPathUI(ctx: any, f: any): void;
     /** ペン図形（多角形）のプレビューとアンカー（スクリーン座標） */
     drawShapePenUI(ctx: any, f: any): void;
+    /**
+     * 自動トリミングのセッション開始。
+     * ベース画像の ImageData を1度だけ読んでおき、許容度スライダのライブプレビューで使い回す
+     * （毎回 getImageData すると大きい画像でカクつくため）。
+     */
+    startObjTrim(): void;
+    /**
+     * クリックした場所のオブジェクト（近似色で繋がった範囲）を選ぶ。
+     * @param {{x: number, y: number}} ip image座標
+     */
+    pickObjRegion(ip: {
+        x: number;
+        y: number;
+    }): void;
+    /**
+     * 選択領域を計算し直してプレビューを更新する（許容度スライダから毎回呼ばれるのでデバウンス）。
+     * @param {boolean} [immediate] true なら待たずに計算する
+     */
+    updateObjRegion(immediate?: boolean): void;
+    _objTimer: number | undefined;
+    /**
+     * 選択領域から輪郭（オレンジ）を作る。プレビューで毎フレーム作ると
+     * 大きい画像でキャンバスを作り直し続けることになるので、選択が変わったときだけ作る。
+     */
+    buildObjMask(): void;
+    /** 残らない側を暗転させるオーバーレイを作る（内側/外側の切替時にも呼ぶ） */
+    buildObjShade(): void;
+    /** 領域の塗りつぶしマスク（白＝残す側）。カット実行時にだけ作る */
+    objMaskCanvas(): HTMLCanvasElement | null;
+    /** 余白（pad）を足した「トリミング予定エリア」= 選択領域の外接矩形。未選択なら null */
+    objTrimRect(): {
+        x: number;
+        y: number;
+        width: number;
+        height: number;
+    } | null;
+    /**
+     * 自動トリミングのライブプレビュー（スクリーン座標）。
+     * 選択領域を色で塗り、輪郭と「トリミング予定エリア」の外接矩形を点線で出す。
+     */
+    drawObjTrimUI(ctx: any, f: any): void;
+    /**
+     * 自動トリミングを確定する。
+     * @param {boolean} keep true=内側（選んだ対象）を残す / false=内側を消して外側を残す
+     * @returns {boolean} 適用したか
+     */
+    applyObjTrim(keep: boolean): boolean;
     /**
      * セグメンテーションアダプタを設定する（rs-livecam と同じ契約）。
      * @param {{name: string, segment: (canvas: HTMLCanvasElement) => any}|null} adapter
