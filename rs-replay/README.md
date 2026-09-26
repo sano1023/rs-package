@@ -5,8 +5,14 @@
 ## インストール
 
 ```bash
-npm install @parelabo/rs-replay
+npm login --scope=@sano1023 --auth-type=legacy --registry=https://npm.pkg.github.com
+npm config set @sano1023:registry=https://npm.pkg.github.com --location=user
+npm install @sano1023/rs-replay
 ```
+
+> GitHub Packages から配布しています。public パッケージもインストールには GitHub 認証が必要です。ログイン時の Password には read:packages 権限を持つ personal access token (classic) を使用します。認証不要の導入には、下記の GitHub tarball または CDN を利用できます。
+
+認証・更新の詳細は [共通インストール手順](https://github.com/sano1023/rs-package/blob/main/INSTALLING.md) を参照してください。登録済みバージョンは [GitHub Packages 一覧](https://github.com/sano1023?tab=packages&repo_name=rs-package) で確認できます。以下のパッケージ名による import は Vite などのバンドラ向けです。
 
 <details>
 <summary>npm レジストリを使わない場合（GitHub tarball 直指定）</summary>
@@ -21,8 +27,8 @@ npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-replay-0
 ### バニラ JS（ESM・バンドラあり）
 
 ```js
-import { createRSReplayPlayer } from '@parelabo/rs-replay';
-import '@parelabo/rs-replay/rs-replay.css';   // スタイル（バンドラ経由）
+import { createRSReplayPlayer } from '@sano1023/rs-replay';
+import '@sano1023/rs-replay/rs-replay.css';   // スタイル（バンドラ経由）
 
 createRSReplayPlayer(document.querySelector('#app'), session, { /* オプション */ });
 ```
@@ -30,8 +36,8 @@ createRSReplayPlayer(document.querySelector('#app'), session, { /* オプショ�
 ### `<script>` タグ（CDN・ビルド環境不要）
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@parelabo/rs-replay@0.4.0/dist/rs-replay.css">
-<script src="https://cdn.jsdelivr.net/npm/@parelabo/rs-replay@0.4.0/dist/rs-replay.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sano1023/rs-package@main/rs-replay/dist/rs-replay.css">
+<script src="https://cdn.jsdelivr.net/gh/sano1023/rs-package@main/rs-replay/dist/rs-replay.min.js"></script>
 <script>
   // 公開APIはグローバル RSReplay に載る
   RSReplay.createRSReplayPlayer(document.querySelector('#app'), session, { /* オプション */ });
@@ -41,8 +47,8 @@ createRSReplayPlayer(document.querySelector('#app'), session, { /* オプショ�
 ### Vue 3
 
 ```js
-import { RsReplayPlayer, RsHeatmap } from '@parelabo/rs-replay/vue';
-import '@parelabo/rs-replay/rs-replay.css';   // スタイル（バンドラ経由）
+import { RsReplayPlayer, RsHeatmap } from '@sano1023/rs-replay/vue';
+import '@sano1023/rs-replay/rs-replay.css';   // スタイル（バンドラ経由）
 ```
 
 ```vue
@@ -54,8 +60,8 @@ import '@parelabo/rs-replay/rs-replay.css';   // スタイル（バンドラ経�
 ### React 18 / 19
 
 ```jsx
-import { RsReplayPlayer, RsHeatmap } from '@parelabo/rs-replay/react';
-import '@parelabo/rs-replay/rs-replay.css';   // スタイル（バンドラ経由）
+import { RsReplayPlayer, RsHeatmap } from '@sano1023/rs-replay/react';
+import '@sano1023/rs-replay/rs-replay.css';   // スタイル（バンドラ経由）
 
 export default function App() {
   return <RsReplayPlayer />;
@@ -78,7 +84,7 @@ export default function App() {
 - **実運用サイズ（v0.2）**: `CompressionStream('gzip')` による gzip 圧縮（**通常操作5分で gzip 後 500KB 未満**）。非対応環境は非圧縮に自動フォールバック
 - **プレイヤー同梱のオールインワン**: タイムライン・シーク・速度（0.5〜8x）・仮想カーソル・クリックリップルまで同梱。「記録コアだけ」ではないオールインワン
 - **安全な再生**: sandbox iframe（`allow-scripts` なし）で再現するため、**記録ページのスクリプトは一切実行されない**（再生が第2のXSS経路にならない）
-- **依存ゼロ・ビルド不要**: ESモジュールを `src/` から直接 import。記録開始はスニペット数行
+- **依存ゼロ・ビルド不要**: ビルド済みの ESモジュールをパッケージから import。記録開始はスニペット数行
 - **ライセンス**: MIT
 
 対応ブラウザ: 最新の Chrome / Edge / Safari / Firefox
@@ -93,23 +99,15 @@ php -S localhost:8099   # または任意の静的サーバー
 
 左半分のフォーム・ボタン・スクロール領域を操作し、「ここまでを再生」を押すと右半分のプレイヤーで再現される**ループバックデモ**。password やマスク要素の生値が再生側に一切現れないことをその場で確認できます。**v0.2 では Shadow DOM・同一オリジン iframe・Canvas を含むコンポーネントの記録/再生、カスタムイベント/console.error/ルート変化のタイムラインマーカー、無操作スキップ、gzip 後サイズの表示も試せます。v0.3 では「現在の操作をセッションに追加」で複数セッションを溜め、「ヒートマップ表示」で左ペインにクリック/ムーブ/スクロール深度のヒートマップを重ね、種別切替・強度調整もその場で試せます。v0.4 では「反応しないボタン」を素早く連打してから再生するとレイジクリック（◆）/デッドクリック（○）がタイムラインに表示され、「現在のセッションを監査」でマスク漏れ検査（メール/電話/カード番号/未マスクinput）、「ファネル到達集計」で段階到達の集計を試せます。**
 
-## インストール
-
-npm公開前は、`src/` ディレクトリをコピーするだけで使えます。
-
-```html
-<link rel="stylesheet" href="./rs-replay/src/rs-replay.css">
-```
-
 ```js
-import { createRSReplayRecorder, createRSReplayPlayer } from './rs-replay/src/index.js';
-// npm公開後: import { createRSReplayRecorder, createRSReplayPlayer } from 'rs-replay';
+import { createRSReplayRecorder, createRSReplayPlayer } from '@sano1023/rs-replay';
+import '@sano1023/rs-replay/rs-replay.css';
 ```
 
 ## クイックスタート
 
 ```js
-import { createRSReplayRecorder, createRSReplayPlayer, mergeChunks } from 'rs-replay';
+import { createRSReplayRecorder, createRSReplayPlayer, mergeChunks } from '@sano1023/rs-replay';
 
 // ---- 記録 ----
 const recorder = createRSReplayRecorder({
@@ -207,7 +205,7 @@ Shadow DOM（open）・同一オリジン iframe は**既定で記録/再生さ�
 記録済みセッション（`getSession()` / `mergeChunks()` の戻り・単体でも配列でもJSON文字列でも可）を集計し、`target` 要素の上に自前canvasでヒートマップをオーバーレイする。**複数セッションは合成される**（同じ要素・同じ位置・同じ深度帯で強度が加算）。
 
 ```js
-import { createRSHeatmap } from 'rs-replay';
+import { createRSHeatmap } from '@sano1023/rs-replay';
 
 const sessions = [sessionA, sessionB, sessionC];   // 複数セッションを合成
 const heatmap = createRSHeatmap('#page', sessions, { type: 'click' });
@@ -251,7 +249,7 @@ heatmap.destroy();
 セッションの `events` 配列だけを読む **DOM非依存の純関数**。プレイヤーは `analyze: true`（既定）でレイジ/デッドクリックを自動検出し、タイムラインに `rage`（◆）/`dead`（○）マーカーを描く。個別にも呼べる。
 
 ```js
-import { detectRageClicks, detectDeadClicks, funnelReach } from 'rs-replay';
+import { detectRageClicks, detectDeadClicks, funnelReach } from '@sano1023/rs-replay';
 
 // レイジクリック（近接位置の短時間連打）: 既定 3回以上・間隔1000ms以内・半径30px
 const rage = detectRageClicks(session.events, { minClicks: 3, windowMs: 1000, radius: 30 });
@@ -277,7 +275,7 @@ export: `detectRageClicks` / `detectDeadClicks` / `analysisMarkers`（Player用�
 セッションJSON（snapshot ツリー＋ events）を走査し、**マスク漏れ**を検出して報告する。記録前の設定ミス（`maskSelector` の付け忘れ・サードパーティ製フィールド等）で生値がセッションへ落ちていないかを、**保存/共有の前に機械チェック**するための道具。DOM非依存の純関数で、外部送信は一切しない。
 
 ```js
-import { auditSession } from 'rs-replay';
+import { auditSession } from '@sano1023/rs-replay';
 
 const report = auditSession(session);   // JSON文字列でも可
 // {
@@ -325,7 +323,7 @@ v0.2 の拡張は**すべて既存スキーマへの追加フィールド**（`v
 `CompressionStream('gzip')` を使う（アダプタ不要）。非対応環境では非圧縮 UTF-8 にフォールバックし、解凍側は先頭のマジックバイト（`0x1f 0x8b`）で圧縮/非圧縮を自動判別する。
 
 ```js
-import { sessionToGzip, sessionFromGzip, isCompressionSupported } from 'rs-replay';
+import { sessionToGzip, sessionFromGzip, isCompressionSupported } from '@sano1023/rs-replay';
 
 const bytes = await recorder.getCompressedSession();   // Promise<Uint8Array>（gzip）
 // navigator.sendBeacon('/api/replay', bytes);          // 送信は利用側の責務

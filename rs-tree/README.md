@@ -5,8 +5,14 @@
 ## インストール
 
 ```bash
-npm install @parelabo/rs-tree
+npm login --scope=@sano1023 --auth-type=legacy --registry=https://npm.pkg.github.com
+npm config set @sano1023:registry=https://npm.pkg.github.com --location=user
+npm install @sano1023/rs-tree
 ```
+
+> GitHub Packages から配布しています。public パッケージもインストールには GitHub 認証が必要です。ログイン時の Password には read:packages 権限を持つ personal access token (classic) を使用します。認証不要の導入には、下記の GitHub tarball または CDN を利用できます。
+
+認証・更新の詳細は [共通インストール手順](https://github.com/sano1023/rs-package/blob/main/INSTALLING.md) を参照してください。登録済みバージョンは [GitHub Packages 一覧](https://github.com/sano1023?tab=packages&repo_name=rs-package) で確認できます。以下のパッケージ名による import は Vite などのバンドラ向けです。
 
 <details>
 <summary>npm レジストリを使わない場合（GitHub tarball 直指定）</summary>
@@ -21,8 +27,8 @@ npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-tree-0.2
 ### バニラ JS（ESM・バンドラあり）
 
 ```js
-import { createRSTree } from '@parelabo/rs-tree';
-import '@parelabo/rs-tree/rs-tree.css';   // スタイル（バンドラ経由）
+import { createRSTree } from '@sano1023/rs-tree';
+import '@sano1023/rs-tree/rs-tree.css';   // スタイル（バンドラ経由）
 
 createRSTree(document.querySelector('#app'), { nodes, /* オプション */ });
 ```
@@ -30,8 +36,8 @@ createRSTree(document.querySelector('#app'), { nodes, /* オプション */ });
 ### `<script>` タグ（CDN・ビルド環境不要）
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@parelabo/rs-tree@0.2.0/dist/rs-tree.css">
-<script src="https://cdn.jsdelivr.net/npm/@parelabo/rs-tree@0.2.0/dist/rs-tree.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sano1023/rs-package@main/rs-tree/dist/rs-tree.css">
+<script src="https://cdn.jsdelivr.net/gh/sano1023/rs-package@main/rs-tree/dist/rs-tree.min.js"></script>
 <script>
   // 公開APIはグローバル RSTree に載る
   RSTree.createRSTree(document.querySelector('#app'), { nodes, /* オプション */ });
@@ -41,8 +47,8 @@ createRSTree(document.querySelector('#app'), { nodes, /* オプション */ });
 ### Vue 3
 
 ```js
-import { RsTree } from '@parelabo/rs-tree/vue';
-import '@parelabo/rs-tree/rs-tree.css';   // スタイル（バンドラ経由）
+import { RsTree } from '@sano1023/rs-tree/vue';
+import '@sano1023/rs-tree/rs-tree.css';   // スタイル（バンドラ経由）
 ```
 
 ```vue
@@ -54,8 +60,8 @@ import '@parelabo/rs-tree/rs-tree.css';   // スタイル（バンドラ経由�
 ### React 18 / 19
 
 ```jsx
-import { RsTree } from '@parelabo/rs-tree/react';
-import '@parelabo/rs-tree/rs-tree.css';   // スタイル（バンドラ経由）
+import { RsTree } from '@sano1023/rs-tree/react';
+import '@sano1023/rs-tree/rs-tree.css';   // スタイル（バンドラ経由）
 
 export default function App() {
   return <RsTree />;
@@ -85,11 +91,16 @@ export default function App() {
 - **コンテキストメニュー**: `contextMenu: true` で組み込み（名前変更/子を追加/削除）、関数指定で独自メニュー（右クリック・Esc/外側クリックで閉じる）
 - ドラッグ中の**端自動スクロール**（スクロールコンテナ時）
 
+```js
+import { createRSTree } from '@sano1023/rs-tree';
+import '@sano1023/rs-tree/rs-tree.css';
+```
+
 ## 使い方
 
 ```js
-import { createRSTree } from './rs-tree/src/index.js';
-// CSS: <link rel="stylesheet" href="./rs-tree/src/rs-tree.css">
+import { createRSTree } from '@sano1023/rs-tree';
+// CSS: <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sano1023/rs-package@main/rs-tree/dist/rs-tree.css">
 
 const tree = createRSTree('#tree', {
     checkboxes: true,
@@ -118,14 +129,14 @@ tree.toNodes();                                        // 入れ子 JSON（保�
 ### 純ロジック API（node でも動く）
 
 ```js
-import { normalizeTree, applyCheck, moveNode, searchTree, visibleList } from 'rs-tree';
+import { normalizeTree, applyCheck, moveNode, searchTree, visibleList } from '@sano1023/rs-tree';
 ```
 
 ## Vue / React
 
 ```js
-import { RsTree } from 'rs-tree/vue';    // <RsTree :nodes="nodes" :options="{ checkboxes: true }" @check="..." />
-import { RsTree } from 'rs-tree/react';  // <RsTree nodes={nodes} options={{}} onCheck={...} ref={ref} />
+import { RsTree } from '@sano1023/rs-tree/vue';    // <RsTree :nodes="nodes" :options="{ checkboxes: true }" @check="..." />
+import { RsTree } from '@sano1023/rs-tree/react';  // <RsTree nodes={nodes} options={{}} onCheck={...} ref={ref} />
 ```
 
 ## テスト

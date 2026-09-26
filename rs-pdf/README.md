@@ -5,8 +5,14 @@
 ## インストール
 
 ```bash
-npm install @parelabo/rs-pdf
+npm login --scope=@sano1023 --auth-type=legacy --registry=https://npm.pkg.github.com
+npm config set @sano1023:registry=https://npm.pkg.github.com --location=user
+npm install @sano1023/rs-pdf
 ```
+
+> GitHub Packages から配布しています。public パッケージもインストールには GitHub 認証が必要です。ログイン時の Password には read:packages 権限を持つ personal access token (classic) を使用します。認証不要の導入には、下記の GitHub tarball または CDN を利用できます。
+
+認証・更新の詳細は [共通インストール手順](https://github.com/sano1023/rs-package/blob/main/INSTALLING.md) を参照してください。登録済みバージョンは [GitHub Packages 一覧](https://github.com/sano1023?tab=packages&repo_name=rs-package) で確認できます。以下のパッケージ名による import は Vite などのバンドラ向けです。
 
 <details>
 <summary>npm レジストリを使わない場合（GitHub tarball 直指定）</summary>
@@ -21,8 +27,8 @@ npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-pdf-0.5.
 ### バニラ JS（ESM・バンドラあり）
 
 ```js
-import { createRSPDF } from '@parelabo/rs-pdf';
-import '@parelabo/rs-pdf/rs-pdf.css';   // スタイル（バンドラ経由）
+import { createRSPDF } from '@sano1023/rs-pdf';
+import '@sano1023/rs-pdf/rs-pdf.css';   // スタイル（バンドラ経由）
 
 createRSPDF(document.querySelector('#app'), { /* オプション */ });
 ```
@@ -30,8 +36,8 @@ createRSPDF(document.querySelector('#app'), { /* オプション */ });
 ### `<script>` タグ（CDN・ビルド環境不要）
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@parelabo/rs-pdf@0.5.0/dist/rs-pdf.css">
-<script src="https://cdn.jsdelivr.net/npm/@parelabo/rs-pdf@0.5.0/dist/rs-pdf.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sano1023/rs-package@main/rs-pdf/dist/rs-pdf.css">
+<script src="https://cdn.jsdelivr.net/gh/sano1023/rs-package@main/rs-pdf/dist/rs-pdf.min.js"></script>
 <script>
   // 公開APIはグローバル RSPDF に載る
   RSPDF.createRSPDF(document.querySelector('#app'), { /* オプション */ });
@@ -41,8 +47,8 @@ createRSPDF(document.querySelector('#app'), { /* オプション */ });
 ### Vue 3
 
 ```js
-import { RsPdfViewer } from '@parelabo/rs-pdf/vue';
-import '@parelabo/rs-pdf/rs-pdf.css';   // スタイル（バンドラ経由）
+import { RsPdfViewer } from '@sano1023/rs-pdf/vue';
+import '@sano1023/rs-pdf/rs-pdf.css';   // スタイル（バンドラ経由）
 ```
 
 ```vue
@@ -54,8 +60,8 @@ import '@parelabo/rs-pdf/rs-pdf.css';   // スタイル（バンドラ経由）
 ### React 18 / 19
 
 ```jsx
-import { RsPdfViewer } from '@parelabo/rs-pdf/react';
-import '@parelabo/rs-pdf/rs-pdf.css';   // スタイル（バンドラ経由）
+import { RsPdfViewer } from '@sano1023/rs-pdf/react';
+import '@sano1023/rs-pdf/rs-pdf.css';   // スタイル（バンドラ経由）
 
 export default function App() {
   return <RsPdfViewer />;
@@ -70,7 +76,7 @@ export default function App() {
 
 依存ゼロのPDFビューア＆注釈ライブラリです（現在 v0.1 = ビューア）。
 
-- **依存ゼロコア**: ランタイム依存なし。ビルド不要で `src/` から直接 import できる ESモジュール
+- **依存ゼロコア**: ランタイム依存なし。ビルド済みの ESモジュールをパッケージから import できる
 - **レンダラアダプタ注入**: PDFのラスタライズはアダプタ契約に切り出し、コアは永久にこの契約だけに依存する（rs-scanner のデコーダ注入と同じ流儀）。**pdf.js マッパー `pdfjsAdapter(pdfjsLib)` を同梱**（コアからは import しない。利用側が pdf.js を読み込んで渡す）
 - **ページ仮想化**: 全ページ分の軽量プレースホルダを並べ、**可視±2枚だけ canvas render**。範囲外は canvasプール（上限8枚）へ返却。100ページのPDFでも同時に存在する canvas は可視±2枚分のみ
 - **レティナ対応**: 実効 render scale = zoom × devicePixelRatio（CSSサイズと描画解像度を分離）
@@ -96,17 +102,9 @@ php -S localhost:8099   # または任意の静的サーバー
 
 デモは pdf.js を CDN（jsdelivr の pdfjs-dist）から注入し、同梱の `demo/sample.pdf`（日本語入り6ページ・`demo/make-sample-pdf.mjs` で自前生成）を表示します。ローカルPDFのファイル選択・destroy・アダプタ未注入エラーの再現も試せます。
 
-## インストール
-
-npm公開前は、`src/` ディレクトリをコピーするだけで使えます。
-
-```html
-<link rel="stylesheet" href="./rs-pdf/src/rs-pdf.css">
-```
-
 ```js
-import { createRSPDF, pdfjsAdapter } from './rs-pdf/src/index.js';
-// npm公開後: import { createRSPDF, pdfjsAdapter } from 'rs-pdf';
+import { createRSPDF, pdfjsAdapter } from '@sano1023/rs-pdf';
+import '@sano1023/rs-pdf/rs-pdf.css';
 ```
 
 ## クイックスタート
@@ -116,7 +114,7 @@ import { createRSPDF, pdfjsAdapter } from './rs-pdf/src/index.js';
 ```
 
 ```js
-import { createRSPDF, pdfjsAdapter } from 'rs-pdf';
+import { createRSPDF, pdfjsAdapter } from '@sano1023/rs-pdf';
 import * as pdfjsLib from 'pdfjs-dist';           // または CDN の pdf.min.mjs
 pdfjsLib.GlobalWorkerOptions.workerSrc = '...pdf.worker.min.mjs';
 
@@ -240,7 +238,7 @@ AcroForm付きPDFを開くと、テキスト / チェック / ラジオ / コン
 ### 同梱の pdf.js マッパー
 
 ```js
-import { pdfjsAdapter } from 'rs-pdf';
+import { pdfjsAdapter } from '@sano1023/rs-pdf';
 
 const renderer = pdfjsAdapter(pdfjsLib, {
     // getDocument へそのまま渡される（CJKフォントを含むPDFには cMap 類を推奨）

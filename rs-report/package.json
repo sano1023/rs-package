@@ -1,5 +1,5 @@
 {
-    "name": "@parelabo/rs-report",
+    "name": "@sano1023/rs-report",
     "version": "0.5.0",
     "description": "依存ゼロの帳票（レポート）エンジン。mm精度のバンドレイアウト・自動改ページ・グループ集計・繰越・和暦/大字漢数字・実寸印刷。SVF / ActiveReports JS / Stimulsoft 代替。",
     "type": "module",
@@ -57,6 +57,7 @@
         "email": "contact@parelabo.com"
     },
     "publishConfig": {
+        "registry": "https://npm.pkg.github.com",
         "access": "public"
     },
     "types": "./dist/types/index.d.ts",

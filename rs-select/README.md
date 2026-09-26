@@ -5,8 +5,14 @@
 ## インストール
 
 ```bash
-npm install @parelabo/rs-select
+npm login --scope=@sano1023 --auth-type=legacy --registry=https://npm.pkg.github.com
+npm config set @sano1023:registry=https://npm.pkg.github.com --location=user
+npm install @sano1023/rs-select
 ```
+
+> GitHub Packages から配布しています。public パッケージもインストールには GitHub 認証が必要です。ログイン時の Password には read:packages 権限を持つ personal access token (classic) を使用します。認証不要の導入には、下記の GitHub tarball または CDN を利用できます。
+
+認証・更新の詳細は [共通インストール手順](https://github.com/sano1023/rs-package/blob/main/INSTALLING.md) を参照してください。登録済みバージョンは [GitHub Packages 一覧](https://github.com/sano1023?tab=packages&repo_name=rs-package) で確認できます。以下のパッケージ名による import は Vite などのバンドラ向けです。
 
 <details>
 <summary>npm レジストリを使わない場合（GitHub tarball 直指定）</summary>
@@ -21,8 +27,8 @@ npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-select-0
 ### バニラ JS（ESM・バンドラあり）
 
 ```js
-import { createRSSelect } from '@parelabo/rs-select';
-import '@parelabo/rs-select/rs-select.css';   // スタイル（バンドラ経由）
+import { createRSSelect } from '@sano1023/rs-select';
+import '@sano1023/rs-select/rs-select.css';   // スタイル（バンドラ経由）
 
 createRSSelect(document.querySelector('#app'), { items, /* オプション */ });
 ```
@@ -30,8 +36,8 @@ createRSSelect(document.querySelector('#app'), { items, /* オプション */ })
 ### `<script>` タグ（CDN・ビルド環境不要）
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@parelabo/rs-select@0.1.0/dist/rs-select.css">
-<script src="https://cdn.jsdelivr.net/npm/@parelabo/rs-select@0.1.0/dist/rs-select.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sano1023/rs-package@main/rs-select/dist/rs-select.css">
+<script src="https://cdn.jsdelivr.net/gh/sano1023/rs-package@main/rs-select/dist/rs-select.min.js"></script>
 <script>
   // 公開APIはグローバル RSSelect に載る
   RSSelect.createRSSelect(document.querySelector('#app'), { items, /* オプション */ });
@@ -41,8 +47,8 @@ createRSSelect(document.querySelector('#app'), { items, /* オプション */ })
 ### Vue 3
 
 ```js
-import { RsSelect } from '@parelabo/rs-select/vue';
-import '@parelabo/rs-select/rs-select.css';   // スタイル（バンドラ経由）
+import { RsSelect } from '@sano1023/rs-select/vue';
+import '@sano1023/rs-select/rs-select.css';   // スタイル（バンドラ経由）
 ```
 
 ```vue
@@ -54,8 +60,8 @@ import '@parelabo/rs-select/rs-select.css';   // スタイル（バンドラ経�
 ### React 18 / 19
 
 ```jsx
-import { RsSelect } from '@parelabo/rs-select/react';
-import '@parelabo/rs-select/rs-select.css';   // スタイル（バンドラ経由）
+import { RsSelect } from '@sano1023/rs-select/react';
+import '@sano1023/rs-select/rs-select.css';   // スタイル（バンドラ経由）
 
 export default function App() {
   return <RsSelect />;
@@ -83,6 +89,11 @@ export default function App() {
 - グループ見出し・disabled 候補・クリアボタン・プレースホルダ・CSS 変数テーマ
 - Vue 3 / React ラッパー（v-model 対応）・MIT
 
+```js
+import { matches, normalizeForSearch, romajiToHiragana } from '@sano1023/rs-select';
+import '@sano1023/rs-select/rs-select.css';
+```
+
 ## 使い方
 
 ```html
@@ -93,7 +104,7 @@ export default function App() {
     </optgroup>
 </select>
 <script type="module">
-    import { createRSSelect } from 'rs-select';
+    import { createRSSelect } from '@sano1023/rs-select';
     createRSSelect('#pref');
 </script>
 ```
@@ -123,15 +134,15 @@ sel.setItems(nextItems); sel.open(); sel.close(); sel.setDisabled(true);
 ### 純ロジック API（node でも動く）
 
 ```js
-import { matches, normalizeForSearch, romajiToHiragana } from 'rs-select';
+import { matches, normalizeForSearch, romajiToHiragana } from '@sano1023/rs-select';
 matches({ label: '東京都', kana: 'とうきょうと' }, 'toukyou');   // true
 ```
 
 ## Vue / React
 
 ```js
-import { RsSelect } from 'rs-select/vue';    // <RsSelect v-model="value" :items="items" :options="{ multiple: true }" />
-import { RsSelect } from 'rs-select/react';  // <RsSelect items={items} value={value} onChange={...} ref={ref} />
+import { RsSelect } from '@sano1023/rs-select/vue';    // <RsSelect v-model="value" :items="items" :options="{ multiple: true }" />
+import { RsSelect } from '@sano1023/rs-select/react';  // <RsSelect items={items} value={value} onChange={...} ref={ref} />
 ```
 
 ## テスト

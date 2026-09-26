@@ -1,5 +1,5 @@
 {
-    "name": "@parelabo/rs-select",
+    "name": "@sano1023/rs-select",
     "version": "0.1.0",
     "description": "依存ゼロの高機能セレクトボックス（日本語ファースト検索・複数選択タグ・非同期候補・仮想リスト・WAI-ARIA combobox）",
     "type": "module",
@@ -52,6 +52,7 @@
         "email": "contact@parelabo.com"
     },
     "publishConfig": {
+        "registry": "https://npm.pkg.github.com",
         "access": "public"
     },
     "types": "./dist/types/index.d.ts",

@@ -5,8 +5,14 @@
 ## インストール
 
 ```bash
-npm install @parelabo/rs-scanner
+npm login --scope=@sano1023 --auth-type=legacy --registry=https://npm.pkg.github.com
+npm config set @sano1023:registry=https://npm.pkg.github.com --location=user
+npm install @sano1023/rs-scanner
 ```
+
+> GitHub Packages から配布しています。public パッケージもインストールには GitHub 認証が必要です。ログイン時の Password には read:packages 権限を持つ personal access token (classic) を使用します。認証不要の導入には、下記の GitHub tarball または CDN を利用できます。
+
+認証・更新の詳細は [共通インストール手順](https://github.com/sano1023/rs-package/blob/main/INSTALLING.md) を参照してください。登録済みバージョンは [GitHub Packages 一覧](https://github.com/sano1023?tab=packages&repo_name=rs-package) で確認できます。以下のパッケージ名による import は Vite などのバンドラ向けです。
 
 <details>
 <summary>npm レジストリを使わない場合（GitHub tarball 直指定）</summary>
@@ -21,8 +27,8 @@ npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-scanner-
 ### バニラ JS（ESM・バンドラあり）
 
 ```js
-import { createRSScanner } from '@parelabo/rs-scanner';
-import '@parelabo/rs-scanner/rs-scanner.css';   // スタイル（バンドラ経由）
+import { createRSScanner } from '@sano1023/rs-scanner';
+import '@sano1023/rs-scanner/rs-scanner.css';   // スタイル（バンドラ経由）
 
 createRSScanner(document.querySelector('#app'), { /* オプション */ });
 ```
@@ -30,8 +36,8 @@ createRSScanner(document.querySelector('#app'), { /* オプション */ });
 ### `<script>` タグ（CDN・ビルド環境不要）
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@parelabo/rs-scanner@0.1.0/dist/rs-scanner.css">
-<script src="https://cdn.jsdelivr.net/npm/@parelabo/rs-scanner@0.1.0/dist/rs-scanner.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sano1023/rs-package@main/rs-scanner/dist/rs-scanner.css">
+<script src="https://cdn.jsdelivr.net/gh/sano1023/rs-package@main/rs-scanner/dist/rs-scanner.min.js"></script>
 <script>
   // 公開APIはグローバル RSScanner に載る
   RSScanner.createRSScanner(document.querySelector('#app'), { /* オプション */ });
@@ -41,8 +47,8 @@ createRSScanner(document.querySelector('#app'), { /* オプション */ });
 ### Vue 3
 
 ```js
-import { RsScanner } from '@parelabo/rs-scanner/vue';
-import '@parelabo/rs-scanner/rs-scanner.css';   // スタイル（バンドラ経由）
+import { RsScanner } from '@sano1023/rs-scanner/vue';
+import '@sano1023/rs-scanner/rs-scanner.css';   // スタイル（バンドラ経由）
 ```
 
 ```vue
@@ -54,8 +60,8 @@ import '@parelabo/rs-scanner/rs-scanner.css';   // スタイル（バンドラ�
 ### React 18 / 19
 
 ```jsx
-import { RsScanner } from '@parelabo/rs-scanner/react';
-import '@parelabo/rs-scanner/rs-scanner.css';   // スタイル（バンドラ経由）
+import { RsScanner } from '@sano1023/rs-scanner/react';
+import '@sano1023/rs-scanner/rs-scanner.css';   // スタイル（バンドラ経由）
 
 export default function App() {
   return <RsScanner />;
@@ -80,6 +86,11 @@ QR/バーコード読み取りライブラリ（rs-qrcode と対）。カメラ�
 - `scanImage(file)` で画像1枚の一発読み取り（アップロード読み取り）
 - `listCameras()` / `setTorch(on)`（対応端末のライト）
 
+```js
+import { createRSScanner, jsQRAdapter } from '@sano1023/rs-scanner';
+import '@sano1023/rs-scanner/rs-scanner.css';
+```
+
 ## デモ
 
 ```bash
@@ -92,11 +103,11 @@ php -S localhost:8099
 ## クイックスタート
 
 ```html
-<link rel="stylesheet" href="rs-scanner/rs-scanner.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sano1023/rs-package@main/rs-scanner/dist/rs-scanner.css">
 ```
 
 ```js
-import { createRSScanner, jsQRAdapter } from './rs-scanner/index.js';
+import { createRSScanner, jsQRAdapter } from '@sano1023/rs-scanner';
 
 const scanner = createRSScanner('#viewport', {
     formats: ['qr_code', 'code_128', 'ean_13'],

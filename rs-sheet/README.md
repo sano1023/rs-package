@@ -5,8 +5,14 @@
 ## インストール
 
 ```bash
-npm install @parelabo/rs-sheet
+npm login --scope=@sano1023 --auth-type=legacy --registry=https://npm.pkg.github.com
+npm config set @sano1023:registry=https://npm.pkg.github.com --location=user
+npm install @sano1023/rs-sheet
 ```
+
+> GitHub Packages から配布しています。public パッケージもインストールには GitHub 認証が必要です。ログイン時の Password には read:packages 権限を持つ personal access token (classic) を使用します。認証不要の導入には、下記の GitHub tarball または CDN を利用できます。
+
+認証・更新の詳細は [共通インストール手順](https://github.com/sano1023/rs-package/blob/main/INSTALLING.md) を参照してください。登録済みバージョンは [GitHub Packages 一覧](https://github.com/sano1023?tab=packages&repo_name=rs-package) で確認できます。以下のパッケージ名による import は Vite などのバンドラ向けです。
 
 <details>
 <summary>npm レジストリを使わない場合（GitHub tarball 直指定）</summary>
@@ -21,8 +27,8 @@ npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-sheet-0.
 ### バニラ JS（ESM・バンドラあり）
 
 ```js
-import { createRSSheet } from '@parelabo/rs-sheet';
-import '@parelabo/rs-sheet/rs-sheet.css';   // スタイル（バンドラ経由）
+import { createRSSheet } from '@sano1023/rs-sheet';
+import '@sano1023/rs-sheet/rs-sheet.css';   // スタイル（バンドラ経由）
 
 createRSSheet(document.querySelector('#app'), { /* オプション */ });
 ```
@@ -30,8 +36,8 @@ createRSSheet(document.querySelector('#app'), { /* オプション */ });
 ### `<script>` タグ（CDN・ビルド環境不要）
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@parelabo/rs-sheet@0.5.0/dist/rs-sheet.css">
-<script src="https://cdn.jsdelivr.net/npm/@parelabo/rs-sheet@0.5.0/dist/rs-sheet.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sano1023/rs-package@main/rs-sheet/dist/rs-sheet.css">
+<script src="https://cdn.jsdelivr.net/gh/sano1023/rs-package@main/rs-sheet/dist/rs-sheet.min.js"></script>
 <script>
   // 公開APIはグローバル RSSheet に載る
   RSSheet.createRSSheet(document.querySelector('#app'), { /* オプション */ });
@@ -41,8 +47,8 @@ createRSSheet(document.querySelector('#app'), { /* オプション */ });
 ### Vue 3
 
 ```js
-import { RsSheet } from '@parelabo/rs-sheet/vue';
-import '@parelabo/rs-sheet/rs-sheet.css';   // スタイル（バンドラ経由）
+import { RsSheet } from '@sano1023/rs-sheet/vue';
+import '@sano1023/rs-sheet/rs-sheet.css';   // スタイル（バンドラ経由）
 ```
 
 ```vue
@@ -54,8 +60,8 @@ import '@parelabo/rs-sheet/rs-sheet.css';   // スタイル（バンドラ経由
 ### React 18 / 19
 
 ```jsx
-import { RsSheet } from '@parelabo/rs-sheet/react';
-import '@parelabo/rs-sheet/rs-sheet.css';   // スタイル（バンドラ経由）
+import { RsSheet } from '@sano1023/rs-sheet/react';
+import '@sano1023/rs-sheet/rs-sheet.css';   // スタイル（バンドラ経由）
 
 export default function App() {
   return <RsSheet />;
@@ -71,7 +77,7 @@ export default function App() {
 **本格数式エンジン内蔵・依存ゼロ**のセル指向スプレッドシートライブラリです（現在 v0.5）。
 
 - **本格数式エンジン込みで MIT**: 字句解析 → 再帰下降パーサ → AST評価の自前エンジンを内蔵。数式エンジンまで含めて依存ゼロ・ライセンスキー不要
-- **依存ゼロ・ビルド不要**: ランタイム依存なし。`src/` から直接 import できる ESモジュール
+- **依存ゼロ・ビルド不要**: ランタイム依存なし。パッケージから import できる ESモジュール
 - **組み込み関数136個**: SUM / IF / VLOOKUP に加え **XLOOKUP / SUMIFS / COUNTIFS / TEXT / SUBSTITUTE / DATEDIF / EOMONTH / WORKDAY / NETWORKDAYS（祝日対応）/ MEDIAN / STDEV / RANK / PERCENTILE** など（下記一覧）。`defineFunction()` でカスタム関数を数行で追加でき、組み込み関数もすべて同じ API で実装（dogfooding）
 - **共同編集の土台（v0.5）**: **変更イベントストリーム（`on('ops', ops => …)`。共同編集サーバへ流せる op 粒度の差分 `{type,payload,seq}` を発火。既存 `on('change')` はそのまま）・読み取り専用ビュー（`readOnly` オプション / `setReadOnly()`。入力・削除・ペースト・フィル・行列挿入削除・undo/redo を禁止し、閲覧・選択・コピーは可）・数式監査（`setAudit()`。選択セルの参照元 / 参照先を依存グラフから辿って矢印で表示）**
 - **性能とカスタマイズ（v0.4）**: **10万セル対応（差分描画＋再計算・再描画の microtask バッチ化で、同一 tick の多数変更を1回の再描画に束ねる）・カスタムセルレンダラ / エディタ（`defineCellRenderer()`、組み込みの チェックボックス / 選択肢（ドロップダウン）セル）・rs-chart 連携（範囲を選んでチャート化。`createRSChart` があれば動く opt-in 連携でハード依存にしない）**
@@ -95,17 +101,9 @@ php -S localhost:8099   # または任意の静的サーバー
 
 見積書（単価×数量→小計→合計が連動・XLOOKUP・タイトルのセル結合・見出しの枠固定・数量の数値検証・コードのリスト入力・小計のデータバー・和暦の発行日）と売上集計（SUMIFS/MEDIAN/RANK・カラースケール・データバー・達成率のセル値ルール・判定のリスト検証・オートフィルタ）の2シナリオを試せます。
 
-## インストール
-
-npm公開前は、`src/` ディレクトリと `src/rs-sheet.css` をコピーするだけで使えます。
-
-```html
-<link rel="stylesheet" href="./rs-sheet/src/rs-sheet.css">
-```
-
 ```js
-import { createRSSheet } from './rs-sheet/src/index.js';
-// npm公開後: import { createRSSheet } from 'rs-sheet';
+import { createRSSheet } from '@sano1023/rs-sheet';
+import '@sano1023/rs-sheet/rs-sheet.css';
 ```
 
 ## クイックスタート
@@ -115,7 +113,7 @@ import { createRSSheet } from './rs-sheet/src/index.js';
 ```
 
 ```js
-import { createRSSheet } from 'rs-sheet';
+import { createRSSheet } from '@sano1023/rs-sheet';
 
 const sheet = createRSSheet('#container', {
     data: [                              // 2次元配列（先頭シートに展開）
@@ -232,7 +230,7 @@ sheet.destroy();
 ### カスタム関数 — `defineFunction(name, fn, opts)`
 
 ```js
-import { defineFunction } from 'rs-sheet';
+import { defineFunction } from '@sano1023/rs-sheet';
 
 defineFunction('TAXINC', (v) => Math.floor(v * 1.10), { minArgs: 1, maxArgs: 1 });
 // → セルに =TAXINC(B2) と書ける
@@ -285,7 +283,7 @@ sheet.flush();                                                         // 保留
 ### カスタムセルレンダラ / エディタ — `defineCellRenderer()`
 
 ```js
-import { defineCellRenderer } from 'rs-sheet';
+import { defineCellRenderer } from '@sano1023/rs-sheet';
 
 // 組み込み: チェックボックス（クリック / Space でトグル）と 選択肢（ドロップダウン）
 sheet.setCellType('E4:E8', 'checkbox');

@@ -5,8 +5,14 @@
 ## インストール
 
 ```bash
-npm install @parelabo/rs-grid
+npm login --scope=@sano1023 --auth-type=legacy --registry=https://npm.pkg.github.com
+npm config set @sano1023:registry=https://npm.pkg.github.com --location=user
+npm install @sano1023/rs-grid
 ```
+
+> GitHub Packages から配布しています。public パッケージもインストールには GitHub 認証が必要です。ログイン時の Password には read:packages 権限を持つ personal access token (classic) を使用します。認証不要の導入には、下記の GitHub tarball または CDN を利用できます。
+
+認証・更新の詳細は [共通インストール手順](https://github.com/sano1023/rs-package/blob/main/INSTALLING.md) を参照してください。登録済みバージョンは [GitHub Packages 一覧](https://github.com/sano1023?tab=packages&repo_name=rs-package) で確認できます。以下のパッケージ名による import は Vite などのバンドラ向けです。
 
 <details>
 <summary>npm レジストリを使わない場合（GitHub tarball 直指定）</summary>
@@ -21,8 +27,8 @@ npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-grid-0.4
 ### バニラ JS（ESM・バンドラあり）
 
 ```js
-import { createRSGrid } from '@parelabo/rs-grid';
-import '@parelabo/rs-grid/rs-grid.css';   // スタイル（バンドラ経由）
+import { createRSGrid } from '@sano1023/rs-grid';
+import '@sano1023/rs-grid/rs-grid.css';   // スタイル（バンドラ経由）
 
 createRSGrid(document.querySelector('#app'), { /* オプション */ });
 ```
@@ -30,8 +36,8 @@ createRSGrid(document.querySelector('#app'), { /* オプション */ });
 ### `<script>` タグ（CDN・ビルド環境不要）
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@parelabo/rs-grid@0.4.1/dist/rs-grid.css">
-<script src="https://cdn.jsdelivr.net/npm/@parelabo/rs-grid@0.4.1/dist/rs-grid.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sano1023/rs-package@main/rs-grid/dist/rs-grid.css">
+<script src="https://cdn.jsdelivr.net/gh/sano1023/rs-package@main/rs-grid/dist/rs-grid.min.js"></script>
 <script>
   // 公開APIはグローバル RSGrid に載る
   RSGrid.createRSGrid(document.querySelector('#app'), { /* オプション */ });
@@ -41,8 +47,8 @@ createRSGrid(document.querySelector('#app'), { /* オプション */ });
 ### Vue 3
 
 ```js
-import { RsGrid } from '@parelabo/rs-grid/vue';
-import '@parelabo/rs-grid/rs-grid.css';   // スタイル（バンドラ経由）
+import { RsGrid } from '@sano1023/rs-grid/vue';
+import '@sano1023/rs-grid/rs-grid.css';   // スタイル（バンドラ経由）
 ```
 
 ```vue
@@ -54,8 +60,8 @@ import '@parelabo/rs-grid/rs-grid.css';   // スタイル（バンドラ経由�
 ### React 18 / 19
 
 ```jsx
-import { RsGrid } from '@parelabo/rs-grid/react';
-import '@parelabo/rs-grid/rs-grid.css';   // スタイル（バンドラ経由）
+import { RsGrid } from '@sano1023/rs-grid/react';
+import '@sano1023/rs-grid/rs-grid.css';   // スタイル（バンドラ経由）
 
 export default function App() {
   return <RsGrid />;
@@ -102,18 +108,14 @@ php -S localhost:8099
 # → http://localhost:8099/rs-grid/demo/ を開く
 ```
 
-## インストール
-
-npm 公開前のため、`src/` をプロジェクトにコピーして import してください。
-
-```html
-<link rel="stylesheet" href="rs-grid/rs-grid.css">
+```js
+import '@sano1023/rs-grid/rs-grid.css';
 ```
 
 ## クイックスタート
 
 ```js
-import { createRSGrid } from './rs-grid/index.js';
+import { createRSGrid } from '@sano1023/rs-grid';
 
 const grid = createRSGrid('#grid', {
     columns: [

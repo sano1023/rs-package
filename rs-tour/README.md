@@ -5,8 +5,14 @@
 ## インストール
 
 ```bash
-npm install @parelabo/rs-tour
+npm login --scope=@sano1023 --auth-type=legacy --registry=https://npm.pkg.github.com
+npm config set @sano1023:registry=https://npm.pkg.github.com --location=user
+npm install @sano1023/rs-tour
 ```
+
+> GitHub Packages から配布しています。public パッケージもインストールには GitHub 認証が必要です。ログイン時の Password には read:packages 権限を持つ personal access token (classic) を使用します。認証不要の導入には、下記の GitHub tarball または CDN を利用できます。
+
+認証・更新の詳細は [共通インストール手順](https://github.com/sano1023/rs-package/blob/main/INSTALLING.md) を参照してください。登録済みバージョンは [GitHub Packages 一覧](https://github.com/sano1023?tab=packages&repo_name=rs-package) で確認できます。以下のパッケージ名による import は Vite などのバンドラ向けです。
 
 <details>
 <summary>npm レジストリを使わない場合（GitHub tarball 直指定）</summary>
@@ -21,7 +27,7 @@ npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-tour-0.1
 ### バニラ JS（ESM・バンドラあり）
 
 ```js
-import { createRSTour } from '@parelabo/rs-tour';
+import { createRSTour } from '@sano1023/rs-tour';
 
 createRSTour({ /* オプション */ });
 ```
@@ -29,7 +35,7 @@ createRSTour({ /* オプション */ });
 ### `<script>` タグ（CDN・ビルド環境不要）
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/@parelabo/rs-tour@0.1.0/dist/rs-tour.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/sano1023/rs-package@main/rs-tour/dist/rs-tour.min.js"></script>
 <script>
   // 公開APIはグローバル RSTour に載る
   RSTour.createRSTour({ /* オプション */ });
@@ -39,7 +45,7 @@ createRSTour({ /* オプション */ });
 ### Vue 3
 
 ```js
-import { RsTour } from '@parelabo/rs-tour/vue';
+import { RsTour } from '@sano1023/rs-tour/vue';
 ```
 
 ```vue
@@ -51,7 +57,7 @@ import { RsTour } from '@parelabo/rs-tour/vue';
 ### React 18 / 19
 
 ```jsx
-import { RsTour } from '@parelabo/rs-tour/react';
+import { RsTour } from '@sano1023/rs-tour/react';
 
 export default function App() {
   return <RsTour />;
@@ -81,13 +87,8 @@ php -S localhost:8099   # または任意の静的サーバー
 # → http://localhost:8099/demo/ を開く
 ```
 
-## インストール
-
-npm公開前は、`src/index.js` を1ファイルコピーするだけで使えます。
-
 ```js
-import { createRSTour } from './rs-tour/src/index.js';
-// npm: import { createRSTour } from '@parelabo/rs-tour';
+import { createRSTour } from '@sano1023/rs-tour';
 ```
 
 ## クイックスタート
@@ -98,7 +99,7 @@ import { createRSTour } from './rs-tour/src/index.js';
 ```
 
 ```js
-import { createRSTour } from '@parelabo/rs-tour';
+import { createRSTour } from '@sano1023/rs-tour';
 
 const tour = createRSTour({
     steps: [
@@ -168,7 +169,7 @@ document.querySelector('#start-tour').addEventListener('click', () => tour.start
 
 ```vue
 <script setup>
-import { createRSTour } from '@parelabo/rs-tour';
+import { createRSTour } from '@sano1023/rs-tour';
 
 const tour = createRSTour({ steps: [/* ... */] });
 </script>
@@ -182,7 +183,7 @@ const tour = createRSTour({ steps: [/* ... */] });
 
 ```jsx
 import { useMemo } from 'react';
-import { createRSTour } from '@parelabo/rs-tour';
+import { createRSTour } from '@sano1023/rs-tour';
 
 function TourButton() {
     const tour = useMemo(() => createRSTour({ steps: [/* ... */] }), []);

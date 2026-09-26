@@ -1,5 +1,5 @@
 {
-    "name": "@parelabo/rs-baslider",
+    "name": "@sano1023/rs-baslider",
     "version": "0.1.0",
     "description": "Before/After比較スライダー（依存ゼロ・横/縦・タッチ対応・ラベル・複数設置）",
     "type": "module",
@@ -45,6 +45,7 @@
         "email": "contact@parelabo.com"
     },
     "publishConfig": {
+        "registry": "https://npm.pkg.github.com",
         "access": "public"
     },
     "types": "./dist/types/index.d.ts",

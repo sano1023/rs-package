@@ -71,6 +71,9 @@
             image: photo(color.base + i, { w: 1000, h: 750, label: `${color.name} ${i + 1}` }),
             large: photo(color.base + i, { w: 2000, h: 1500, label: `${color.name} ${i + 1}` }),
             thumb: photo(color.base + i, { w: 180, h: 180, label: '' }),
+            // スマホは縦長にトリミング。拡大元も mobileLarge に合わせる
+            mobileImage: photo(color.base + i, { w: 750, h: 1000, label: `${color.name} ${i + 1}（スマホ用）` }),
+            mobileLarge: photo(color.base + i, { w: 1500, h: 2000, label: `${color.name} ${i + 1}（スマホ用）` }),
             alt: `${color.name} ${i + 1}`,
             caption: `${color.name} — アングル ${i + 1}`,
         }));

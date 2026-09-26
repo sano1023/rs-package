@@ -1,5 +1,5 @@
 {
-    "name": "@parelabo/rs-grid",
+    "name": "@sano1023/rs-grid",
     "version": "0.4.1",
     "description": "Excel風データグリッド（依存ゼロ・仮想スクロール・Excel互換コピペ・フィルハンドル・undo/redo）",
     "type": "module",
@@ -46,6 +46,7 @@
         "email": "contact@parelabo.com"
     },
     "publishConfig": {
+        "registry": "https://npm.pkg.github.com",
         "access": "public"
     },
     "types": "./dist/types/index.d.ts",

@@ -5,8 +5,14 @@
 ## インストール
 
 ```bash
-npm install @parelabo/rs-datepicker
+npm login --scope=@sano1023 --auth-type=legacy --registry=https://npm.pkg.github.com
+npm config set @sano1023:registry=https://npm.pkg.github.com --location=user
+npm install @sano1023/rs-datepicker
 ```
+
+> GitHub Packages から配布しています。public パッケージもインストールには GitHub 認証が必要です。ログイン時の Password には read:packages 権限を持つ personal access token (classic) を使用します。認証不要の導入には、下記の GitHub tarball または CDN を利用できます。
+
+認証・更新の詳細は [共通インストール手順](https://github.com/sano1023/rs-package/blob/main/INSTALLING.md) を参照してください。登録済みバージョンは [GitHub Packages 一覧](https://github.com/sano1023?tab=packages&repo_name=rs-package) で確認できます。以下のパッケージ名による import は Vite などのバンドラ向けです。
 
 <details>
 <summary>npm レジストリを使わない場合（GitHub tarball 直指定）</summary>
@@ -21,8 +27,8 @@ npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-datepick
 ### バニラ JS（ESM・バンドラあり）
 
 ```js
-import { createRSDatePicker } from '@parelabo/rs-datepicker';
-import '@parelabo/rs-datepicker/rs-datepicker.css';   // スタイル（バンドラ経由）
+import { createRSDatePicker } from '@sano1023/rs-datepicker';
+import '@sano1023/rs-datepicker/rs-datepicker.css';   // スタイル（バンドラ経由）
 
 createRSDatePicker(document.querySelector('#app'), { /* オプション */ });
 ```
@@ -30,8 +36,8 @@ createRSDatePicker(document.querySelector('#app'), { /* オプション */ });
 ### `<script>` タグ（CDN・ビルド環境不要）
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@parelabo/rs-datepicker@0.4.0/dist/rs-datepicker.css">
-<script src="https://cdn.jsdelivr.net/npm/@parelabo/rs-datepicker@0.4.0/dist/rs-datepicker.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sano1023/rs-package@main/rs-datepicker/dist/rs-datepicker.css">
+<script src="https://cdn.jsdelivr.net/gh/sano1023/rs-package@main/rs-datepicker/dist/rs-datepicker.min.js"></script>
 <script>
   // 公開APIはグローバル RSDatepicker に載る
   RSDatepicker.createRSDatePicker(document.querySelector('#app'), { /* オプション */ });
@@ -41,8 +47,8 @@ createRSDatePicker(document.querySelector('#app'), { /* オプション */ });
 ### Vue 3
 
 ```js
-import { RsDatePicker, RsDateSelect } from '@parelabo/rs-datepicker/vue';
-import '@parelabo/rs-datepicker/rs-datepicker.css';   // スタイル（バンドラ経由）
+import { RsDatePicker, RsDateSelect } from '@sano1023/rs-datepicker/vue';
+import '@sano1023/rs-datepicker/rs-datepicker.css';   // スタイル（バンドラ経由）
 ```
 
 ```vue
@@ -54,8 +60,8 @@ import '@parelabo/rs-datepicker/rs-datepicker.css';   // スタイル（バン�
 ### React 18 / 19
 
 ```jsx
-import { RsDatePicker, RsDateSelect } from '@parelabo/rs-datepicker/react';
-import '@parelabo/rs-datepicker/rs-datepicker.css';   // スタイル（バンドラ経由）
+import { RsDatePicker, RsDateSelect } from '@sano1023/rs-datepicker/react';
+import '@sano1023/rs-datepicker/rs-datepicker.css';   // スタイル（バンドラ経由）
 
 export default function App() {
   return <RsDatePicker />;
@@ -85,16 +91,9 @@ php -S localhost:8099
 # → http://localhost:8099/rs-datepicker/demo/schedule.html （スケジュール調整）
 ```
 
-## インストール
-
-npm 公開前のため、`src/` をプロジェクトにコピーして import してください。
-
-```html
-<link rel="stylesheet" href="rs-datepicker/rs-datepicker.css">
-```
-
 ```js
-import { createRSDatePicker } from './rs-datepicker/index.js';
+import { createRSDatePicker } from '@sano1023/rs-datepicker';
+import '@sano1023/rs-datepicker/rs-datepicker.css';
 ```
 
 ## クイックスタート
@@ -176,7 +175,7 @@ createRSDatePicker('#days', { mode: 'multiple', name: 'holidays' });
 - **フォーム送信**: `name` 指定で hidden を自動出力
 
 ```js
-import { createRSSchedulePicker } from 'rs-datepicker';
+import { createRSSchedulePicker } from '@sano1023/rs-datepicker';
 
 const sp = createRSSchedulePicker('#schedule', {
     name: 'term',    // → term_from / term_to（YYYY-MM-DD）
@@ -222,7 +221,7 @@ term_from / term_to の**2つの input で選ぶ従来型**にしたい場合は
 確定値は hidden input に `YYYY-MM-DD` 形式で入るので、フォームにそのまま載せられます。
 
 ```js
-import { createRSDateSelect } from 'rs-datepicker';
+import { createRSDateSelect } from '@sano1023/rs-datepicker';
 
 createRSDateSelect('#birthday', {
     name: 'birthday',                     // hidden input の name（送信キー）

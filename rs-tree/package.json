@@ -1,5 +1,5 @@
 {
-    "name": "@parelabo/rs-tree",
+    "name": "@sano1023/rs-tree",
     "version": "0.2.0",
     "description": "依存ゼロのツリービュー（三態チェック・D&D移動・遅延読込・検索・仮想スクロール・キーボード完備）",
     "type": "module",
@@ -51,6 +51,7 @@
         "email": "contact@parelabo.com"
     },
     "publishConfig": {
+        "registry": "https://npm.pkg.github.com",
         "access": "public"
     },
     "types": "./dist/types/index.d.ts",

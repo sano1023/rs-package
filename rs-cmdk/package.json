@@ -1,5 +1,5 @@
 {
-    "name": "@parelabo/rs-cmdk",
+    "name": "@sano1023/rs-cmdk",
     "version": "0.1.0",
     "description": "依存ゼロのコマンドパレット（Ctrl+K・日本語ファジー検索・最近使った順・ネストページ）",
     "type": "module",
@@ -43,6 +43,7 @@
         "email": "contact@parelabo.com"
     },
     "publishConfig": {
+        "registry": "https://npm.pkg.github.com",
         "access": "public"
     },
     "types": "./dist/types/index.d.ts",

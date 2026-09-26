@@ -1,5 +1,5 @@
 {
-    "name": "@parelabo/rs-form",
+    "name": "@sano1023/rs-form",
     "version": "0.5.0",
     "description": "依存ゼロのスキーマ駆動フォームビルダー",
     "type": "module",
@@ -30,6 +30,34 @@
         "./conversational": {
             "types": "./dist/types/conversational.d.ts",
             "import": "./dist/esm/conversational.js"
+        },
+        "./embed": {
+            "types": "./dist/types/embed.d.ts",
+            "import": "./dist/esm/embed.js"
+        },
+        "./i18n-schema": {
+            "types": "./dist/types/i18n-schema.d.ts",
+            "import": "./dist/esm/i18n-schema.js"
+        },
+        "./scoring": {
+            "types": "./dist/types/scoring.d.ts",
+            "import": "./dist/esm/scoring.js"
+        },
+        "./summary": {
+            "types": "./dist/types/summary.d.ts",
+            "import": "./dist/esm/summary.js"
+        },
+        "./theme": {
+            "types": "./dist/types/theme.d.ts",
+            "import": "./dist/esm/theme.js"
+        },
+        "./variant": {
+            "types": "./dist/types/variant.d.ts",
+            "import": "./dist/esm/variant.js"
+        },
+        "./i18n": {
+            "types": "./dist/types/i18n-schema.d.ts",
+            "import": "./dist/esm/i18n-schema.js"
         }
     },
     "files": [
@@ -57,6 +85,7 @@
         "email": "contact@parelabo.com"
     },
     "publishConfig": {
+        "registry": "https://npm.pkg.github.com",
         "access": "public"
     },
     "types": "./dist/types/index.d.ts",

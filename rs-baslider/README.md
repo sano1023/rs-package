@@ -5,8 +5,14 @@
 ## インストール
 
 ```bash
-npm install @parelabo/rs-baslider
+npm login --scope=@sano1023 --auth-type=legacy --registry=https://npm.pkg.github.com
+npm config set @sano1023:registry=https://npm.pkg.github.com --location=user
+npm install @sano1023/rs-baslider
 ```
+
+> GitHub Packages から配布しています。public パッケージもインストールには GitHub 認証が必要です。ログイン時の Password には read:packages 権限を持つ personal access token (classic) を使用します。認証不要の導入には、下記の GitHub tarball または CDN を利用できます。
+
+認証・更新の詳細は [共通インストール手順](https://github.com/sano1023/rs-package/blob/main/INSTALLING.md) を参照してください。登録済みバージョンは [GitHub Packages 一覧](https://github.com/sano1023?tab=packages&repo_name=rs-package) で確認できます。以下のパッケージ名による import は Vite などのバンドラ向けです。
 
 <details>
 <summary>npm レジストリを使わない場合（GitHub tarball 直指定）</summary>
@@ -21,8 +27,8 @@ npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-baslider
 ### バニラ JS（ESM・バンドラあり）
 
 ```js
-import { createRSBASlider } from '@parelabo/rs-baslider';
-import '@parelabo/rs-baslider/rs-baslider.css';   // スタイル（バンドラ経由）
+import { createRSBASlider } from '@sano1023/rs-baslider';
+import '@sano1023/rs-baslider/rs-baslider.css';   // スタイル（バンドラ経由）
 
 createRSBASlider(document.querySelector('#app'), { /* オプション */ });
 ```
@@ -30,8 +36,8 @@ createRSBASlider(document.querySelector('#app'), { /* オプション */ });
 ### `<script>` タグ（CDN・ビルド環境不要）
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@parelabo/rs-baslider@0.1.0/dist/rs-baslider.css">
-<script src="https://cdn.jsdelivr.net/npm/@parelabo/rs-baslider@0.1.0/dist/rs-baslider.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sano1023/rs-package@main/rs-baslider/dist/rs-baslider.css">
+<script src="https://cdn.jsdelivr.net/gh/sano1023/rs-package@main/rs-baslider/dist/rs-baslider.min.js"></script>
 <script>
   // 公開APIはグローバル RSBaslider に載る
   RSBaslider.createRSBASlider(document.querySelector('#app'), { /* オプション */ });
@@ -41,8 +47,8 @@ createRSBASlider(document.querySelector('#app'), { /* オプション */ });
 ### Vue 3
 
 ```js
-import { RsBaSlider } from '@parelabo/rs-baslider/vue';
-import '@parelabo/rs-baslider/rs-baslider.css';   // スタイル（バンドラ経由）
+import { RsBaSlider } from '@sano1023/rs-baslider/vue';
+import '@sano1023/rs-baslider/rs-baslider.css';   // スタイル（バンドラ経由）
 ```
 
 ```vue
@@ -54,8 +60,8 @@ import '@parelabo/rs-baslider/rs-baslider.css';   // スタイル（バンドラ
 ### React 18 / 19
 
 ```jsx
-import { RsBaSlider } from '@parelabo/rs-baslider/react';
-import '@parelabo/rs-baslider/rs-baslider.css';   // スタイル（バンドラ経由）
+import { RsBaSlider } from '@sano1023/rs-baslider/react';
+import '@sano1023/rs-baslider/rs-baslider.css';   // スタイル（バンドラ経由）
 
 export default function App() {
   return <RsBaSlider />;
@@ -85,18 +91,14 @@ php -S localhost:8099
 # → http://localhost:8099/rs-baslider/demo/ を開く
 ```
 
-## インストール
-
-npm 公開前のため、`src/` をプロジェクトにコピーして import してください。
-
-```html
-<link rel="stylesheet" href="rs-baslider/rs-baslider.css">
+```js
+import '@sano1023/rs-baslider/rs-baslider.css';
 ```
 
 ## クイックスタート
 
 ```js
-import { createRSBASlider } from './rs-baslider/index.js';
+import { createRSBASlider } from '@sano1023/rs-baslider';
 
 createRSBASlider('#compare', {
     before: '/img/before.jpg',

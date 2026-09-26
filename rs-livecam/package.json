@@ -1,5 +1,5 @@
 {
-    "name": "@parelabo/rs-livecam",
+    "name": "@sano1023/rs-livecam",
     "version": "0.2.0",
     "description": "リアルタイムカメラ加工（美肌・仮想背景/モザイク・2Dアバター・消えるフェイルセーフ・WebRTC配信対応）",
     "type": "module",
@@ -47,6 +47,7 @@
         "email": "contact@parelabo.com"
     },
     "publishConfig": {
+        "registry": "https://npm.pkg.github.com",
         "access": "public"
     },
     "types": "./dist/types/index.d.ts",

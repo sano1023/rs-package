@@ -5,8 +5,14 @@
 ## インストール
 
 ```bash
-npm install @parelabo/rs-gantt
+npm login --scope=@sano1023 --auth-type=legacy --registry=https://npm.pkg.github.com
+npm config set @sano1023:registry=https://npm.pkg.github.com --location=user
+npm install @sano1023/rs-gantt
 ```
+
+> GitHub Packages から配布しています。public パッケージもインストールには GitHub 認証が必要です。ログイン時の Password には read:packages 権限を持つ personal access token (classic) を使用します。認証不要の導入には、下記の GitHub tarball または CDN を利用できます。
+
+認証・更新の詳細は [共通インストール手順](https://github.com/sano1023/rs-package/blob/main/INSTALLING.md) を参照してください。登録済みバージョンは [GitHub Packages 一覧](https://github.com/sano1023?tab=packages&repo_name=rs-package) で確認できます。以下のパッケージ名による import は Vite などのバンドラ向けです。
 
 <details>
 <summary>npm レジストリを使わない場合（GitHub tarball 直指定）</summary>
@@ -21,8 +27,8 @@ npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-gantt-0.
 ### バニラ JS（ESM・バンドラあり）
 
 ```js
-import { createRSGantt } from '@parelabo/rs-gantt';
-import '@parelabo/rs-gantt/rs-gantt.css';   // スタイル（バンドラ経由）
+import { createRSGantt } from '@sano1023/rs-gantt';
+import '@sano1023/rs-gantt/rs-gantt.css';   // スタイル（バンドラ経由）
 
 createRSGantt(document.querySelector('#app'), { /* オプション */ });
 ```
@@ -30,8 +36,8 @@ createRSGantt(document.querySelector('#app'), { /* オプション */ });
 ### `<script>` タグ（CDN・ビルド環境不要）
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@parelabo/rs-gantt@0.5.0/dist/rs-gantt.css">
-<script src="https://cdn.jsdelivr.net/npm/@parelabo/rs-gantt@0.5.0/dist/rs-gantt.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sano1023/rs-package@main/rs-gantt/dist/rs-gantt.css">
+<script src="https://cdn.jsdelivr.net/gh/sano1023/rs-package@main/rs-gantt/dist/rs-gantt.min.js"></script>
 <script>
   // 公開APIはグローバル RSGantt に載る
   RSGantt.createRSGantt(document.querySelector('#app'), { /* オプション */ });
@@ -41,8 +47,8 @@ createRSGantt(document.querySelector('#app'), { /* オプション */ });
 ### Vue 3
 
 ```js
-import { RsGantt } from '@parelabo/rs-gantt/vue';
-import '@parelabo/rs-gantt/rs-gantt.css';   // スタイル（バンドラ経由）
+import { RsGantt } from '@sano1023/rs-gantt/vue';
+import '@sano1023/rs-gantt/rs-gantt.css';   // スタイル（バンドラ経由）
 ```
 
 ```vue
@@ -54,8 +60,8 @@ import '@parelabo/rs-gantt/rs-gantt.css';   // スタイル（バンドラ経由
 ### React 18 / 19
 
 ```jsx
-import { RsGantt } from '@parelabo/rs-gantt/react';
-import '@parelabo/rs-gantt/rs-gantt.css';   // スタイル（バンドラ経由）
+import { RsGantt } from '@sano1023/rs-gantt/react';
+import '@sano1023/rs-gantt/rs-gantt.css';   // スタイル（バンドラ経由）
 
 export default function App() {
   return <RsGantt />;
@@ -70,7 +76,7 @@ export default function App() {
 
 依存ゼロの**対話型プロジェクトガント**。バーをドラッグすれば計画そのもの（start / duration / progress / 依存関係）が書き換わり、依存タスクが連鎖して動く、スケジューリングエンジンを持つ編集ツールです（現在 v0.5）。
 
-- **依存ゼロ・ライセンスキー不要**: ランタイム依存なし。ビルド不要で `src/` から直接 import できる ESモジュール
+- **依存ゼロ・ライセンスキー不要**: ランタイム依存なし。ビルド済みの ESモジュールをパッケージから import できる
 - **日本の祝日・営業日カレンダー内蔵**: 土日 + 日本の祝日（春分/秋分の計算式・振替休日・国民の休日・五輪特例まで内蔵計算、2000〜2099年）+ 年末年始。非稼働日は網掛けされ、ドラッグは営業日にスナップ、duration は営業日数
 - **スケジューラビュー（v0.5）**: `view: 'scheduler'` で **縦軸=リソース（部屋/設備/人）× 横軸=時間** の予約・シフト表ビュー。イベントを**ドラッグで別リソース／別時間へ移動**・右端で終了時刻を変更でき、同一リソースで**時間が重なるイベントは段組み（レーン）表示**。営業時間ウィンドウ（`dayStart`/`dayEnd`）・非稼働日の網掛けに対応
 - **大規模データと入出力（v0.4）**: **仮想スクロール**（1万タスクでも可視域だけをDOM描画・左右ペイン同期・行高固定32px、初期描画1000ms以内）・**Excel/TSV貼り付けインポート**（name/start/end/担当 + インデントで階層化）・**CSVエクスポート**（BOM付きUTF-8）・**PNGエクスポート**（タイムラインを canvas 描画）・**印刷CSS**（A4横・ページ分割）
@@ -99,17 +105,9 @@ php -S localhost:8099   # または任意の静的サーバー
 
 ソフト開発プロジェクト21タスクの工程表に加え、ページ下部に**スケジューラビュー（会議室・設備予約）**（v0.5）を同梱：予約ブロックをドラッグで別の部屋／別の時間へ移動・右端で終了時刻を変更でき、同じ部屋で時間が重なる予約は段組みで並び、土日は網掛けされます。さらに**1万タスク生成（仮想スクロール）・TSV貼り付けインポート・CSV/PNG書き出し・印刷**（v0.4）や、**リソース割当（担当者アバター）・下部リソースヒストグラム（過負荷を赤表示・稼働率ビュー）・ベースライン保存と比較（薄い計画バー＋遅延日数列）・進捗ライン（イナズマ線）**（v0.3）、ズーム切替（時/日/週/月/四半期/年・Ctrl+ホイール）・全ドラッグ操作・依存線作成と依存タイプ切替（FS/SS/FF/SF）・自動スケジュールのON/OFF・クリティカルパス表示・行のインデント(Tab)/ドラッグ並べ替え・集計フッター・undo/redo・JSONラウンドトリップ・イベントログを試せます。
 
-## インストール
-
-npm公開前は、`src/` ディレクトリと `src/rs-gantt.css` をコピーするだけで使えます。
-
-```html
-<link rel="stylesheet" href="./rs-gantt/src/rs-gantt.css">
-```
-
 ```js
-import { createRSGantt } from './rs-gantt/src/index.js';
-// npm公開後: import { createRSGantt } from 'rs-gantt';
+import { createRSGantt } from '@sano1023/rs-gantt';
+import '@sano1023/rs-gantt/rs-gantt.css';
 ```
 
 ## クイックスタート
@@ -119,7 +117,7 @@ import { createRSGantt } from './rs-gantt/src/index.js';
 ```
 
 ```js
-import { createRSGantt } from 'rs-gantt';
+import { createRSGantt } from '@sano1023/rs-gantt';
 createRSGantt('#app', { tasks: [{ id: 1, name: '要件定義', start: '2026-07-06', duration: 5 }] });
 ```
 
@@ -246,7 +244,7 @@ gantt.destroy();
 `render(task, gantt)` は文字列 or DOM Node を返します。`footer(gantt)` を定義すると**集計フッター行**にその列の集計値が出ます（組み込み列も件数・日数合計・重み付き進捗などを出します）。
 
 ```js
-import { defineGanttColumn } from 'rs-gantt';
+import { defineGanttColumn } from '@sano1023/rs-gantt';
 
 const assignee = defineGanttColumn({
     name: 'assignee', title: '担当', width: 80,
@@ -261,7 +259,7 @@ createRSGantt('#app', { ganttColumns: [assignee], columns: ['wbs', 'name', 'assi
 today線・非稼働日の網掛けも同じ API の組み込みオーバーレイです。
 
 ```js
-import { defineGanttOverlay } from 'rs-gantt';
+import { defineGanttOverlay } from '@sano1023/rs-gantt';
 
 const deadline = defineGanttOverlay({
     name: 'deadline', layer: 'over',                  // 'under'（バーの下）| 'over'（上）
@@ -353,7 +351,7 @@ scheduler.setView('gantt');                            // ガントビューへ�
 ### 祝日・営業日 API（単体でも使える）
 
 ```js
-import { listHolidays, holidayName, createCalendar, parseDate } from 'rs-gantt';
+import { listHolidays, holidayName, createCalendar, parseDate } from '@sano1023/rs-gantt';
 listHolidays(2026);                       // [{ date: '2026-01-01', name: '元日' }, ...]
 const cal = createCalendar();             // 土日+祝日+年末年始
 cal.isWorkday(parseDate('2026-07-20'));   // false（海の日）

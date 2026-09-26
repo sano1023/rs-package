@@ -1,5 +1,5 @@
 {
-    "name": "@parelabo/rs-notify",
+    "name": "@sano1023/rs-notify",
     "version": "0.1.0",
     "description": "依存ゼロのトースト通知＋Promiseベースの confirm / alert / prompt ダイアログ",
     "type": "module",
@@ -43,6 +43,7 @@
         "email": "contact@parelabo.com"
     },
     "publishConfig": {
+        "registry": "https://npm.pkg.github.com",
         "access": "public"
     },
     "types": "./dist/types/index.d.ts",

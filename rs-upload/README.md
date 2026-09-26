@@ -5,8 +5,14 @@
 ## インストール
 
 ```bash
-npm install @parelabo/rs-upload
+npm login --scope=@sano1023 --auth-type=legacy --registry=https://npm.pkg.github.com
+npm config set @sano1023:registry=https://npm.pkg.github.com --location=user
+npm install @sano1023/rs-upload
 ```
+
+> GitHub Packages から配布しています。public パッケージもインストールには GitHub 認証が必要です。ログイン時の Password には read:packages 権限を持つ personal access token (classic) を使用します。認証不要の導入には、下記の GitHub tarball または CDN を利用できます。
+
+認証・更新の詳細は [共通インストール手順](https://github.com/sano1023/rs-package/blob/main/INSTALLING.md) を参照してください。登録済みバージョンは [GitHub Packages 一覧](https://github.com/sano1023?tab=packages&repo_name=rs-package) で確認できます。以下のパッケージ名による import は Vite などのバンドラ向けです。
 
 <details>
 <summary>npm レジストリを使わない場合（GitHub tarball 直指定）</summary>
@@ -21,8 +27,8 @@ npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-upload-0
 ### バニラ JS（ESM・バンドラあり）
 
 ```js
-import { createRSUpload } from '@parelabo/rs-upload';
-import '@parelabo/rs-upload/rs-upload.css';   // スタイル（バンドラ経由）
+import { createRSUpload } from '@sano1023/rs-upload';
+import '@sano1023/rs-upload/rs-upload.css';   // スタイル（バンドラ経由）
 
 createRSUpload(document.querySelector('#app'), { /* オプション */ });
 ```
@@ -30,8 +36,8 @@ createRSUpload(document.querySelector('#app'), { /* オプション */ });
 ### `<script>` タグ（CDN・ビルド環境不要）
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@parelabo/rs-upload@0.4.0/dist/rs-upload.css">
-<script src="https://cdn.jsdelivr.net/npm/@parelabo/rs-upload@0.4.0/dist/rs-upload.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sano1023/rs-package@main/rs-upload/dist/rs-upload.css">
+<script src="https://cdn.jsdelivr.net/gh/sano1023/rs-package@main/rs-upload/dist/rs-upload.min.js"></script>
 <script>
   // 公開APIはグローバル RSUpload に載る
   RSUpload.createRSUpload(document.querySelector('#app'), { /* オプション */ });
@@ -41,8 +47,8 @@ createRSUpload(document.querySelector('#app'), { /* オプション */ });
 ### Vue 3
 
 ```js
-import { RsUpload } from '@parelabo/rs-upload/vue';
-import '@parelabo/rs-upload/rs-upload.css';   // スタイル（バンドラ経由）
+import { RsUpload } from '@sano1023/rs-upload/vue';
+import '@sano1023/rs-upload/rs-upload.css';   // スタイル（バンドラ経由）
 ```
 
 ```vue
@@ -54,8 +60,8 @@ import '@parelabo/rs-upload/rs-upload.css';   // スタイル（バンドラ経�
 ### React 18 / 19
 
 ```jsx
-import { RsUpload } from '@parelabo/rs-upload/react';
-import '@parelabo/rs-upload/rs-upload.css';   // スタイル（バンドラ経由）
+import { RsUpload } from '@sano1023/rs-upload/react';
+import '@sano1023/rs-upload/rs-upload.css';   // スタイル（バンドラ経由）
 
 export default function App() {
   return <RsUpload />;
@@ -70,7 +76,7 @@ export default function App() {
 
 依存ゼロのファイルアップロードUI＋転送エンジン。ベンダーサーバなしで、どの自前バックエンドにもそのまま刺さります（現在 v0.4）。
 
-- **依存ゼロ・ビルド不要**: ランタイム依存なし。`src/` から直接 import できる ESモジュール＋CSS 1枚
+- **依存ゼロ・ビルド不要**: ランタイム依存なし。パッケージから import できる ESモジュール＋CSS 1枚
 - **ベンダーサーバ不要**: 転送は利用者のエンドポイント直行。認証ヘッダ・URL はすべて利用者のもの
 - **コアとUIを分離**: UploadQueue（状態機械・並列数制御・指数バックオフリトライ）は DOM なしで単体利用可。Widget はその上の1利用者
 - **転送アダプタ契約**: 組み込みの `simpleTransport` / `chunkedTransport` / **`tusTransport`（v0.3）** / **S3 presigned（v0.3）** も自作アダプタも同格
@@ -107,17 +113,9 @@ D&D・フォルダD&D・カメラ撮影・貼り付け・進捗・キャンセ�
 
 **v0.4** もデモから試せます: 動画ファイルを投入するとサムネイル（1フレーム）が表示されます。PDF は「PDFプレビューを有効化」ボタンで rs-pdf アダプタ（pdf.js を CDN 読込）を注入すると1ページ目が表示されます（未注入なら汎用アイコン）。チャンク転送モードで「帯域制限」を選ぶと送信レートが上限に抑えられ、全体進捗に**残り時間の推定**が出ます。
 
-## インストール
-
-npm公開前は、`src/` ディレクトリをコピーするだけで使えます。
-
-```html
-<link rel="stylesheet" href="./rs-upload/src/rs-upload.css">
-```
-
 ```js
-import { createRSUpload, simpleTransport } from './rs-upload/src/index.js';
-// npm公開後: import { createRSUpload, simpleTransport } from 'rs-upload';
+import { createRSUpload, simpleTransport } from '@sano1023/rs-upload';
+import '@sano1023/rs-upload/rs-upload.css';
 ```
 
 ## クイックスタート
@@ -127,7 +125,7 @@ import { createRSUpload, simpleTransport } from './rs-upload/src/index.js';
 ```
 
 ```js
-import { createRSUpload, simpleTransport } from 'rs-upload';
+import { createRSUpload, simpleTransport } from '@sano1023/rs-upload';
 
 const upload = createRSUpload('#uploader', {
     transport: simpleTransport({
@@ -219,7 +217,7 @@ upload.destroy();            // object URL の revoke・リスナー解除まで
 すべての転送はこの契約の実装で、組み込みアダプタも同格です。
 
 ```js
-import { defineTransport } from 'rs-upload';
+import { defineTransport } from '@sano1023/rs-upload';
 
 const myTransport = defineTransport({
     name: 'my-backend',
@@ -241,7 +239,7 @@ const myTransport = defineTransport({
 大きなファイルを分割送信し、中断しても続きから再開できる自前プロトコルの転送アダプタです。**送信中はチャンク1個分しかメモリに載りません**（`file.slice()` の逐次読み。ファイル全体を ArrayBuffer 化しません）。`maxBytesPerSec`（v0.4）を渡すと、チャンク送信前にトークンバケット（`throttle.js`）へバイト数を予約して必要なら待ち、**送信レートを上限に抑えます**。制限はトランスポート単位で共有されるので、並列送信の合計レートも守られます。
 
 ```js
-import { createRSUpload, chunkedTransport } from 'rs-upload';
+import { createRSUpload, chunkedTransport } from '@sano1023/rs-upload';
 
 createRSUpload('#uploader', {
     transport: chunkedTransport({
@@ -265,7 +263,7 @@ createRSUpload('#uploader', {
 フォルダをドロップすると `webkitGetAsEntry` で再帰走査し、各ファイルに相対パス（`file.relativePath = 'photos/2024/a.jpg'`）を付与してキューへ入れます。走査ロジックは単体でも使えます。
 
 ```js
-import { filesFromDataTransfer } from 'rs-upload';
+import { filesFromDataTransfer } from '@sano1023/rs-upload';
 el.addEventListener('drop', async (e) => {
     e.preventDefault();
     const files = await filesFromDataTransfer(e.dataTransfer); // relativePath 付き File[]
@@ -280,8 +278,8 @@ el.addEventListener('drop', async (e) => {
 - **PDF1ページ目**: **rs-pdf のレンダラアダプタ注入**（opt-in）。`pdfRenderer` に `pdfjsAdapter(pdfjsLib)` 等を渡すと1ページ目を描画します。rs-upload コアは rs-pdf を import しません（依存ゼロを維持・注入は import のみ）。未注入なら PDF は汎用アイコン表示にフォールバックします。単体関数 `renderPdfFirstPage(file, renderer, { maxSize })` も使えます。
 
 ```js
-import { createRSUpload, chunkedTransport } from 'rs-upload';
-import { pdfjsAdapter } from 'rs-pdf';            // rs-pdf のレンダラアダプタ（import のみ）
+import { createRSUpload, chunkedTransport } from '@sano1023/rs-upload';
+import { pdfjsAdapter } from '@sano1023/rs-pdf';            // rs-pdf のレンダラアダプタ（import のみ）
 import * as pdfjsLib from 'pdfjs-dist';           // pdf.js は利用者が用意（CDN でも可）
 
 createRSUpload('#uploader', {
@@ -310,7 +308,7 @@ createRSUpload('#uploader', {
 バリデーション通過後・転送前に配列順で直列適用されます（v0.3 の `rsImageAdapter()` もこの形）。
 
 ```js
-{ name: 'rs-image', match?: (file) => boolean, process(file, { signal, onProgress }) => Promise<Blob|File> }
+{ name: '@sano1023/rs-image', match?: (file) => boolean, process(file, { signal, onProgress }) => Promise<Blob|File> }
 ```
 
 ### rs-image 前処理 — `rsImageAdapter(options)`（v0.3）
@@ -318,8 +316,8 @@ createRSUpload('#uploader', {
 **rs-image の変換エンジン**を前処理として繋ぎ、アップロード前に画像を縮小・圧縮・WebP化・EXIF正立します。転送量とサーバ負荷を削る思想です。rs-image は **import して使うだけ**で、rs-upload コアの依存はゼロのまま（`rsImageAdapter` を渡した時だけ rs-image を読み込みます）。
 
 ```js
-import { createRSUpload, chunkedTransport, rsImageAdapter } from 'rs-upload';
-import { processImage } from 'rs-image';   // engine を注入（未注入なら動的 import で解決）
+import { createRSUpload, chunkedTransport, rsImageAdapter } from '@sano1023/rs-upload';
+import { processImage } from '@sano1023/rs-image';   // engine を注入（未注入なら動的 import で解決）
 
 createRSUpload('#uploader', {
     transport: chunkedTransport({ endpoint: '/api/upload' }),
@@ -346,8 +344,8 @@ createRSUpload('#uploader', {
 `edit` を有効にすると各画像に編集ボタンが付き、**rs-image のエディタをモーダルで開いて回転・トリミング**できます。「適用」でエクスポート結果がファイル実体に反映され（`replaceFile`）、その状態で転送されます。編集の余地を残すため `autoStart: false` との併用が自然です（`upload.start()` で送信）。
 
 ```js
-import { createRSUpload, simpleTransport } from 'rs-upload';
-import { createRSImageEditor } from 'rs-image';
+import { createRSUpload, simpleTransport } from '@sano1023/rs-upload';
+import { createRSImageEditor } from '@sano1023/rs-image';
 
 createRSUpload('#uploader', {
     transport: simpleTransport({ endpoint: '/api/upload' }),
@@ -367,7 +365,7 @@ rs-image のスタイル（`rs-image.css`）をページに読み込んでくだ
 tus resumable upload protocol 1.0 準拠。tusd 等の既存 tus サーバがそのまま使えます。
 
 ```js
-import { createRSUpload, tusTransport } from 'rs-upload';
+import { createRSUpload, tusTransport } from '@sano1023/rs-upload';
 
 createRSUpload('#uploader', {
     transport: tusTransport({
@@ -385,7 +383,7 @@ createRSUpload('#uploader', {
 **署名は利用者の自前バックエンド**が行い、ブラウザは presigned URL に PUT するだけ（AWS 認証情報はブラウザに置かない）。
 
 ```js
-import { createRSUpload, s3PutTransport, s3MultipartTransport } from 'rs-upload';
+import { createRSUpload, s3PutTransport, s3MultipartTransport } from '@sano1023/rs-upload';
 
 // 単発 PUT（~5GB まで）
 s3PutTransport({
@@ -409,7 +407,7 @@ s3MultipartTransport({
 リモートURL（直リンク画像・共有リンク等）を File 化してキューへ入れるための契約を定義します。**取得実装はアプリ側の責務**（CORS の都合で多くは「同一オリジンプロキシ経由」になります・スコープ外）。
 
 ```js
-import { defineUrlImporter, filenameFromUrl } from 'rs-upload';
+import { defineUrlImporter, filenameFromUrl } from '@sano1023/rs-upload';
 
 const byUrl = defineUrlImporter({
     name: 'by-url',
@@ -425,7 +423,7 @@ upload.addFiles([await byUrl.fetch('https://example.com/a.jpg')]);
 ### UploadQueue 単体利用（DOMなし）
 
 ```js
-import { UploadQueue } from 'rs-upload';
+import { UploadQueue } from '@sano1023/rs-upload';
 
 const queue = new UploadQueue({ transport, parallel: 3, retry: { count: 3, baseDelay: 1000 } });
 queue.on('fileDone', ({ file, result }) => {});

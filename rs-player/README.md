@@ -5,8 +5,14 @@
 ## インストール
 
 ```bash
-npm install @parelabo/rs-player
+npm login --scope=@sano1023 --auth-type=legacy --registry=https://npm.pkg.github.com
+npm config set @sano1023:registry=https://npm.pkg.github.com --location=user
+npm install @sano1023/rs-player
 ```
+
+> GitHub Packages から配布しています。public パッケージもインストールには GitHub 認証が必要です。ログイン時の Password には read:packages 権限を持つ personal access token (classic) を使用します。認証不要の導入には、下記の GitHub tarball または CDN を利用できます。
+
+認証・更新の詳細は [共通インストール手順](https://github.com/sano1023/rs-package/blob/main/INSTALLING.md) を参照してください。登録済みバージョンは [GitHub Packages 一覧](https://github.com/sano1023?tab=packages&repo_name=rs-package) で確認できます。以下のパッケージ名による import は Vite などのバンドラ向けです。
 
 <details>
 <summary>npm レジストリを使わない場合（GitHub tarball 直指定）</summary>
@@ -21,8 +27,8 @@ npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-player-0
 ### バニラ JS（ESM・バンドラあり）
 
 ```js
-import { createRSPlayer } from '@parelabo/rs-player';
-import '@parelabo/rs-player/rs-player.css';   // スタイル（バンドラ経由）
+import { createRSPlayer } from '@sano1023/rs-player';
+import '@sano1023/rs-player/rs-player.css';   // スタイル（バンドラ経由）
 
 createRSPlayer(document.querySelector('#app'), { /* オプション */ });
 ```
@@ -30,8 +36,8 @@ createRSPlayer(document.querySelector('#app'), { /* オプション */ });
 ### `<script>` タグ（CDN・ビルド環境不要）
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@parelabo/rs-player@0.5.0/dist/rs-player.css">
-<script src="https://cdn.jsdelivr.net/npm/@parelabo/rs-player@0.5.0/dist/rs-player.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sano1023/rs-package@main/rs-player/dist/rs-player.css">
+<script src="https://cdn.jsdelivr.net/gh/sano1023/rs-package@main/rs-player/dist/rs-player.min.js"></script>
 <script>
   // 公開APIはグローバル RSPlayer に載る
   RSPlayer.createRSPlayer(document.querySelector('#app'), { /* オプション */ });
@@ -41,8 +47,8 @@ createRSPlayer(document.querySelector('#app'), { /* オプション */ });
 ### Vue 3
 
 ```js
-import { RsPlayer } from '@parelabo/rs-player/vue';
-import '@parelabo/rs-player/rs-player.css';   // スタイル（バンドラ経由）
+import { RsPlayer } from '@sano1023/rs-player/vue';
+import '@sano1023/rs-player/rs-player.css';   // スタイル（バンドラ経由）
 ```
 
 ```vue
@@ -54,8 +60,8 @@ import '@parelabo/rs-player/rs-player.css';   // スタイル（バンドラ経�
 ### React 18 / 19
 
 ```jsx
-import { RsPlayer } from '@parelabo/rs-player/react';
-import '@parelabo/rs-player/rs-player.css';   // スタイル（バンドラ経由）
+import { RsPlayer } from '@sano1023/rs-player/react';
+import '@sano1023/rs-player/rs-player.css';   // スタイル（バンドラ経由）
 
 export default function App() {
   return <RsPlayer />;
@@ -70,7 +76,7 @@ export default function App() {
 
 依存ゼロのHTML5動画プレイヤーライブラリ。企業サイトの製品動画・eラーニング・社内動画ポータル・メディアサイト・ライブ配信の視聴ページ向けです（現在 v0.5）。
 
-- **依存ゼロ**: ランタイム依存なし。ビルド不要で `src/` から直接 import できる ESモジュール
+- **依存ゼロ**: ランタイム依存なし。ビルド済みの ESモジュールをパッケージから import できる
 - **ライセンスキー・ドメイン制限なし**（MITライセンス）
 - **主要動画サイト互換のキーボード操作を既定で提供**: Space/K・J/L=±10秒・←→=±5秒・↑↓=音量・M/F/C・数字0-9ジャンプ・&lt; &gt;=速度、コントロール自動非表示（静止3秒）、ホバー時刻ツールチップ、ドラッグシーク
 - **チャプター**（v0.2）: シークバーの区切り＋ホバーで章名・設定メニューからジャンプ（配列 or WebVTT）
@@ -107,17 +113,9 @@ php -S localhost:8099   # または任意の静的サーバー
 上段プレイヤーで v0.1/v0.2（2画質切替・日英字幕・チャプター・VTTスプライトのサムネイル・ダブルタップ/長押し・ミニプレイヤー・エンドスクリーン・全ショートカット・カスタム「10秒送り」ボタン・destroy/再生成）、中段の「プレイリストプレイヤー」で v0.3（プレイリスト連続再生・サイドリスト・自動サムネイル・A-Bループ・コマ送り・ウォーターマーク）、「ストリーミングプレイヤー」で v0.4（HLSアダプタの画質レベル/AUTO・LIVEバッジとライブエッジジャンプ・DVR窓・倍速ピッチ保持）、最下段の「MediaStream プレイヤー」で v0.5（MediaStream 再生モードでのシーク/総時間の自動非表示・アナリティクスアダプタへの視聴イベント配信）を試せます。v0.4 デモは hls.js の代わりに**フェイクHLS**を、v0.5 デモは rs-livecam の代わりに `canvas.captureStream()` の**フェイク MediaStream** を注入し、裏で同梱の progressive 動画を再生してUIを体験できるようにしています（実運用では hls.js を CDN 等から、MediaStream を rs-livecam 等から注入）。
 テスト動画は `demo/media/make-media.sh`（ffmpeg）、サムネイルスプライトは `demo/media/make-thumbnails.mjs`（依存ゼロ・Node の zlib のみ）で再生成できます（プレイリストは既存の2本の webm をそのまま2アイテムとして使います）。
 
-## インストール
-
-npm公開前は、`src/` ディレクトリをコピーするだけで使えます。
-
-```html
-<link rel="stylesheet" href="./rs-player/src/rs-player.css">
-```
-
 ```js
-import { createRSPlayer } from './rs-player/src/index.js';
-// npm公開後: import { createRSPlayer } from 'rs-player';
+import { createRSPlayer } from '@sano1023/rs-player';
+import '@sano1023/rs-player/rs-player.css';
 ```
 
 ## クイックスタート
@@ -127,7 +125,7 @@ import { createRSPlayer } from './rs-player/src/index.js';
 ```
 
 ```js
-import { createRSPlayer } from 'rs-player';
+import { createRSPlayer } from '@sano1023/rs-player';
 
 const player = createRSPlayer('#player', {
     sources: [                                    // 複数画質（プログレッシブ）
@@ -233,7 +231,7 @@ hls.js は**同梱しません**（依存ゼロ堅持）。利用側が hls.js �
 ```
 
 ```js
-import { createRSPlayer, hlsAdapter } from 'rs-player';
+import { createRSPlayer, hlsAdapter } from '@sano1023/rs-player';
 
 const player = createRSPlayer('#player', {
     sources: [{ src: '/stream/master.m3u8', type: 'application/x-mpegURL' }],
@@ -290,7 +288,7 @@ player.on('pitchchange', ({ preservesPitch }) => {});
 `srcObject` に `MediaStream` を渡す（または `player.setStream(stream)`）と **MediaStream 再生モード**に入ります。ライブカメラ等には尺・シークの概念が無いため、**シークバーと総時間表示が自動で隠れます**（コンテナに `rsp-stream` クラスが付き、CSS で非表示化）。rs-livecam は **import しません** — MediaStream を受ける口（`srcObject` / `setStream`）で連携します。
 
 ```js
-import { createRSPlayer } from 'rs-player';
+import { createRSPlayer } from '@sano1023/rs-player';
 // 例: rs-livecam / getUserMedia が生成した MediaStream を注入
 const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
 
@@ -415,7 +413,7 @@ v0.5 で追加: `streamchange`（{stream, active}：MediaStream 再生モード�
 ### カスタムボタン — `definePlayerButton(def)`
 
 ```js
-import { createRSPlayer, definePlayerButton } from 'rs-player';
+import { createRSPlayer, definePlayerButton } from '@sano1023/rs-player';
 
 const shareBtn = definePlayerButton({
     name: 'share',

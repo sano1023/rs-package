@@ -1,5 +1,5 @@
 {
-    "name": "@parelabo/rs-sign",
+    "name": "@sano1023/rs-sign",
     "version": "0.4.0",
     "description": "電子署名SaaSの画面部品網羅を目指す、依存ゼロの署名パッド＋電子印鑑ライブラリ（rs-pdf / rs-form 連携アダプタ同梱）",
     "type": "module",
@@ -48,6 +48,7 @@
         "email": "contact@parelabo.com"
     },
     "publishConfig": {
+        "registry": "https://npm.pkg.github.com",
         "access": "public"
     },
     "types": "./dist/types/index.d.ts",

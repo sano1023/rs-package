@@ -1,5 +1,5 @@
 {
-    "name": "@parelabo/rs-datepicker",
+    "name": "@sano1023/rs-datepicker",
     "version": "0.4.0",
     "description": "日本語ファースト・依存ゼロの日付ピッカー（単一/複数/期間・ドラッグ期間選択・スケジュール調整・時刻・年スクロールナビ・マーカー）",
     "type": "module",
@@ -47,6 +47,7 @@
         "email": "contact@parelabo.com"
     },
     "publishConfig": {
+        "registry": "https://npm.pkg.github.com",
         "access": "public"
     },
     "types": "./dist/types/index.d.ts",

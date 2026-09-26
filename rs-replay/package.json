@@ -1,5 +1,5 @@
 {
-    "name": "@parelabo/rs-replay",
+    "name": "@sano1023/rs-replay",
     "version": "0.4.0",
     "description": "完全セルフホスト・依存ゼロのセッション記録/再生ライブラリ",
     "type": "module",
@@ -47,6 +47,7 @@
         "email": "contact@parelabo.com"
     },
     "publishConfig": {
+        "registry": "https://npm.pkg.github.com",
         "access": "public"
     },
     "types": "./dist/types/index.d.ts",

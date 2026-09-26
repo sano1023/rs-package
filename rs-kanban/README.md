@@ -5,8 +5,14 @@
 ## インストール
 
 ```bash
-npm install @parelabo/rs-kanban
+npm login --scope=@sano1023 --auth-type=legacy --registry=https://npm.pkg.github.com
+npm config set @sano1023:registry=https://npm.pkg.github.com --location=user
+npm install @sano1023/rs-kanban
 ```
+
+> GitHub Packages から配布しています。public パッケージもインストールには GitHub 認証が必要です。ログイン時の Password には read:packages 権限を持つ personal access token (classic) を使用します。認証不要の導入には、下記の GitHub tarball または CDN を利用できます。
+
+認証・更新の詳細は [共通インストール手順](https://github.com/sano1023/rs-package/blob/main/INSTALLING.md) を参照してください。登録済みバージョンは [GitHub Packages 一覧](https://github.com/sano1023?tab=packages&repo_name=rs-package) で確認できます。以下のパッケージ名による import は Vite などのバンドラ向けです。
 
 <details>
 <summary>npm レジストリを使わない場合（GitHub tarball 直指定）</summary>
@@ -21,8 +27,8 @@ npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-kanban-0
 ### バニラ JS（ESM・バンドラあり）
 
 ```js
-import { createRSKanban } from '@parelabo/rs-kanban';
-import '@parelabo/rs-kanban/rs-kanban.css';   // スタイル（バンドラ経由）
+import { createRSKanban } from '@sano1023/rs-kanban';
+import '@sano1023/rs-kanban/rs-kanban.css';   // スタイル（バンドラ経由）
 
 createRSKanban(document.querySelector('#app'), { columns, cards, /* オプション */ });
 ```
@@ -30,8 +36,8 @@ createRSKanban(document.querySelector('#app'), { columns, cards, /* オプショ
 ### `<script>` タグ（CDN・ビルド環境不要）
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@parelabo/rs-kanban@0.2.0/dist/rs-kanban.css">
-<script src="https://cdn.jsdelivr.net/npm/@parelabo/rs-kanban@0.2.0/dist/rs-kanban.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sano1023/rs-package@main/rs-kanban/dist/rs-kanban.css">
+<script src="https://cdn.jsdelivr.net/gh/sano1023/rs-package@main/rs-kanban/dist/rs-kanban.min.js"></script>
 <script>
   // 公開APIはグローバル RSKanban に載る
   RSKanban.createRSKanban(document.querySelector('#app'), { columns, cards, /* オプション */ });
@@ -41,8 +47,8 @@ createRSKanban(document.querySelector('#app'), { columns, cards, /* オプショ
 ### Vue 3
 
 ```js
-import { RsKanban } from '@parelabo/rs-kanban/vue';
-import '@parelabo/rs-kanban/rs-kanban.css';   // スタイル（バンドラ経由）
+import { RsKanban } from '@sano1023/rs-kanban/vue';
+import '@sano1023/rs-kanban/rs-kanban.css';   // スタイル（バンドラ経由）
 ```
 
 ```vue
@@ -54,8 +60,8 @@ import '@parelabo/rs-kanban/rs-kanban.css';   // スタイル（バンドラ経�
 ### React 18 / 19
 
 ```jsx
-import { RsKanban } from '@parelabo/rs-kanban/react';
-import '@parelabo/rs-kanban/rs-kanban.css';   // スタイル（バンドラ経由）
+import { RsKanban } from '@sano1023/rs-kanban/react';
+import '@sano1023/rs-kanban/rs-kanban.css';   // スタイル（バンドラ経由）
 
 export default function App() {
   return <RsKanban />;
@@ -86,11 +92,16 @@ export default function App() {
 - **列の折りたたみ**: 縦書きバー（件数つき）にしてボードを広く使える
 - **タグ色**: `tagColors: { 急ぎ: '#dc2626' }` でチップに色
 
+```js
+import { createRSKanban } from '@sano1023/rs-kanban';
+import '@sano1023/rs-kanban/rs-kanban.css';
+```
+
 ## 使い方
 
 ```js
-import { createRSKanban } from './rs-kanban/src/index.js';
-// CSS: <link rel="stylesheet" href="./rs-kanban/src/rs-kanban.css">
+import { createRSKanban } from '@sano1023/rs-kanban';
+// CSS: <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sano1023/rs-package@main/rs-kanban/dist/rs-kanban.css">
 
 const board = createRSKanban('#board', {
     columns: [
@@ -117,15 +128,15 @@ board.getBoard();                             // 保存用スナップショッ�
 ### 純ロジック API（node でも動く）
 
 ```js
-import { normalizeBoard, moveCard, checkWip, filterCards } from 'rs-kanban';
+import { normalizeBoard, moveCard, checkWip, filterCards } from '@sano1023/rs-kanban';
 const { board: next, moved, reason } = moveCard(board, cardId, 'doing', 0);   // 純関数（元は不変）
 ```
 
 ## Vue / React
 
 ```js
-import { RsKanban } from 'rs-kanban/vue';    // <RsKanban :columns="columns" :cards="cards" @card-move="..." />
-import { RsKanban } from 'rs-kanban/react';  // <RsKanban columns={columns} cards={cards} onCardMove={...} ref={ref} />
+import { RsKanban } from '@sano1023/rs-kanban/vue';    // <RsKanban :columns="columns" :cards="cards" @card-move="..." />
+import { RsKanban } from '@sano1023/rs-kanban/react';  // <RsKanban columns={columns} cards={cards} onCardMove={...} ref={ref} />
 ```
 
 ## テスト

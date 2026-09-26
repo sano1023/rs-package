@@ -1,5 +1,5 @@
 {
-    "name": "@parelabo/rs-calendar",
+    "name": "@sano1023/rs-calendar",
     "version": "0.5.0",
     "description": "依存ゼロのイベントカレンダー（月/週/日/リストビュー・日本の祝日内蔵・RRULE繰り返し・ICS入出力・ドラッグ編集）",
     "type": "module",
@@ -51,6 +51,7 @@
         "email": "contact@parelabo.com"
     },
     "publishConfig": {
+        "registry": "https://npm.pkg.github.com",
         "access": "public"
     },
     "types": "./dist/types/index.d.ts",

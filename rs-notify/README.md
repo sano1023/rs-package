@@ -5,8 +5,14 @@
 ## インストール
 
 ```bash
-npm install @parelabo/rs-notify
+npm login --scope=@sano1023 --auth-type=legacy --registry=https://npm.pkg.github.com
+npm config set @sano1023:registry=https://npm.pkg.github.com --location=user
+npm install @sano1023/rs-notify
 ```
+
+> GitHub Packages から配布しています。public パッケージもインストールには GitHub 認証が必要です。ログイン時の Password には read:packages 権限を持つ personal access token (classic) を使用します。認証不要の導入には、下記の GitHub tarball または CDN を利用できます。
+
+認証・更新の詳細は [共通インストール手順](https://github.com/sano1023/rs-package/blob/main/INSTALLING.md) を参照してください。登録済みバージョンは [GitHub Packages 一覧](https://github.com/sano1023?tab=packages&repo_name=rs-package) で確認できます。以下のパッケージ名による import は Vite などのバンドラ向けです。
 
 <details>
 <summary>npm レジストリを使わない場合（GitHub tarball 直指定）</summary>
@@ -21,8 +27,8 @@ npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-notify-0
 ### バニラ JS（ESM・バンドラあり）
 
 ```js
-import { toast.success } from '@parelabo/rs-notify';
-import '@parelabo/rs-notify/rs-notify.css';   // スタイル（バンドラ経由）
+import { toast.success } from '@sano1023/rs-notify';
+import '@sano1023/rs-notify/rs-notify.css';   // スタイル（バンドラ経由）
 
 toast.success('保存しました');
 ```
@@ -30,8 +36,8 @@ toast.success('保存しました');
 ### `<script>` タグ（CDN・ビルド環境不要）
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@parelabo/rs-notify@0.1.0/dist/rs-notify.css">
-<script src="https://cdn.jsdelivr.net/npm/@parelabo/rs-notify@0.1.0/dist/rs-notify.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sano1023/rs-package@main/rs-notify/dist/rs-notify.css">
+<script src="https://cdn.jsdelivr.net/gh/sano1023/rs-package@main/rs-notify/dist/rs-notify.min.js"></script>
 <script>
   // 公開APIはグローバル RSNotify に載る
   RSNotify.toast.success('保存しました');
@@ -52,11 +58,16 @@ toast.success('保存しました');
   Esc/Enter・起点フォーカス復帰・danger スタイル（削除確認）
 - SSR 安全（DOM 生成は初回呼び出しまで遅延）・reduced motion 対応・CSS 変数テーマ・MIT
 
+```js
+import { toast, confirm, alert, prompt } from '@sano1023/rs-notify';
+import '@sano1023/rs-notify/rs-notify.css';
+```
+
 ## 使い方
 
 ```js
-import { toast, confirm, alert, prompt } from 'rs-notify';
-// CSS: <link rel="stylesheet" href="rs-notify/rs-notify.css">
+import { toast, confirm, alert, prompt } from '@sano1023/rs-notify';
+// CSS: <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sano1023/rs-package@main/rs-notify/dist/rs-notify.css">
 
 toast.success('保存しました');
 toast.error('保存に失敗しました', { duration: 0 });                  // 0 = 自動で消えない
@@ -78,7 +89,7 @@ await alert('処理が完了しました');
 const name = await prompt('テンプレート名', { value: '新しい帳票' });   // キャンセルは null
 
 // 設定
-import { configureToasts } from 'rs-notify';
+import { configureToasts } from '@sano1023/rs-notify';
 configureToasts({ position: 'bottom-center', duration: 3000, max: 3 });
 ```
 

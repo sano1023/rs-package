@@ -5,8 +5,14 @@
 ## インストール
 
 ```bash
-npm install @parelabo/rs-sign
+npm login --scope=@sano1023 --auth-type=legacy --registry=https://npm.pkg.github.com
+npm config set @sano1023:registry=https://npm.pkg.github.com --location=user
+npm install @sano1023/rs-sign
 ```
+
+> GitHub Packages から配布しています。public パッケージもインストールには GitHub 認証が必要です。ログイン時の Password には read:packages 権限を持つ personal access token (classic) を使用します。認証不要の導入には、下記の GitHub tarball または CDN を利用できます。
+
+認証・更新の詳細は [共通インストール手順](https://github.com/sano1023/rs-package/blob/main/INSTALLING.md) を参照してください。登録済みバージョンは [GitHub Packages 一覧](https://github.com/sano1023?tab=packages&repo_name=rs-package) で確認できます。以下のパッケージ名による import は Vite などのバンドラ向けです。
 
 <details>
 <summary>npm レジストリを使わない場合（GitHub tarball 直指定）</summary>
@@ -21,8 +27,8 @@ npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-sign-0.4
 ### バニラ JS（ESM・バンドラあり）
 
 ```js
-import { createRSSignPad } from '@parelabo/rs-sign';
-import '@parelabo/rs-sign/rs-sign.css';   // スタイル（バンドラ経由）
+import { createRSSignPad } from '@sano1023/rs-sign';
+import '@sano1023/rs-sign/rs-sign.css';   // スタイル（バンドラ経由）
 
 createRSSignPad(document.querySelector('#app'), { /* オプション */ });
 ```
@@ -30,8 +36,8 @@ createRSSignPad(document.querySelector('#app'), { /* オプション */ });
 ### `<script>` タグ（CDN・ビルド環境不要）
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@parelabo/rs-sign@0.4.0/dist/rs-sign.css">
-<script src="https://cdn.jsdelivr.net/npm/@parelabo/rs-sign@0.4.0/dist/rs-sign.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sano1023/rs-package@main/rs-sign/dist/rs-sign.css">
+<script src="https://cdn.jsdelivr.net/gh/sano1023/rs-package@main/rs-sign/dist/rs-sign.min.js"></script>
 <script>
   // 公開APIはグローバル RSSign に載る
   RSSign.createRSSignPad(document.querySelector('#app'), { /* オプション */ });
@@ -41,8 +47,8 @@ createRSSignPad(document.querySelector('#app'), { /* オプション */ });
 ### Vue 3
 
 ```js
-import { RsSignPad, RsHanko, RsSign } from '@parelabo/rs-sign/vue';
-import '@parelabo/rs-sign/rs-sign.css';   // スタイル（バンドラ経由）
+import { RsSignPad, RsHanko, RsSign } from '@sano1023/rs-sign/vue';
+import '@sano1023/rs-sign/rs-sign.css';   // スタイル（バンドラ経由）
 ```
 
 ```vue
@@ -54,8 +60,8 @@ import '@parelabo/rs-sign/rs-sign.css';   // スタイル（バンドラ経由�
 ### React 18 / 19
 
 ```jsx
-import { RsSignPad, RsHanko, RsSign } from '@parelabo/rs-sign/react';
-import '@parelabo/rs-sign/rs-sign.css';   // スタイル（バンドラ経由）
+import { RsSignPad, RsHanko, RsSign } from '@sano1023/rs-sign/react';
+import '@sano1023/rs-sign/rs-sign.css';   // スタイル（バンドラ経由）
 
 export default function App() {
   return <RsSignPad />;
@@ -70,7 +76,7 @@ export default function App() {
 
 電子署名まわりのフロントエンド部品を揃えた、依存ゼロの署名・押印ライブラリです（現在 v0.4: 署名パッド＋電子印鑑ジェネレータ＋契約書ワークフロー＋複数署名者の順序制御/差し戻し/有効期限＋かすれ/にじみ印影・銀行印/職印＋**rs-pdf / rs-form 連携アダプタ**）。
 
-- **依存ゼロ**: ランタイム依存なし。ビルド不要で `src/` から直接 import できる ESモジュール
+- **依存ゼロ**: ランタイム依存なし。ビルド済みの ESモジュールをパッケージから import できる
 - **滑らかな署名パッド**: Catmull-Rom→3次ベジェ平滑化・筆圧/速度による可変線幅・`getCoalescedEvents()` による120Hzペン対応
 - **正のデータはストロークJSON**: 点列 `{x, y, t, p}` ＋ ペン設定のベクタ形式が正。PNG/SVG/再生アニメはそこから導出される派生物（同じJSONからは常に同じ画素 = 決定的レンダリング）
 - **電子印鑑ジェネレータ標準装備**: 認印（丸＋姓の縦組み）・角印（社名の右→左縦書き・之印補完）・データー印（姓/日付/社名の3段）・**銀行印風（横彫り）**・**職印（二重円・円弧文字）**。サイズはmm指定・出力は透過PNGとベクタSVG
@@ -95,17 +101,9 @@ php -S localhost:8099   # または任意の静的サーバー
 
 署名パッド（ペン色/太さ・undo/クリア・再生・PNG/SVG/JSON入出力・hidden input連携）と、電子印鑑ジェネレータ（名前入力→認印/角印/データー印の切替プレビュー・mm指定・PNG/SVGダウンロード）、契約書ワークフロー（作成者がフィールドを配置 → 甲/乙が署名・押印で充足 → 完成合成PNG → SHA-256監査ログの検証／改ざん検出）に加え、**v0.4 の連携デモ**（rs-pdf のPDFページへ印影を配置して注釈JSONに書き出し・rs-form の signature 質問へ署名パッドを差し込んで回答JSONに dataURL が載る様子）を1画面で試せます。連携デモは同階層に配置された `../rs-pdf` / `../rs-form` を相対 import し、無い場合は契約データの表示にフォールバックします。
 
-## インストール
-
-npm公開前は、`src/` ディレクトリをコピーするだけで使えます。
-
-```html
-<link rel="stylesheet" href="./rs-sign/src/rs-sign.css">
-```
-
 ```js
-import { createRSSignPad, createRSHanko, createRSSign, defineStamp, verifyAudit } from './rs-sign/src/index.js';
-// npm公開後: import { createRSSignPad, createRSHanko, createRSSign, defineStamp, verifyAudit } from 'rs-sign';
+import { createRSSignPad, createRSHanko, createRSSign, defineStamp, verifyAudit } from '@sano1023/rs-sign';
+import '@sano1023/rs-sign/rs-sign.css';
 ```
 
 ## クイックスタート
@@ -118,7 +116,7 @@ import { createRSSignPad, createRSHanko, createRSSign, defineStamp, verifyAudit 
 ```
 
 ```js
-import { createRSSignPad, createRSHanko } from 'rs-sign';
+import { createRSSignPad, createRSHanko } from '@sano1023/rs-sign';
 
 // ① 手書き署名パッド
 const pad = createRSSignPad('#pad', {
@@ -205,7 +203,7 @@ hanko.toPNG({ type: 'mitome', name: '佐野', fade: 0.35, bleed: 0.2, seed: 7 })
 ### カスタム印面 — `defineStamp(def)`
 
 ```js
-import { createRSHanko, defineStamp } from 'rs-sign';
+import { createRSHanko, defineStamp } from '@sano1023/rs-sign';
 
 const approved = defineStamp({
     name: 'approved-en',                          // render({ type: 'approved-en' }) で使える
@@ -236,7 +234,7 @@ createRSHanko({ stamps: [approved] });
 文書（複数ページ＝画像配列）にフィールドを配置し、署名者が署名/押印して締結、完成合成PNGと監査ログを得るまでの状態機械です。
 
 ```js
-import { createRSSign, verifyAudit } from 'rs-sign';
+import { createRSSign, verifyAudit } from '@sano1023/rs-sign';
 
 // doc.pages は url / HTMLImageElement / HTMLCanvasElement の配列（rs-image と同じページモデル）
 const sign = createRSSign('#viewer', { pages: ['p1.png', 'p2.png'] }, {
@@ -337,8 +335,8 @@ rs-sign は署名・押印の「画面部品と監査JSON」を担い、**PDFの
 rs-sign の署名/印影は「画像 dataURL ＋ %座標 ＋ ページ番号」です。これを rs-pdf の**画像スタンプ注釈**（`{ type: 'stamp', page, rect, image }`）へ変換します。座標系は rs-sign（page=0始まり・x/y/w/h=% 0..100）→ rs-pdf（page=1始まり・rect=0..1）を吸収します。生成は**DOM非依存の純粋関数**で、rs-pdf を注入すれば実際のページ上へ配置できます。
 
 ```js
-import { createRSHanko, createRSSign, signatureAnnotation, fieldsToAnnotations, createPdfSignAdapter } from 'rs-sign';
-import { createRSPDF, pdfjsAdapter } from 'rs-pdf';
+import { createRSHanko, createRSSign, signatureAnnotation, fieldsToAnnotations, createPdfSignAdapter } from '@sano1023/rs-sign';
+import { createRSPDF, pdfjsAdapter } from '@sano1023/rs-pdf';
 
 // ① 純粋: 画像＋%座標＋ページ → rs-pdf スタンプ注釈データ（rs-pdf 不要・単体テスト可能）
 const png = createRSHanko().toPNG({ type: 'mitome', name: '佐野' });
@@ -372,8 +370,8 @@ pdf.annotations.toJSON();                                                       
 rs-form には v0.2 から signature 質問タイプがあり、`options.signaturePad = (canvas, api) => ({ destroy })` というアダプタ契約で既定の手書き実装を差し替えられます。rs-sign はこの契約に合う関数を1つ提供します。**rs-form のソースは変更しません。**
 
 ```js
-import { createRSForm } from 'rs-form';
-import { rsSignaturePad } from 'rs-sign';
+import { createRSForm } from '@sano1023/rs-form';
+import { rsSignaturePad } from '@sano1023/rs-sign';
 
 createRSForm('#app', schema, {
     // これ1行で signature 質問の既定 canvas が rs-sign の滑らかな署名パッドに置き換わる

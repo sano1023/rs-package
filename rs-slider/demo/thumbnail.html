@@ -23,6 +23,9 @@
     <div class="card">
         <h2>下部サムネイル（thumbs: 'bottom'）</h2>
         <p class="note">メイン画像はスワイプでも切替可能。アクティブなサムネイルがハイライトされ、自動でスクロール追従します。</p>
+        <p class="note">
+            ウィンドウ幅を768px未満にすると「スマホ用画像」に切り替わります（<code>mobileImage</code> / <code>mobileThumb</code>）。
+        </p>
         <div id="g-bottom"></div>
         <div class="value" id="v-bottom"></div>
     </div>
@@ -43,15 +46,19 @@
     import { createRSGallery } from '../dist/rs-slider.esm.min.js';
     import { photo } from './assets.js';
 
-    const items = (base, n) => Array.from({ length: n }, (_, i) => ({
+    const items = (base, n, mobile = false) => Array.from({ length: n }, (_, i) => ({
         image: photo(base + i, { w: 1200, h: 900, label: `Gallery ${i + 1}` }),
         thumb: photo(base + i, { w: 200, h: 200, label: '' }),
+        ...(mobile ? {
+            mobileImage: photo(base + i + 40, { w: 750, h: 900, label: `Gallery ${i + 1}（スマホ用）` }),
+            mobileThumb: photo(base + i + 40, { w: 200, h: 200, label: '' }),
+        } : {}),
         caption: `${i + 1}枚目のキャプション`,
         alt: `ギャラリー画像 ${i + 1}`,
     }));
 
     const g = createRSGallery('#g-bottom', {
-        items: items(120, 8),
+        items: items(120, 8, true),
         thumbs: 'bottom',
         zoom: false,
         onChange: (i) => {

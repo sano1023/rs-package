@@ -5,8 +5,14 @@
 ## インストール
 
 ```bash
-npm install @parelabo/rs-chart
+npm login --scope=@sano1023 --auth-type=legacy --registry=https://npm.pkg.github.com
+npm config set @sano1023:registry=https://npm.pkg.github.com --location=user
+npm install @sano1023/rs-chart
 ```
+
+> GitHub Packages から配布しています。public パッケージもインストールには GitHub 認証が必要です。ログイン時の Password には read:packages 権限を持つ personal access token (classic) を使用します。認証不要の導入には、下記の GitHub tarball または CDN を利用できます。
+
+認証・更新の詳細は [共通インストール手順](https://github.com/sano1023/rs-package/blob/main/INSTALLING.md) を参照してください。登録済みバージョンは [GitHub Packages 一覧](https://github.com/sano1023?tab=packages&repo_name=rs-package) で確認できます。以下のパッケージ名による import は Vite などのバンドラ向けです。
 
 <details>
 <summary>npm レジストリを使わない場合（GitHub tarball 直指定）</summary>
@@ -21,8 +27,8 @@ npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-chart-0.
 ### バニラ JS（ESM・バンドラあり）
 
 ```js
-import { createRSChart } from '@parelabo/rs-chart';
-import '@parelabo/rs-chart/rs-chart.css';   // スタイル（バンドラ経由）
+import { createRSChart } from '@sano1023/rs-chart';
+import '@sano1023/rs-chart/rs-chart.css';   // スタイル（バンドラ経由）
 
 createRSChart(document.querySelector('#app'), { /* オプション */ });
 ```
@@ -30,8 +36,8 @@ createRSChart(document.querySelector('#app'), { /* オプション */ });
 ### `<script>` タグ（CDN・ビルド環境不要）
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@parelabo/rs-chart@0.5.0/dist/rs-chart.css">
-<script src="https://cdn.jsdelivr.net/npm/@parelabo/rs-chart@0.5.0/dist/rs-chart.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sano1023/rs-package@main/rs-chart/dist/rs-chart.css">
+<script src="https://cdn.jsdelivr.net/gh/sano1023/rs-package@main/rs-chart/dist/rs-chart.min.js"></script>
 <script>
   // 公開APIはグローバル RSChart に載る
   RSChart.createRSChart(document.querySelector('#app'), { /* オプション */ });
@@ -41,8 +47,8 @@ createRSChart(document.querySelector('#app'), { /* オプション */ });
 ### Vue 3
 
 ```js
-import { RsChart, RsDashboard } from '@parelabo/rs-chart/vue';
-import '@parelabo/rs-chart/rs-chart.css';   // スタイル（バンドラ経由）
+import { RsChart, RsDashboard } from '@sano1023/rs-chart/vue';
+import '@sano1023/rs-chart/rs-chart.css';   // スタイル（バンドラ経由）
 ```
 
 ```vue
@@ -54,8 +60,8 @@ import '@parelabo/rs-chart/rs-chart.css';   // スタイル（バンドラ経由
 ### React 18 / 19
 
 ```jsx
-import { RsChart, RsDashboard } from '@parelabo/rs-chart/react';
-import '@parelabo/rs-chart/rs-chart.css';   // スタイル（バンドラ経由）
+import { RsChart, RsDashboard } from '@sano1023/rs-chart/react';
+import '@sano1023/rs-chart/rs-chart.css';   // スタイル（バンドラ経由）
 
 export default function App() {
   return <RsChart />;
@@ -70,7 +76,7 @@ export default function App() {
 
 依存ゼロのSVGチャートライブラリ。業務システム・SaaS・ダッシュボード・金融（Stock）・リアルタイム監視向けです（現在 v0.5・ロードマップ完走）。
 
-- **依存ゼロ**: ランタイム依存なし。ビルド不要で `src/` から直接 import できる ESモジュール（JS合計 約55KB）
+- **依存ゼロ**: ランタイム依存なし。ビルド済みの ESモジュールをパッケージから import できる（JS合計 約55KB）
 - **チャートタイプ＝プラグイン**: line / column などの組み込みタイプもすべて `defineChartType()` で実装（利用者が独自チャートを数行で追加できる）
 - **宣言的オプションAPI**: `series` / `xAxis` / `legend` / `tooltip` などの素直な構造
 - **Renderer 抽象**: SVG（既定・エクスポート/アクセシビリティ向き）と Canvas（Turbo mode・大量データ向き）を `renderer` オプションで切替。上位層は同一コード
@@ -89,17 +95,9 @@ php -S localhost:8099   # または任意の静的サーバー
 
 全タイプ・タイプ混在・時間軸・凡例トグル・共有ツールチップ・リサイズ・エクスポート・カスタムタイプ（ロリポップ）を試せます。
 
-## インストール
-
-npm公開前は、`src/` ディレクトリと `src/rs-chart.css` をコピーするだけで使えます。
-
-```html
-<link rel="stylesheet" href="./rs-chart/src/rs-chart.css">
-```
-
 ```js
-import { createRSChart } from './rs-chart/src/index.js';
-// npm公開後: import { createRSChart } from 'rs-chart';
+import { createRSChart } from '@sano1023/rs-chart';
+import '@sano1023/rs-chart/rs-chart.css';
 ```
 
 ## クイックスタート
@@ -109,7 +107,7 @@ import { createRSChart } from './rs-chart/src/index.js';
 ```
 
 ```js
-import { createRSChart } from 'rs-chart';
+import { createRSChart } from '@sano1023/rs-chart';
 
 const chart = createRSChart('#container', {
     type: 'line',
@@ -190,7 +188,7 @@ chart.destroy();
 グリッドレイアウトに複数チャートとKPIカードを並べ、チャート間のズーム・ホバーを連動させます。
 
 ```js
-import { createRSDashboard } from 'rs-chart';
+import { createRSDashboard } from '@sano1023/rs-chart';
 
 createRSDashboard('#dash', {
     columns: 12,
@@ -208,7 +206,7 @@ createRSDashboard('#dash', {
 ### カスタムチャートタイプ — `defineChartType(def)`
 
 ```js
-import { createRSChart, defineChartType } from 'rs-chart';
+import { createRSChart, defineChartType } from '@sano1023/rs-chart';
 
 const lollipop = defineChartType({
     name: 'lollipop',

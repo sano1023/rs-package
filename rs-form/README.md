@@ -5,8 +5,14 @@
 ## インストール
 
 ```bash
-npm install @parelabo/rs-form
+npm login --scope=@sano1023 --auth-type=legacy --registry=https://npm.pkg.github.com
+npm config set @sano1023:registry=https://npm.pkg.github.com --location=user
+npm install @sano1023/rs-form
 ```
+
+> GitHub Packages から配布しています。public パッケージもインストールには GitHub 認証が必要です。ログイン時の Password には read:packages 権限を持つ personal access token (classic) を使用します。認証不要の導入には、下記の GitHub tarball または CDN を利用できます。
+
+認証・更新の詳細は [共通インストール手順](https://github.com/sano1023/rs-package/blob/main/INSTALLING.md) を参照してください。登録済みバージョンは [GitHub Packages 一覧](https://github.com/sano1023?tab=packages&repo_name=rs-package) で確認できます。以下のパッケージ名による import は Vite などのバンドラ向けです。
 
 <details>
 <summary>npm レジストリを使わない場合（GitHub tarball 直指定）</summary>
@@ -21,8 +27,8 @@ npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-form-0.5
 ### バニラ JS（ESM・バンドラあり）
 
 ```js
-import { createRSForm } from '@parelabo/rs-form';
-import '@parelabo/rs-form/rs-form.css';   // スタイル（バンドラ経由）
+import { createRSForm } from '@sano1023/rs-form';
+import '@sano1023/rs-form/rs-form.css';   // スタイル（バンドラ経由）
 
 createRSForm(document.querySelector('#app'), schema, { /* オプション */ });
 ```
@@ -30,8 +36,8 @@ createRSForm(document.querySelector('#app'), schema, { /* オプション */ });
 ### `<script>` タグ（CDN・ビルド環境不要）
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@parelabo/rs-form@0.5.0/dist/rs-form.css">
-<script src="https://cdn.jsdelivr.net/npm/@parelabo/rs-form@0.5.0/dist/rs-form.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sano1023/rs-package@main/rs-form/dist/rs-form.css">
+<script src="https://cdn.jsdelivr.net/gh/sano1023/rs-package@main/rs-form/dist/rs-form.min.js"></script>
 <script>
   // 公開APIはグローバル RSForm に載る
   RSForm.createRSForm(document.querySelector('#app'), schema, { /* オプション */ });
@@ -41,8 +47,8 @@ createRSForm(document.querySelector('#app'), schema, { /* オプション */ });
 ### Vue 3
 
 ```js
-import { RsForm } from '@parelabo/rs-form/vue';
-import '@parelabo/rs-form/rs-form.css';   // スタイル（バンドラ経由）
+import { RsForm } from '@sano1023/rs-form/vue';
+import '@sano1023/rs-form/rs-form.css';   // スタイル（バンドラ経由）
 ```
 
 ```vue
@@ -54,8 +60,8 @@ import '@parelabo/rs-form/rs-form.css';   // スタイル（バンドラ経由�
 ### React 18 / 19
 
 ```jsx
-import { RsForm } from '@parelabo/rs-form/react';
-import '@parelabo/rs-form/rs-form.css';   // スタイル（バンドラ経由）
+import { RsForm } from '@sano1023/rs-form/react';
+import '@sano1023/rs-form/rs-form.css';   // スタイル（バンドラ経由）
 
 export default function App() {
   return <RsForm />;
@@ -71,7 +77,7 @@ export default function App() {
 スキーマ駆動・依存ゼロの日本語フォーム/アンケートライブラリです（現在 v0.5 = レンダラコア + 対話モード + GUIビルダー + 採点/集計/テーマ + 多言語/A・Bバリアント/埋め込み）。
 
 - **スキーマは素のJSON・回答も素のJSON**: 独自クラスやバイナリ形式なし。git管理・DB保存・サーバ間受け渡しがそのまま出来る
-- **依存ゼロ**: ランタイム依存なし。ビルド不要で `src/` から直接 import できる ESモジュール
+- **依存ゼロ**: ランタイム依存なし。ビルド済みの ESモジュールをパッケージから import できる
 - **質問タイプ16種**: text / textarea / number / radio / checkbox / select / rating / nps / date / email / tel / postal / matrix / file / signature / **calc（計算フィールド）** — すべて公開API `defineQuestionType()` で実装（利用者が数行で独自タイプを追加できる）
 - **採点/クイズモード（v0.4）**: 質問に `correctAnswer` と `points` を持たせ、`schema.scoring`（or `quiz: true`）で送信時に**採点結果画面**（得点・％・合否バッジ・設問ごとの正誤）を表示。checkbox は順不同の集合一致＋`partial: true` で部分点。`form.getGrade()` で素のJSONの採点結果も取得できる
 - **計算フィールド（v0.4）**: `{ type: 'calc', expression: 'price * qty' }` で**他の回答から自動算出**する読み取り専用フィールド。visibleIf と同じ式パーサ（算術 `+ - * / %` を追加）で評価し、依存する回答が変わるたびに即時再計算・回答JSONにも載る
@@ -103,23 +109,15 @@ php -S localhost:8099   # または任意の静的サーバー
 
 デモでは問い合わせフォーム（2ページ・自動保存・住所補完・visibleIf・ふりがな自動収集）とアンケート（rating / nps / カスタム slider タイプ）、**対話モード**（1問1画面・matrix / file / signature・住所補完）を回答JSONのリアルタイム表示・イベントログ付きで、**フォームビルダー（v0.3）** タブでは D&D・プロパティ編集・条件エディタ・ライブプレビュー切替・スキーマ入出力・undo/redo を、**採点・計算 / 回答集計 / テーマ（v0.4）** タブでは採点クイズ＋結果画面・計算フィールドの自動算出・rs-chart による回答集計サマリ（表フォールバック切替つき）・テーマエディタを、さらに **配布・多言語（v0.5）** タブでは日本語/英語の言語切替・A/Bバリアントの決定的割当表示・埋め込みスニペットの出力を試せます。
 
-## インストール
-
-npm公開前は、`src/` ディレクトリをコピーするだけで使えます。
-
-```html
-<link rel="stylesheet" href="./rs-form/src/rs-form.css">
-```
-
 ```js
-import { createRSForm } from './rs-form/src/index.js';
-// npm公開後: import { createRSForm } from 'rs-form';
+import { createRSForm } from '@sano1023/rs-form';
+import '@sano1023/rs-form/rs-form.css';
 ```
 
 ## クイックスタート
 
 ```js
-import { createRSForm } from 'rs-form';
+import { createRSForm } from '@sano1023/rs-form';
 
 const schema = {
     title: 'お問い合わせフォーム',
@@ -166,7 +164,7 @@ form.destroy();
 
 | オプション | 型 / 既定値 | 説明 |
 |---|---|---|
-| `mode` | `'standard'` | 表示モード。`'readonly'` で回答閲覧。`'conversational'` で対話モード（`import 'rs-form/conversational'` が必要） |
+| `mode` | `'standard'` | 表示モード。`'readonly'` で回答閲覧。`'conversational'` で対話モード（`import '@sano1023/rs-form/conversational'` が必要） |
 | `autosave` | `false` | localStorage への下書き自動保存。リロードで復元・submit 成功でクリア |
 | `storageKey` | schema.title | 下書き保存キー（`rs-form:` プレフィックス付与） |
 | `messages` | — | エラーメッセージの全体上書き（例: `{ required: '必須だよ' }`） |
@@ -233,7 +231,7 @@ form.destroy();
 組み込み: `required` / `pattern` / `range`（min/max）/ `length`（min/max）/ `charset` / `email` / `tel` / `postal` / `minSelect` / `maxSelect` / `date`。独自バリデータは組み込みと同格に追加できます:
 
 ```js
-import { defineValidator } from 'rs-form';
+import { defineValidator } from '@sano1023/rs-form';
 
 defineValidator('corpEmail', (value) =>
     String(value).endsWith('.co.jp') || '会社のメールアドレスを入力してください');
@@ -259,7 +257,7 @@ defineValidator('corpEmail', (value) =>
 1問ずつ表示するモード。standard と**同じスキーマ・同じ FormModel・同じ回答JSON**で、レンダラだけが差し替わります。対話モードのコードは別エントリ（`rs-form/conversational`）なので、standard だけの利用者には読み込まれません。
 
 ```js
-import { createRSForm } from 'rs-form/conversational';   // これで conversational レンダラが登録される
+import { createRSForm } from '@sano1023/rs-form/conversational';   // これで conversational レンダラが登録される
 
 createRSForm('#app', schema, { mode: 'conversational' });
 ```
@@ -274,7 +272,7 @@ createRSForm('#app', schema, { mode: 'conversational' });
 スキーマを GUI で編集するノーコードビルダー。**別エントリ（`rs-form/builder`）** なので、レンダラだけの利用者には1バイトも読み込まれません。パレットのソースは質問タイプ registry、プレビューは既存レンダラ（`createRSForm`）の再利用で、**スキーマ（素のJSON）が唯一の真実**です。
 
 ```js
-import { createRSFormBuilder } from 'rs-form/builder';   // 別エントリ
+import { createRSFormBuilder } from '@sano1023/rs-form/builder';   // 別エントリ
 import 'rs-form/rs-form.css';                            // 同じ1枚に .rsfb-* も含む
 
 const builder = createRSFormBuilder('#builder', { schema });   // schema は任意（省略可）
@@ -310,7 +308,7 @@ builder.on('change', () => save(builder.getSchema()));         // 出力はレ�
 組み込み12種と同じAPIです。入力要素を作って返すだけで、ラベル・必須マーク・エラー表示・aria 配線・回答JSONへの反映はコアが行います:
 
 ```js
-import { defineQuestionType, createRSForm } from 'rs-form';
+import { defineQuestionType, createRSForm } from '@sano1023/rs-form';
 
 const slider = defineQuestionType({
     name: 'slider',
@@ -402,8 +400,8 @@ form.on('submit', () => console.log(form.getGrade()));
 複数回答（回答JSONの配列）を質問ごとに集計し、[rs-chart](../rs-chart) で可視化します。rs-chart は **import して使うだけ**の opt-in 連携で、渡さなければ表にフォールバックします。
 
 ```js
-import { createRSFormSummary } from 'rs-form/summary';
-import { createRSChart } from 'rs-chart';   // ← 読み取り連携（未使用ならフォールバック）
+import { createRSFormSummary } from '@sano1023/rs-form/summary';
+import { createRSChart } from '@sano1023/rs-chart';   // ← 読み取り連携（未使用ならフォールバック）
 
 createRSFormSummary('#summary', {
     schema,                 // or questions: [...]
@@ -430,7 +428,7 @@ CSSカスタムプロパティで差し替えできます（定義は `.rsf` ス
 GUI で編集してプレビューへ即時反映するテーマエディタも同梱しています:
 
 ```js
-import { createRSFormThemeEditor } from 'rs-form/theme';
+import { createRSFormThemeEditor } from '@sano1023/rs-form/theme';
 const ed = createRSFormThemeEditor('#editor', { apply: '#preview' }); // #preview 内のフォームに反映
 ed.on('change', (theme) => save(theme));
 ed.exportCSS();   // ":root, .rsf { --rsf-primary: ...; }" を書き出す
@@ -457,7 +455,7 @@ form.availableLocales();    // → ['en', 'ja']（スキーマから収集）
 畳み込みは DOM 非依存の純粋関数です（`rs-form/i18n`）:
 
 ```js
-import { resolveSchemaLocale, resolveText, schemaLocales } from 'rs-form/i18n';
+import { resolveSchemaLocale, resolveText, schemaLocales } from '@sano1023/rs-form/i18n';
 resolveText({ ja: 'はい', en: 'Yes' }, 'en');   // → 'Yes'（単一文字列や undefined はそのまま返す）
 resolveSchemaLocale(schema, 'en', { fallbackLocale: 'ja' }); // → 従来どおりの素のスキーマ
 ```
@@ -481,7 +479,7 @@ form.getVariant();   // → 'A' | 'B'
 割当・振り分けは純粋関数です（`rs-form/variant`）:
 
 ```js
-import { assignVariant, applyVariant, pickVariantSchema } from 'rs-form/variant';
+import { assignVariant, applyVariant, pickVariantSchema } from '@sano1023/rs-form/variant';
 assignVariant(userId, ['A', 'B']);                 // 決定的に 'A' or 'B'（{ A:{weight:2}, B:{} } で重み付け可）
 const { variant, schema: applied } = pickVariantSchema(schema, userId); // 割当＋具体スキーマ
 ```
@@ -491,7 +489,7 @@ const { variant, schema: applied } = pickVariantSchema(schema, userId); // 割�
 スキーマから、任意サイトに貼れる **HTML + ESモジュール script** を書き出します。ビルド不要のまま配布できます。
 
 ```js
-import { generateEmbedSnippet } from 'rs-form/embed';
+import { generateEmbedSnippet } from '@sano1023/rs-form/embed';
 const html = generateEmbedSnippet(schema, {
     baseUrl: 'https://cdn.example.com/rs-form/src', // index.js / rs-form.css の置き場所
     mountId: 'my-form', locale: 'en', variant: 'A', // mode: 'conversational' も可

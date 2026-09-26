@@ -5,8 +5,14 @@
 ## インストール
 
 ```bash
-npm install @parelabo/rs-editor
+npm login --scope=@sano1023 --auth-type=legacy --registry=https://npm.pkg.github.com
+npm config set @sano1023:registry=https://npm.pkg.github.com --location=user
+npm install @sano1023/rs-editor
 ```
+
+> GitHub Packages から配布しています。public パッケージもインストールには GitHub 認証が必要です。ログイン時の Password には read:packages 権限を持つ personal access token (classic) を使用します。認証不要の導入には、下記の GitHub tarball または CDN を利用できます。
+
+認証・更新の詳細は [共通インストール手順](https://github.com/sano1023/rs-package/blob/main/INSTALLING.md) を参照してください。登録済みバージョンは [GitHub Packages 一覧](https://github.com/sano1023?tab=packages&repo_name=rs-package) で確認できます。以下のパッケージ名による import は Vite などのバンドラ向けです。
 
 <details>
 <summary>npm レジストリを使わない場合（GitHub tarball 直指定）</summary>
@@ -21,8 +27,8 @@ npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-editor-0
 ### バニラ JS（ESM・バンドラあり）
 
 ```js
-import { createRSEditor } from '@parelabo/rs-editor';
-import '@parelabo/rs-editor/rs-editor.css';   // スタイル（バンドラ経由）
+import { createRSEditor } from '@sano1023/rs-editor';
+import '@sano1023/rs-editor/rs-editor.css';   // スタイル（バンドラ経由）
 
 createRSEditor(document.querySelector('#app'), { /* オプション */ });
 ```
@@ -30,8 +36,8 @@ createRSEditor(document.querySelector('#app'), { /* オプション */ });
 ### `<script>` タグ（CDN・ビルド環境不要）
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@parelabo/rs-editor@0.6.0/dist/rs-editor.css">
-<script src="https://cdn.jsdelivr.net/npm/@parelabo/rs-editor@0.6.0/dist/rs-editor.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sano1023/rs-package@main/rs-editor/dist/rs-editor.css">
+<script src="https://cdn.jsdelivr.net/gh/sano1023/rs-package@main/rs-editor/dist/rs-editor.min.js"></script>
 <script>
   // 公開APIはグローバル RSEditor に載る
   RSEditor.createRSEditor(document.querySelector('#app'), { /* オプション */ });
@@ -41,8 +47,8 @@ createRSEditor(document.querySelector('#app'), { /* オプション */ });
 ### Vue 3
 
 ```js
-import { RsEditor } from '@parelabo/rs-editor/vue';
-import '@parelabo/rs-editor/rs-editor.css';   // スタイル（バンドラ経由）
+import { RsEditor } from '@sano1023/rs-editor/vue';
+import '@sano1023/rs-editor/rs-editor.css';   // スタイル（バンドラ経由）
 ```
 
 ```vue
@@ -54,8 +60,8 @@ import '@parelabo/rs-editor/rs-editor.css';   // スタイル（バンドラ経�
 ### React 18 / 19
 
 ```jsx
-import { RsEditor } from '@parelabo/rs-editor/react';
-import '@parelabo/rs-editor/rs-editor.css';   // スタイル（バンドラ経由）
+import { RsEditor } from '@sano1023/rs-editor/react';
+import '@sano1023/rs-editor/rs-editor.css';   // スタイル（バンドラ経由）
 
 export default function App() {
   return <RsEditor />;
@@ -70,7 +76,7 @@ export default function App() {
 
 プラグインアーキテクチャを持つ、依存ゼロのWYSIWYGエディタライブラリです（現在 v0.6）。
 
-- **依存ゼロ**: ランタイム依存なし。ビルド不要で `src/` から直接 import できる ESモジュール
+- **依存ゼロ**: ランタイム依存なし。ビルド済みの ESモジュールをパッケージから import できる
 - **プラグインアーキテクチャ**: 太字などの組み込み機能もすべて同じプラグインAPIで実装（利用者が数行で機能を追加できる）
 - **HTML / JSON 両対応**: `getHTML()/setHTML()` に加え、構造化JSONでの入出力（`getJSON()/setJSON()`）をサポート。ラウンドトリップ保証つき
 - **日本語IME対応**: composition 中は DOM に触れず、`onChange` も発火しない。「1変換 = 1履歴」で undo できる
@@ -95,17 +101,9 @@ php -S localhost:8099   # または任意の静的サーバー
 
 デモでは全ツールバー機能・カスタムプラグイン（⭐スタンプ）・HTML/JSON出力のリアルタイム表示・ラウンドトリップ検査・readonly / destroy を試せます。
 
-## インストール
-
-npm公開前は、`src/` ディレクトリと `src/rs-editor.css` をコピーするだけで使えます。
-
-```html
-<link rel="stylesheet" href="./rs-editor/src/rs-editor.css">
-```
-
 ```js
-import { createRSEditor } from './rs-editor/src/index.js';
-// npm公開後: import { createRSEditor } from 'rs-editor';
+import { createRSEditor } from '@sano1023/rs-editor';
+import '@sano1023/rs-editor/rs-editor.css';
 ```
 
 ## クイックスタート
@@ -115,7 +113,7 @@ import { createRSEditor } from './rs-editor/src/index.js';
 ```
 
 ```js
-import { createRSEditor } from 'rs-editor';
+import { createRSEditor } from '@sano1023/rs-editor';
 
 const editor = createRSEditor('#content', {
     // ツールバー定義文字列（'|' はセパレータ）
@@ -183,9 +181,9 @@ editor.destroy();              // 元の textarea / div に戻す
 標準では読み込まれません。使うものだけ import して `plugins` に渡し、ボタン名をツールバー定義に足します。
 
 ```js
-import { charmap } from 'rs-editor/plugins/charmap';
-import { searchreplace } from 'rs-editor/plugins/searchreplace';
-import { wordcount } from 'rs-editor/plugins/wordcount';
+import { charmap } from '@sano1023/rs-editor/plugins/charmap';
+import { searchreplace } from '@sano1023/rs-editor/plugins/searchreplace';
+import { wordcount } from '@sano1023/rs-editor/plugins/wordcount';
 
 createRSEditor('#content', {
     toolbar: '… | charmap searchreplace',
@@ -234,7 +232,7 @@ createRSEditor('#content', {
 | `divider` | `divider` | 区切り線（水平線）。**色・太さ・線種・幅**を指定できる。ドロップダウンからプリセット挿入／「スタイルを指定して挿入…」でプレビュー付きダイアログ |
 
 ```js
-import { divider } from 'rs-editor/plugins/divider';
+import { divider } from '@sano1023/rs-editor/plugins/divider';
 
 createRSEditor('#content', {
     toolbar: '… | divider',
@@ -287,7 +285,7 @@ createRSEditor('#content', {
 組み込み機能もすべてこのAPIで実装されています（dogfooding）。
 
 ```js
-import { createRSEditor, definePlugin } from 'rs-editor';
+import { createRSEditor, definePlugin } from '@sano1023/rs-editor';
 
 const stamp = definePlugin({
     name: 'stamp',

@@ -1,5 +1,5 @@
 {
-    "name": "@parelabo/rs-lightbox",
+    "name": "@sano1023/rs-lightbox",
     "version": "0.1.0",
     "description": "依存ゼロ・フレームワーク非依存の画像ライトボックス（ズーム/パン/スワイプ/ピンチ・WAI-ARIAモーダル・フォーカストラップ・先読み・DOM/配列入力）。PhotoSwipe/GLightbox/Fancybox代替。",
     "type": "module",
@@ -51,6 +51,7 @@
         "email": "contact@parelabo.com"
     },
     "publishConfig": {
+        "registry": "https://npm.pkg.github.com",
         "access": "public"
     },
     "types": "./dist/types/index.d.ts",

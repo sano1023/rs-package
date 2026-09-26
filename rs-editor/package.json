@@ -1,5 +1,5 @@
 {
-    "name": "@parelabo/rs-editor",
+    "name": "@sano1023/rs-editor",
     "version": "0.6.0",
     "description": "プラグインアーキテクチャを持つ、依存ゼロのWYSIWYGエディタライブラリ",
     "type": "module",
@@ -55,6 +55,7 @@
         "email": "contact@parelabo.com"
     },
     "publishConfig": {
+        "registry": "https://npm.pkg.github.com",
         "access": "public"
     },
     "types": "./dist/types/index.d.ts",

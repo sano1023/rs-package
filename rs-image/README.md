@@ -12,6 +12,8 @@ npm install @sano1023/rs-image
 
 > GitHub Packages から配布しています。public パッケージもインストールには GitHub 認証が必要です。ログイン時の Password には read:packages 権限を持つ personal access token (classic) を使用します。認証不要の導入には、下記の GitHub tarball または CDN を利用できます。
 
+認証・更新の詳細は [共通インストール手順](https://github.com/sano1023/rs-package/blob/main/INSTALLING.md) を参照してください。登録済みバージョンは [GitHub Packages 一覧](https://github.com/sano1023?tab=packages&repo_name=rs-package) で確認できます。以下のパッケージ名による import は Vite などのバンドラ向けです。
+
 <details>
 <summary>npm レジストリを使わない場合（GitHub tarball 直指定）</summary>
 
@@ -88,12 +90,9 @@ php -S localhost:8099
 # → http://localhost:8099/rs-image/demo/ を開く
 ```
 
-## インストール
-
-npm 公開前のため、`src/` をプロジェクトにコピーして import してください。
-
 ```js
-import { processImage } from './rs-image/index.js';
+import { processImage } from '@sano1023/rs-image';
+import '@sano1023/rs-image/rs-image.css';
 ```
 
 ## クイックスタート
@@ -125,11 +124,11 @@ const dataURL = await processImage(file, {
 画像は常にキャンバスに表示され、すべての操作がリアルタイムに反映されます（WYSIWYG）。
 
 ```html
-<link rel="stylesheet" href="rs-image/rs-image.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sano1023/rs-package@main/rs-image/dist/rs-image.css">
 ```
 
 ```js
-import { createRSImageEditor } from './rs-image/index.js';
+import { createRSImageEditor } from '@sano1023/rs-image';
 
 const editor = createRSImageEditor('#editor', {
     height: 460,
@@ -260,12 +259,12 @@ MediaPipe Selfie Segmentation（人物・軽量）と RMBG-1.4（汎用・約44M
 
 ```js
 // Vue 3
-import { RsImageEditor } from 'rs-image/vue';
+import { RsImageEditor } from '@sano1023/rs-image/vue';
 // <RsImageEditor :src="fileOrUrl" :height="460" @change="..." ref="ed" />
 // await ed.value.export({ format: 'webp' })
 
 // React 18
-import { RsImageEditor } from 'rs-image/react';
+import { RsImageEditor } from '@sano1023/rs-image/react';
 // <RsImageEditor src={fileOrUrl} height={460} onChange={...} ref={ref} />
 // await ref.current.export({ format: 'webp' })
 ```
@@ -300,7 +299,7 @@ import { RsImageEditor } from 'rs-image/react';
 ### ショートカット
 
 ```js
-import { toBlob, toDataURL } from 'rs-image';
+import { toBlob, toDataURL } from '@sano1023/rs-image';
 const blob = await toBlob(file, { resize: { width: 800 }, format: 'webp' });
 const url = await toDataURL(file, { circle: true, format: 'png' });
 ```

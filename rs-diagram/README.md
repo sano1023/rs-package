@@ -5,8 +5,14 @@
 ## インストール
 
 ```bash
-npm install @parelabo/rs-diagram
+npm login --scope=@sano1023 --auth-type=legacy --registry=https://npm.pkg.github.com
+npm config set @sano1023:registry=https://npm.pkg.github.com --location=user
+npm install @sano1023/rs-diagram
 ```
+
+> GitHub Packages から配布しています。public パッケージもインストールには GitHub 認証が必要です。ログイン時の Password には read:packages 権限を持つ personal access token (classic) を使用します。認証不要の導入には、下記の GitHub tarball または CDN を利用できます。
+
+認証・更新の詳細は [共通インストール手順](https://github.com/sano1023/rs-package/blob/main/INSTALLING.md) を参照してください。登録済みバージョンは [GitHub Packages 一覧](https://github.com/sano1023?tab=packages&repo_name=rs-package) で確認できます。以下のパッケージ名による import は Vite などのバンドラ向けです。
 
 <details>
 <summary>npm レジストリを使わない場合（GitHub tarball 直指定）</summary>
@@ -21,8 +27,8 @@ npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-diagram-
 ### バニラ JS（ESM・バンドラあり）
 
 ```js
-import { createRSDiagram } from '@parelabo/rs-diagram';
-import '@parelabo/rs-diagram/rs-diagram.css';   // スタイル（バンドラ経由）
+import { createRSDiagram } from '@sano1023/rs-diagram';
+import '@sano1023/rs-diagram/rs-diagram.css';   // スタイル（バンドラ経由）
 
 createRSDiagram(document.querySelector('#app'), { /* オプション */ });
 ```
@@ -30,8 +36,8 @@ createRSDiagram(document.querySelector('#app'), { /* オプション */ });
 ### `<script>` タグ（CDN・ビルド環境不要）
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@parelabo/rs-diagram@0.6.0/dist/rs-diagram.css">
-<script src="https://cdn.jsdelivr.net/npm/@parelabo/rs-diagram@0.6.0/dist/rs-diagram.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sano1023/rs-package@main/rs-diagram/dist/rs-diagram.css">
+<script src="https://cdn.jsdelivr.net/gh/sano1023/rs-package@main/rs-diagram/dist/rs-diagram.min.js"></script>
 <script>
   // 公開APIはグローバル RSDiagram に載る
   RSDiagram.createRSDiagram(document.querySelector('#app'), { /* オプション */ });
@@ -41,8 +47,8 @@ createRSDiagram(document.querySelector('#app'), { /* オプション */ });
 ### Vue 3
 
 ```js
-import { RsDiagram } from '@parelabo/rs-diagram/vue';
-import '@parelabo/rs-diagram/rs-diagram.css';   // スタイル（バンドラ経由）
+import { RsDiagram } from '@sano1023/rs-diagram/vue';
+import '@sano1023/rs-diagram/rs-diagram.css';   // スタイル（バンドラ経由）
 ```
 
 ```vue
@@ -54,8 +60,8 @@ import '@parelabo/rs-diagram/rs-diagram.css';   // スタイル（バンドラ�
 ### React 18 / 19
 
 ```jsx
-import { RsDiagram } from '@parelabo/rs-diagram/react';
-import '@parelabo/rs-diagram/rs-diagram.css';   // スタイル（バンドラ経由）
+import { RsDiagram } from '@sano1023/rs-diagram/react';
+import '@sano1023/rs-diagram/rs-diagram.css';   // スタイル（バンドラ経由）
 
 export default function App() {
   return <RsDiagram />;
@@ -71,7 +77,7 @@ export default function App() {
 依存ゼロのSVG作図・ダイアグラムライブラリです（現在 v0.6）。
 
 - **宣言的**: `nodes` / `links` の配列を渡すだけで3行で図が出る。独自DSLもクラス継承も不要
-- **依存ゼロ**: ランタイム依存なし。ビルド不要で `src/` から直接 import できる ESモジュール
+- **依存ゼロ**: ランタイム依存なし。ビルド済みの ESモジュールをパッケージから import できる
 - **プラグインアーキテクチャ**: ノード形状・リンク形状はプラグイン（`defineNodeType` / `defineLinkType`）。組み込みの rect / diamond / orthogonal 等もすべて同じAPIで実装
 - **model が唯一の真実**: ドラッグもリサイズも接続もすべて「modelへのコマンド適用 → viewはmodelから再描画」。undo/redo は全編集操作に自動対応
 - **エディタ = ビューア**: `readOnly: true` の切り替えだけで読み取り専用ビューアになる（クリックイベントは生きる）
@@ -124,17 +130,9 @@ php -S localhost:8099   # または任意の静的サーバー
 
 家系図デモは `/rs-diagram/demo/familytree.html`。35人のサンプル家系で、人物カードをクリックすると**その人視点の家系図**に組み替わります。
 
-## インストール
-
-npm公開前は、`src/` ディレクトリをコピーするだけで使えます。
-
-```html
-<link rel="stylesheet" href="./rs-diagram/src/rs-diagram.css">
-```
-
 ```js
-import { createRSDiagram } from './rs-diagram/src/index.js';
-// npm公開後: import { createRSDiagram } from 'rs-diagram';
+import { createRSDiagram } from '@sano1023/rs-diagram';
+import '@sano1023/rs-diagram/rs-diagram.css';
 ```
 
 ## クイックスタート
@@ -145,7 +143,7 @@ import { createRSDiagram } from './rs-diagram/src/index.js';
 ```
 
 ```js
-import { createRSDiagram } from 'rs-diagram';
+import { createRSDiagram } from '@sano1023/rs-diagram';
 
 const diagram = createRSDiagram('#canvas', {
     nodes: [
@@ -306,7 +304,7 @@ Tab / Shift+Tab（ノード巡回選択）/ 矢印キー（選択ノードを移
 組み込み形状もすべてこのAPIで実装されています。
 
 ```js
-import { defineNodeType, defineLinkType, createRSDiagram } from 'rs-diagram';
+import { defineNodeType, defineLinkType, createRSDiagram } from '@sano1023/rs-diagram';
 
 const server = defineNodeType({
     name: 'server',
@@ -335,8 +333,8 @@ createRSDiagram('#el', { nodeTypes: [server], linkTypes: [dashed], nodes: [{ typ
 **rs-chart 内包ノード** — `defineNodeType` の draw 内で `createRSChart` を呼ぶだけで「図の中の小型チャート」が実現できます。
 
 ```js
-import { createRSDiagram, defineChartNode } from 'rs-diagram';
-import { createRSChart } from 'rs-chart';   // ← アプリ側で import して注入
+import { createRSDiagram, defineChartNode } from '@sano1023/rs-diagram';
+import { createRSChart } from '@sano1023/rs-chart';   // ← アプリ側で import して注入
 
 const chartNode = defineChartNode({ createRSChart, defaults: { width: 250, height: 170 } });
 
@@ -359,8 +357,8 @@ diagram.updateNode('sales', { chart: { ...diagram.getNode('sales').chart, series
 **画像ノードの rs-image 編集** — `makeRSImagePicker` を `imagePicker` に渡すと、**画像ノードのダブルクリックで rs-image エディタがモーダル起動**し、編集結果を dataURL でノードへ書き戻します。
 
 ```js
-import { createRSDiagram, makeRSImagePicker } from 'rs-diagram';
-import { createRSImageEditor } from 'rs-image';   // ← 注入
+import { createRSDiagram, makeRSImagePicker } from '@sano1023/rs-diagram';
+import { createRSImageEditor } from '@sano1023/rs-image';   // ← 注入
 
 createRSDiagram('#el', {
     nodes: [{ id: 'pic', type: 'image', x: 40, y: 40, image: '...' }],

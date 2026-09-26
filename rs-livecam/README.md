@@ -5,8 +5,14 @@
 ## インストール
 
 ```bash
-npm install @parelabo/rs-livecam
+npm login --scope=@sano1023 --auth-type=legacy --registry=https://npm.pkg.github.com
+npm config set @sano1023:registry=https://npm.pkg.github.com --location=user
+npm install @sano1023/rs-livecam
 ```
+
+> GitHub Packages から配布しています。public パッケージもインストールには GitHub 認証が必要です。ログイン時の Password には read:packages 権限を持つ personal access token (classic) を使用します。認証不要の導入には、下記の GitHub tarball または CDN を利用できます。
+
+認証・更新の詳細は [共通インストール手順](https://github.com/sano1023/rs-package/blob/main/INSTALLING.md) を参照してください。登録済みバージョンは [GitHub Packages 一覧](https://github.com/sano1023?tab=packages&repo_name=rs-package) で確認できます。以下のパッケージ名による import は Vite などのバンドラ向けです。
 
 <details>
 <summary>npm レジストリを使わない場合（GitHub tarball 直指定）</summary>
@@ -21,7 +27,7 @@ npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-livecam-
 ### バニラ JS（ESM・バンドラあり）
 
 ```js
-import { createRSLiveCam } from '@parelabo/rs-livecam';
+import { createRSLiveCam } from '@sano1023/rs-livecam';
 
 createRSLiveCam({ /* オプション */ });
 ```
@@ -29,7 +35,7 @@ createRSLiveCam({ /* オプション */ });
 ### `<script>` タグ（CDN・ビルド環境不要）
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/@parelabo/rs-livecam@0.2.0/dist/rs-livecam.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/sano1023/rs-package@main/rs-livecam/dist/rs-livecam.min.js"></script>
 <script>
   // 公開APIはグローバル RSLivecam に載る
   RSLivecam.createRSLiveCam({ /* オプション */ });
@@ -39,7 +45,7 @@ createRSLiveCam({ /* オプション */ });
 ### Vue 3
 
 ```js
-import { RsLiveCam } from '@parelabo/rs-livecam/vue';
+import { RsLiveCam } from '@sano1023/rs-livecam/vue';
 ```
 
 ```vue
@@ -51,7 +57,7 @@ import { RsLiveCam } from '@parelabo/rs-livecam/vue';
 ### React 18 / 19
 
 ```jsx
-import { RsLiveCam } from '@parelabo/rs-livecam/react';
+import { RsLiveCam } from '@sano1023/rs-livecam/react';
 
 export default function App() {
   return <RsLiveCam />;
@@ -74,6 +80,10 @@ export default function App() {
 - **avatar モード**: 2Dパーツアバター（依存ゼロ描画）をリグ値（目パチ・口パク・頭の位置/傾き）で駆動。**プリセット `female` / `male` / `neutral`**（長髪・リボン・まつ毛 / 短髪・眉・広い肩幅）＋色カスタム。口はモーションキャプチャに忠実（閉じればきっちり閉じるMARデッドゾーン、頭は滑らか・口は素早いスムージング）。本人の映像は1ピクセルも出ない。離席したら「離席中」プレート
 - ML部（人物セグメンテーション・顔ランドマーク）は**アダプタ注入**。MediaPipe 用マッパー（`selfieSegAdapter` / `faceMeshAdapter`）同梱
 
+```js
+import { createRSLiveCam } from '@sano1023/rs-livecam';
+```
+
 ## デモ
 
 ```bash
@@ -86,7 +96,7 @@ php -S localhost:8099
 ## クイックスタート
 
 ```js
-import { createRSLiveCam } from './rs-livecam/index.js';
+import { createRSLiveCam } from '@sano1023/rs-livecam';
 
 const cam = createRSLiveCam({ mode: 'camera', smooth: 0.6, brightness: 1.05 });
 await cam.start();
@@ -100,7 +110,7 @@ pc.addTrack(cam.stream.getVideoTracks()[0], cam.stream);
 ### 仮想背景 / 背景モザイク（MediaPipe Selfie Segmentation を注入）
 
 ```js
-import { createRSLiveCam, selfieSegAdapter } from './rs-livecam/index.js';
+import { createRSLiveCam, selfieSegAdapter } from '@sano1023/rs-livecam';
 
 const seg = new SelfieSegmentation({ locateFile: (f) => `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/${f}` });
 seg.setOptions({ modelSelection: 1 });
@@ -115,7 +125,7 @@ const cam = createRSLiveCam({
 ### アバター（MediaPipe FaceMesh を注入）
 
 ```js
-import { createRSLiveCam, faceMeshAdapter } from './rs-livecam/index.js';
+import { createRSLiveCam, faceMeshAdapter } from '@sano1023/rs-livecam';
 
 const mesh = new FaceMesh({ locateFile: (f) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${f}` });
 const cam = createRSLiveCam({

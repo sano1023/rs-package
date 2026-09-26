@@ -5,8 +5,14 @@
 ## インストール
 
 ```bash
-npm install @parelabo/rs-pivot
+npm login --scope=@sano1023 --auth-type=legacy --registry=https://npm.pkg.github.com
+npm config set @sano1023:registry=https://npm.pkg.github.com --location=user
+npm install @sano1023/rs-pivot
 ```
+
+> GitHub Packages から配布しています。public パッケージもインストールには GitHub 認証が必要です。ログイン時の Password には read:packages 権限を持つ personal access token (classic) を使用します。認証不要の導入には、下記の GitHub tarball または CDN を利用できます。
+
+認証・更新の詳細は [共通インストール手順](https://github.com/sano1023/rs-package/blob/main/INSTALLING.md) を参照してください。登録済みバージョンは [GitHub Packages 一覧](https://github.com/sano1023?tab=packages&repo_name=rs-package) で確認できます。以下のパッケージ名による import は Vite などのバンドラ向けです。
 
 <details>
 <summary>npm レジストリを使わない場合（GitHub tarball 直指定）</summary>
@@ -21,8 +27,8 @@ npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-pivot-0.
 ### バニラ JS（ESM・バンドラあり）
 
 ```js
-import { createRSPivot } from '@parelabo/rs-pivot';
-import '@parelabo/rs-pivot/rs-pivot.css';   // スタイル（バンドラ経由）
+import { createRSPivot } from '@sano1023/rs-pivot';
+import '@sano1023/rs-pivot/rs-pivot.css';   // スタイル（バンドラ経由）
 
 createRSPivot(document.querySelector('#app'), { /* オプション */ });
 ```
@@ -30,8 +36,8 @@ createRSPivot(document.querySelector('#app'), { /* オプション */ });
 ### `<script>` タグ（CDN・ビルド環境不要）
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@parelabo/rs-pivot@0.4.0/dist/rs-pivot.css">
-<script src="https://cdn.jsdelivr.net/npm/@parelabo/rs-pivot@0.4.0/dist/rs-pivot.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sano1023/rs-package@main/rs-pivot/dist/rs-pivot.css">
+<script src="https://cdn.jsdelivr.net/gh/sano1023/rs-package@main/rs-pivot/dist/rs-pivot.min.js"></script>
 <script>
   // 公開APIはグローバル RSPivot に載る
   RSPivot.createRSPivot(document.querySelector('#app'), { /* オプション */ });
@@ -41,8 +47,8 @@ createRSPivot(document.querySelector('#app'), { /* オプション */ });
 ### Vue 3
 
 ```js
-import { RsPivot } from '@parelabo/rs-pivot/vue';
-import '@parelabo/rs-pivot/rs-pivot.css';   // スタイル（バンドラ経由）
+import { RsPivot } from '@sano1023/rs-pivot/vue';
+import '@sano1023/rs-pivot/rs-pivot.css';   // スタイル（バンドラ経由）
 ```
 
 ```vue
@@ -54,8 +60,8 @@ import '@parelabo/rs-pivot/rs-pivot.css';   // スタイル（バンドラ経由
 ### React 18 / 19
 
 ```jsx
-import { RsPivot } from '@parelabo/rs-pivot/react';
-import '@parelabo/rs-pivot/rs-pivot.css';   // スタイル（バンドラ経由）
+import { RsPivot } from '@sano1023/rs-pivot/react';
+import '@sano1023/rs-pivot/rs-pivot.css';   // スタイル（バンドラ経由）
 
 export default function App() {
   return <RsPivot />;
@@ -70,7 +76,7 @@ export default function App() {
 
 依存ゼロのピボットテーブルライブラリ。業務システム・SaaS の集計画面・BI・売上/在庫/勤怠などの日本語業務レポート向けです（現在 v0.4）。
 
-- **依存ゼロ**: ランタイム依存なし。ビルド不要で `src/` から直接 import できる ESモジュール
+- **依存ゼロ**: ランタイム依存なし。ビルド済みの ESモジュールをパッケージから import できる
 - **フラットなJSON配列を渡すだけ**: サーバ・キューブ・スキーマ定義は不要（3行で導入）
 - **集計エンジンはDOM非依存の純粋関数群**: 列指向ストア＋カテゴリ辞書化＋TypedArray化で、10万行の読み込み＋初回集計を **300ms以内・再スライス200ms以内**（実測 約90ms / 約20ms）。`node --test` で検算済み。DOM非依存なので **Web Worker（`worker: true`）へそのまま逃がせる**
 - **rs-chart / rs-grid とネイティブ連携（v0.3）**: ピボット結果をワンクリックでチャート化（`pivot.chart()`・再スライスで自動追従）、セルダブルクリックの明細を rs-grid（Excel風グリッド）で表示。**rs-pivot + rs-chart + rs-grid だけで無料のBIダッシュボードが組める**（連携はopt-in・未ロード時は明確なエラー）
@@ -108,17 +114,9 @@ php -S localhost:8099   # または任意の静的サーバー
 
 固定シードで生成したサンプル売上データ1万行（地域/店舗/区分/カテゴリ/商品/日付/売上/数量/原価）で、D&D・会計年度・フィルタ・ソート・明細ドリルスルー・エクスポート・レイアウト保存/復元を試せます。
 
-## インストール
-
-npm公開前は、`src/` ディレクトリをコピーするだけで使えます。
-
-```html
-<link rel="stylesheet" href="./rs-pivot/src/rs-pivot.css">
-```
-
 ```js
-import { createRSPivot } from './rs-pivot/src/index.js';
-// npm公開後: import { createRSPivot } from 'rs-pivot';
+import { createRSPivot } from '@sano1023/rs-pivot';
+import '@sano1023/rs-pivot/rs-pivot.css';
 ```
 
 ## クイックスタート
@@ -128,7 +126,7 @@ import { createRSPivot } from './rs-pivot/src/index.js';
 ```
 
 ```js
-import { createRSPivot } from 'rs-pivot';
+import { createRSPivot } from '@sano1023/rs-pivot';
 
 const pivot = createRSPivot('#container', {
     data: records,                       // フラットなJSON配列（これだけで動く）
@@ -218,7 +216,7 @@ pivot.destroy();
 組み込み集計もすべてこのAPIで実装されています。`init`（アキュムレータ生成）→ `step`（1行ずつ更新）→ `result`（値の取り出し）の3関数を渡すだけで、**小計/総計もmerge不要で正確に**計算されます。
 
 ```js
-import { defineAggregation, createRSPivot } from 'rs-pivot';
+import { defineAggregation, createRSPivot } from '@sano1023/rs-pivot';
 
 const range = defineAggregation({
     name: 'range',
@@ -263,7 +261,7 @@ createRSPivot('#el', {
 データセルごとに `cellRenderer(td, cell, ctx)` が呼ばれます（`td`=セル要素、`cell`={ raw, text, kind, vi, rowNode, colNode }、`ctx`={ stats: 値ごとの{min,max}, valueDefs, model }）。同じシグネチャで独自の書式を実装できます。組み込みの `heatmap()` / `dataBar()` はこのAPIのファクトリです。
 
 ```js
-import { createRSPivot, heatmap, dataBar, combineRenderers } from 'rs-pivot';
+import { createRSPivot, heatmap, dataBar, combineRenderers } from '@sano1023/rs-pivot';
 
 pivot.setCellRenderer(heatmap({ min: '#ffffff', max: '#f97316' }));   // ヒートマップ着色
 pivot.setCellRenderer(dataBar({ color: '#93c5fd' }));                 // データバー
@@ -304,7 +302,7 @@ window.print();
 現在のスライスをシリーズ/カテゴリに変換して rs-chart を描画します。**行リーフ＝カテゴリ、もう一方の軸のリーフ×値フィールド＝シリーズ**（円系はカテゴリ×先頭値の1シリーズ）。再スライスすると自動で追従します。
 
 ```js
-import { createRSChart } from 'rs-chart';   // 連携先を注入（or window.createRSChart / options.createRSChart）
+import { createRSChart } from '@sano1023/rs-chart';   // 連携先を注入（or window.createRSChart / options.createRSChart）
 const chart = pivot.chart('#chart', { type: 'column' });   // pie / bar / line / area / column …
 // 以降 D&D やフィルタで再スライスすると chart も自動更新される
 ```

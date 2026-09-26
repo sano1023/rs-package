@@ -5,8 +5,14 @@
 ## インストール
 
 ```bash
-npm install @parelabo/rs-report
+npm login --scope=@sano1023 --auth-type=legacy --registry=https://npm.pkg.github.com
+npm config set @sano1023:registry=https://npm.pkg.github.com --location=user
+npm install @sano1023/rs-report
 ```
+
+> GitHub Packages から配布しています。public パッケージもインストールには GitHub 認証が必要です。ログイン時の Password には read:packages 権限を持つ personal access token (classic) を使用します。認証不要の導入には、下記の GitHub tarball または CDN を利用できます。
+
+認証・更新の詳細は [共通インストール手順](https://github.com/sano1023/rs-package/blob/main/INSTALLING.md) を参照してください。登録済みバージョンは [GitHub Packages 一覧](https://github.com/sano1023?tab=packages&repo_name=rs-package) で確認できます。以下のパッケージ名による import は Vite などのバンドラ向けです。
 
 <details>
 <summary>npm レジストリを使わない場合（GitHub tarball 直指定）</summary>
@@ -21,8 +27,8 @@ npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-report-0
 ### バニラ JS（ESM・バンドラあり）
 
 ```js
-import { createRSReport } from '@parelabo/rs-report';
-import '@parelabo/rs-report/rs-report.css';   // スタイル（バンドラ経由）
+import { createRSReport } from '@sano1023/rs-report';
+import '@sano1023/rs-report/rs-report.css';   // スタイル（バンドラ経由）
 
 createRSReport(document.querySelector('#app'), { template, data: { rows, params } });
 ```
@@ -30,8 +36,8 @@ createRSReport(document.querySelector('#app'), { template, data: { rows, params 
 ### `<script>` タグ（CDN・ビルド環境不要）
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@parelabo/rs-report@0.5.0/dist/rs-report.css">
-<script src="https://cdn.jsdelivr.net/npm/@parelabo/rs-report@0.5.0/dist/rs-report.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sano1023/rs-package@main/rs-report/dist/rs-report.css">
+<script src="https://cdn.jsdelivr.net/gh/sano1023/rs-package@main/rs-report/dist/rs-report.min.js"></script>
 <script>
   // 公開APIはグローバル RSReport に載る
   RSReport.createRSReport(document.querySelector('#app'), { template, data: { rows, params } });
@@ -41,8 +47,8 @@ createRSReport(document.querySelector('#app'), { template, data: { rows, params 
 ### Vue 3
 
 ```js
-import { RsReport } from '@parelabo/rs-report/vue';
-import '@parelabo/rs-report/rs-report.css';   // スタイル（バンドラ経由）
+import { RsReport } from '@sano1023/rs-report/vue';
+import '@sano1023/rs-report/rs-report.css';   // スタイル（バンドラ経由）
 ```
 
 ```vue
@@ -54,8 +60,8 @@ import '@parelabo/rs-report/rs-report.css';   // スタイル（バンドラ経�
 ### React 18 / 19
 
 ```jsx
-import { RsReport } from '@parelabo/rs-report/react';
-import '@parelabo/rs-report/rs-report.css';   // スタイル（バンドラ経由）
+import { RsReport } from '@sano1023/rs-report/react';
+import '@sano1023/rs-report/rs-report.css';   // スタイル（バンドラ経由）
 
 export default function App() {
   return <RsReport />;
@@ -96,7 +102,7 @@ mm 精度のバンドレイアウトで自動改ページつきの帳票を組�
 - 別エントリ `rs-report/designer` ＝ランタイムだけ使うページにはデザイナのコードが載らない
 
 ```js
-import { createRSReportDesigner } from 'rs-report/designer';   // + rs-report-designer.css
+import { createRSReportDesigner } from '@sano1023/rs-report/designer';   // + rs-report-designer.css
 const designer = createRSReportDesigner('#designer', {
     template,                        // 省略時は空の A4
     data: { rows: sampleRows },      // プレビュー用サンプルデータ
@@ -115,19 +121,24 @@ const designer = createRSReportDesigner('#designer', {
 - **サブレポート**: `{ type: 'subreport', template, rows: 'orders' }` — 親の行が持つ配列フィールドを、要素の矩形内で独立に組版（集計スコープも子で閉じる）。収まらない場合は `subreportOverflow` で検知
 
 ```js
-import { createRSReport, createLabelTemplate, rowsFromCSV } from 'rs-report';
+import { createRSReport, createLabelTemplate, rowsFromCSV } from '@sano1023/rs-report';
 createRSReport('#labels', {
     template: createLabelTemplate('a4-24'),
     data: { rows: rowsFromCSV(csvText) },   // CSV差し込み → 24面ラベル
 });
 ```
 
+```js
+import { createRSReport, createLabelTemplate, rowsFromCSV } from '@sano1023/rs-report';
+import '@sano1023/rs-report/rs-report.css';
+```
+
 ## 使い方
 
 ```js
-import { createRSReport, createDocumentTemplate } from './rs-report/src/index.js';
-import { prepareDocumentRows } from './rs-report/src/templates.js';
-// CSS: <link rel="stylesheet" href="./rs-report/src/rs-report.css">
+import { createRSReport, createDocumentTemplate } from '@sano1023/rs-report';
+import { prepareDocumentRows } from '@sano1023/rs-report';
+// CSS: <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sano1023/rs-package@main/rs-report/dist/rs-report.css">
 
 const report = createRSReport('#preview', {
     template: createDocumentTemplate('invoice'),   // invoice | estimate | delivery | receipt
@@ -175,7 +186,7 @@ const template = {
 const report = createRSReport('#app', { template, data: { rows } });
 
 // DOM 不要の組版だけなら（node でも動く）
-import { renderReport } from './rs-report/src/index.js';
+import { renderReport } from '@sano1023/rs-report';
 const { pages, pageCount } = renderReport(template, { rows });
 ```
 
@@ -201,8 +212,8 @@ const { pages, pageCount } = renderReport(template, { rows });
 ## Vue / React
 
 ```js
-import { RsReport } from './rs-report/src/vue.js';    // <RsReport :template="tpl" :data="{ rows }" ref="r" />
-import { RsReport } from './rs-report/src/react.js';  // <RsReport template={tpl} data={{ rows }} ref={r} />
+import { RsReport } from '@sano1023/rs-report/vue';    // <RsReport :template="tpl" :data="{ rows }" ref="r" />
+import { RsReport } from '@sano1023/rs-report/react';  // <RsReport template={tpl} data={{ rows }} ref={r} />
 ```
 
 ## テスト

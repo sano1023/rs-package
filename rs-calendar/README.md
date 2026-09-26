@@ -5,8 +5,14 @@
 ## インストール
 
 ```bash
-npm install @parelabo/rs-calendar
+npm login --scope=@sano1023 --auth-type=legacy --registry=https://npm.pkg.github.com
+npm config set @sano1023:registry=https://npm.pkg.github.com --location=user
+npm install @sano1023/rs-calendar
 ```
+
+> GitHub Packages から配布しています。public パッケージもインストールには GitHub 認証が必要です。ログイン時の Password には read:packages 権限を持つ personal access token (classic) を使用します。認証不要の導入には、下記の GitHub tarball または CDN を利用できます。
+
+認証・更新の詳細は [共通インストール手順](https://github.com/sano1023/rs-package/blob/main/INSTALLING.md) を参照してください。登録済みバージョンは [GitHub Packages 一覧](https://github.com/sano1023?tab=packages&repo_name=rs-package) で確認できます。以下のパッケージ名による import は Vite などのバンドラ向けです。
 
 <details>
 <summary>npm レジストリを使わない場合（GitHub tarball 直指定）</summary>
@@ -21,8 +27,8 @@ npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-calendar
 ### バニラ JS（ESM・バンドラあり）
 
 ```js
-import { createRSCalendar } from '@parelabo/rs-calendar';
-import '@parelabo/rs-calendar/rs-calendar.css';   // スタイル（バンドラ経由）
+import { createRSCalendar } from '@sano1023/rs-calendar';
+import '@sano1023/rs-calendar/rs-calendar.css';   // スタイル（バンドラ経由）
 
 createRSCalendar(document.querySelector('#app'), { events, /* オプション */ });
 ```
@@ -30,8 +36,8 @@ createRSCalendar(document.querySelector('#app'), { events, /* オプション */
 ### `<script>` タグ（CDN・ビルド環境不要）
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@parelabo/rs-calendar@0.5.0/dist/rs-calendar.css">
-<script src="https://cdn.jsdelivr.net/npm/@parelabo/rs-calendar@0.5.0/dist/rs-calendar.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sano1023/rs-package@main/rs-calendar/dist/rs-calendar.css">
+<script src="https://cdn.jsdelivr.net/gh/sano1023/rs-package@main/rs-calendar/dist/rs-calendar.min.js"></script>
 <script>
   // 公開APIはグローバル RSCalendar に載る
   RSCalendar.createRSCalendar(document.querySelector('#app'), { events, /* オプション */ });
@@ -41,8 +47,8 @@ createRSCalendar(document.querySelector('#app'), { events, /* オプション */
 ### Vue 3
 
 ```js
-import { RsCalendar } from '@parelabo/rs-calendar/vue';
-import '@parelabo/rs-calendar/rs-calendar.css';   // スタイル（バンドラ経由）
+import { RsCalendar } from '@sano1023/rs-calendar/vue';
+import '@sano1023/rs-calendar/rs-calendar.css';   // スタイル（バンドラ経由）
 ```
 
 ```vue
@@ -54,8 +60,8 @@ import '@parelabo/rs-calendar/rs-calendar.css';   // スタイル（バンドラ
 ### React 18 / 19
 
 ```jsx
-import { RsCalendar } from '@parelabo/rs-calendar/react';
-import '@parelabo/rs-calendar/rs-calendar.css';   // スタイル（バンドラ経由）
+import { RsCalendar } from '@sano1023/rs-calendar/react';
+import '@sano1023/rs-calendar/rs-calendar.css';   // スタイル（バンドラ経由）
 
 export default function App() {
   return <RsCalendar />;
@@ -117,11 +123,16 @@ const cal = createRSCalendar('#board', {
 - **rs-report 連携**: `monthlyReportData(events, 2026, 7)` — 月間予定表（1日1行・祝日・土日祝色分け・繰り返し展開済み）の template + data を生成。`renderReport` に渡せば A4 1枚の帳票に
 - **キーボードショートカット**（Google カレンダー風）: `t`=今日 / `j`/`k`=前後 / `m` `w` `d` `l` `r`=ビュー切替（入力中は無効）
 
+```js
+import { createRSCalendar } from '@sano1023/rs-calendar';
+import '@sano1023/rs-calendar/rs-calendar.css';
+```
+
 ## 使い方
 
 ```js
-import { createRSCalendar } from './rs-calendar/src/index.js';
-// CSS: <link rel="stylesheet" href="./rs-calendar/src/rs-calendar.css">
+import { createRSCalendar } from '@sano1023/rs-calendar';
+// CSS: <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sano1023/rs-package@main/rs-calendar/dist/rs-calendar.css">
 
 const cal = createRSCalendar('#calendar', {
     view: 'month',                       // month | week | day | list
@@ -159,7 +170,7 @@ const ics = cal.exportICS();             // .ics 文字列
 ### 純ロジック API（node でも動く）
 
 ```js
-import { holidayName, listHolidays, expandRRule, parseICS, buildICS } from 'rs-calendar';
+import { holidayName, listHolidays, expandRRule, parseICS, buildICS } from '@sano1023/rs-calendar';
 holidayName(parseDate('2026-09-22'));    // '国民の休日'
 listHolidays(2026);                       // [{ date, name }, ...]
 ```
@@ -167,8 +178,8 @@ listHolidays(2026);                       // [{ date, name }, ...]
 ## Vue / React
 
 ```js
-import { RsCalendar } from 'rs-calendar/vue';    // <RsCalendar :events="events" :options="{ view: 'week' }" @select="..." />
-import { RsCalendar } from 'rs-calendar/react';  // <RsCalendar events={events} options={{}} onSelect={...} ref={ref} />
+import { RsCalendar } from '@sano1023/rs-calendar/vue';    // <RsCalendar :events="events" :options="{ view: 'week' }" @select="..." />
+import { RsCalendar } from '@sano1023/rs-calendar/react';  // <RsCalendar events={events} options={{}} onSelect={...} ref={ref} />
 ```
 
 ## テスト

@@ -1,5 +1,5 @@
 {
-    "name": "@parelabo/rs-pivot",
+    "name": "@sano1023/rs-pivot",
     "version": "0.4.0",
     "description": "依存ゼロのピボットテーブルライブラリ",
     "type": "module",
@@ -48,6 +48,7 @@
         "email": "contact@parelabo.com"
     },
     "publishConfig": {
+        "registry": "https://npm.pkg.github.com",
         "access": "public"
     },
     "types": "./dist/types/index.d.ts",

@@ -1,5 +1,5 @@
 {
-    "name": "@parelabo/rs-qrcode",
+    "name": "@sano1023/rs-qrcode",
     "version": "0.1.2",
     "description": "QRコード/バーコード生成（依存ゼロ・SVG/PNG・300dpi・ロゴ・ラベル・連番・CSV一括）",
     "type": "module",
@@ -47,6 +47,7 @@
         "email": "contact@parelabo.com"
     },
     "publishConfig": {
+        "registry": "https://npm.pkg.github.com",
         "access": "public"
     },
     "types": "./dist/types/index.d.ts",

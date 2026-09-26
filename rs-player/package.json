@@ -1,5 +1,5 @@
 {
-    "name": "@parelabo/rs-player",
+    "name": "@sano1023/rs-player",
     "version": "0.5.0",
     "description": "依存ゼロのHTML5動画プレイヤー",
     "type": "module",
@@ -65,6 +65,7 @@
         "email": "contact@parelabo.com"
     },
     "publishConfig": {
+        "registry": "https://npm.pkg.github.com",
         "access": "public"
     },
     "types": "./dist/types/index.d.ts",

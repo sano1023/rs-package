@@ -5,8 +5,14 @@
 ## インストール
 
 ```bash
-npm install @parelabo/rs-cmdk
+npm login --scope=@sano1023 --auth-type=legacy --registry=https://npm.pkg.github.com
+npm config set @sano1023:registry=https://npm.pkg.github.com --location=user
+npm install @sano1023/rs-cmdk
 ```
+
+> GitHub Packages から配布しています。public パッケージもインストールには GitHub 認証が必要です。ログイン時の Password には read:packages 権限を持つ personal access token (classic) を使用します。認証不要の導入には、下記の GitHub tarball または CDN を利用できます。
+
+認証・更新の詳細は [共通インストール手順](https://github.com/sano1023/rs-package/blob/main/INSTALLING.md) を参照してください。登録済みバージョンは [GitHub Packages 一覧](https://github.com/sano1023?tab=packages&repo_name=rs-package) で確認できます。以下のパッケージ名による import は Vite などのバンドラ向けです。
 
 <details>
 <summary>npm レジストリを使わない場合（GitHub tarball 直指定）</summary>
@@ -21,8 +27,8 @@ npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-cmdk-0.1
 ### バニラ JS（ESM・バンドラあり）
 
 ```js
-import { createRSCmdk } from '@parelabo/rs-cmdk';
-import '@parelabo/rs-cmdk/rs-cmdk.css';   // スタイル（バンドラ経由）
+import { createRSCmdk } from '@sano1023/rs-cmdk';
+import '@sano1023/rs-cmdk/rs-cmdk.css';   // スタイル（バンドラ経由）
 
 createRSCmdk({ commands });
 ```
@@ -30,8 +36,8 @@ createRSCmdk({ commands });
 ### `<script>` タグ（CDN・ビルド環境不要）
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@parelabo/rs-cmdk@0.1.0/dist/rs-cmdk.css">
-<script src="https://cdn.jsdelivr.net/npm/@parelabo/rs-cmdk@0.1.0/dist/rs-cmdk.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sano1023/rs-package@main/rs-cmdk/dist/rs-cmdk.css">
+<script src="https://cdn.jsdelivr.net/gh/sano1023/rs-package@main/rs-cmdk/dist/rs-cmdk.min.js"></script>
 <script>
   // 公開APIはグローバル RSCmdk に載る
   RSCmdk.createRSCmdk({ commands });
@@ -53,11 +59,16 @@ createRSCmdk({ commands });
 - **Ctrl+K / ⌘K で開閉**（`hotkey` 変更可・`open()` で手動起動）・↑↓ Enter Esc・WAI-ARIA dialog/combobox
 - 命令的 API（ラッパー不要）・SSR 安全・CSS 変数テーマ・MIT
 
+```js
+import { createRSCmdk } from '@sano1023/rs-cmdk';
+import '@sano1023/rs-cmdk/rs-cmdk.css';
+```
+
 ## 使い方
 
 ```js
-import { createRSCmdk } from 'rs-cmdk';
-// CSS: <link rel="stylesheet" href="rs-cmdk/rs-cmdk.css">
+import { createRSCmdk } from '@sano1023/rs-cmdk';
+// CSS: <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sano1023/rs-package@main/rs-cmdk/dist/rs-cmdk.css">
 
 const palette = createRSCmdk({
     storageKey: 'my-app-cmdk',                  // 最近使った順を保存
@@ -80,7 +91,7 @@ palette.destroy();                              // ホットキー解除
 ### 純ロジック API（node でも動く）
 
 ```js
-import { rankItems, scoreItem } from 'rs-cmdk';
+import { rankItems, scoreItem } from '@sano1023/rs-cmdk';
 rankItems(commands, 'hozon', recentIds);        // スコア降順
 ```
 

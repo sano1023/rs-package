@@ -1,5 +1,5 @@
 {
-    "name": "@parelabo/rs-pdf",
+    "name": "@sano1023/rs-pdf",
     "version": "0.5.0",
     "description": "依存ゼロのPDFビューア＆注釈ライブラリ（レンダラはアダプタ注入・pdf.jsマッパー同梱）",
     "type": "module",
@@ -48,6 +48,7 @@
         "email": "contact@parelabo.com"
     },
     "publishConfig": {
+        "registry": "https://npm.pkg.github.com",
         "access": "public"
     },
     "types": "./dist/types/index.d.ts",

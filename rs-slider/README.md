@@ -5,8 +5,14 @@
 ## インストール
 
 ```bash
-npm install @parelabo/rs-slider
+npm login --scope=@sano1023 --auth-type=legacy --registry=https://npm.pkg.github.com
+npm config set @sano1023:registry=https://npm.pkg.github.com --location=user
+npm install @sano1023/rs-slider
 ```
+
+> GitHub Packages から配布しています。public パッケージもインストールには GitHub 認証が必要です。ログイン時の Password には read:packages 権限を持つ personal access token (classic) を使用します。認証不要の導入には、下記の GitHub tarball または CDN を利用できます。
+
+認証・更新の詳細は [共通インストール手順](https://github.com/sano1023/rs-package/blob/main/INSTALLING.md) を参照してください。登録済みバージョンは [GitHub Packages 一覧](https://github.com/sano1023?tab=packages&repo_name=rs-package) で確認できます。以下のパッケージ名による import は Vite などのバンドラ向けです。
 
 <details>
 <summary>npm レジストリを使わない場合（GitHub tarball 直指定）</summary>
@@ -21,8 +27,8 @@ npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-slider-0
 ### バニラ JS（ESM・バンドラあり）
 
 ```js
-import { createRSSlider } from '@parelabo/rs-slider';
-import '@parelabo/rs-slider/rs-slider.css';   // スタイル（バンドラ経由）
+import { createRSSlider } from '@sano1023/rs-slider';
+import '@sano1023/rs-slider/rs-slider.css';   // スタイル（バンドラ経由）
 
 createRSSlider(document.querySelector('#app'), { /* オプション */ });
 ```
@@ -30,8 +36,8 @@ createRSSlider(document.querySelector('#app'), { /* オプション */ });
 ### `<script>` タグ（CDN・ビルド環境不要）
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@parelabo/rs-slider@0.1.0/dist/rs-slider.css">
-<script src="https://cdn.jsdelivr.net/npm/@parelabo/rs-slider@0.1.0/dist/rs-slider.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sano1023/rs-package@main/rs-slider/dist/rs-slider.css">
+<script src="https://cdn.jsdelivr.net/gh/sano1023/rs-package@main/rs-slider/dist/rs-slider.min.js"></script>
 <script>
   // 公開APIはグローバル RSSlider に載る
   RSSlider.createRSSlider(document.querySelector('#app'), { /* オプション */ });
@@ -41,8 +47,8 @@ createRSSlider(document.querySelector('#app'), { /* オプション */ });
 ### Vue 3
 
 ```js
-import { RsSlider, RsGallery, RsMarquee, RsMasonry, RsCoverflow, RsStories } from '@parelabo/rs-slider/vue';
-import '@parelabo/rs-slider/rs-slider.css';   // スタイル（バンドラ経由）
+import { RsSlider, RsGallery, RsMarquee, RsMasonry, RsCoverflow, RsStories } from '@sano1023/rs-slider/vue';
+import '@sano1023/rs-slider/rs-slider.css';   // スタイル（バンドラ経由）
 ```
 
 ```vue
@@ -54,8 +60,8 @@ import '@parelabo/rs-slider/rs-slider.css';   // スタイル（バンドラ経�
 ### React 18 / 19
 
 ```jsx
-import { RsSlider, RsGallery, RsMarquee, RsMasonry, RsCoverflow, RsStories } from '@parelabo/rs-slider/react';
-import '@parelabo/rs-slider/rs-slider.css';   // スタイル（バンドラ経由）
+import { RsSlider, RsGallery, RsMarquee, RsMasonry, RsCoverflow, RsStories } from '@sano1023/rs-slider/react';
+import '@sano1023/rs-slider/rs-slider.css';   // スタイル（バンドラ経由）
 
 export default function App() {
   return <RsSlider />;
@@ -101,19 +107,8 @@ php -S localhost:8099
 
 デモの画像・動画はすべてブラウザ内で生成されるため、ネットワーク不要で動きます。
 
-## インストール
-
-npm 公開前のため、`src/` をプロジェクトにコピーして import してください。
-
-```html
-<link rel="stylesheet" href="rs-slider/rs-slider.css">
-```
-
 ```js
-import {
-    createRSSlider, createRSGallery, createRSFullscreen,
-    createRSMarquee, createRSMasonry, createRSCoverflow, createRSStories,
-} from './rs-slider/index.js';
+import '@sano1023/rs-slider/rs-slider.css';
 ```
 
 ## クイックスタート
@@ -180,12 +175,13 @@ gallery.setItems(redItems); // バリエーション連動
 
 | オプション | 既定値 | 説明 |
 | --- | --- | --- |
-| `items` | — | `[{image, large, thumb, alt, caption, video: {src, poster}}]` |
+| `items` | — | `[{image, mobileImage, large, mobileLarge, thumb, mobileThumb, alt, caption, video: {src, poster}}]` |
 | `thumbs` | `'bottom'` | `'bottom' / 'left' / 'right' / false` |
 | `zoom` / `zoomScale` | `true` / `2.2` | ホバーで拡大（スマホはダブルタップ→ドラッグでパン） |
 | `lazy` | `true` | サムネイル遅延読み込み + 隣接画像先読み |
 | `keyboard` / `swipe` / `arrows` / `loop` | すべて `true` | 操作・UI |
 | `aspectRatio` | `'4 / 3'` | メイン画像エリアの比率 |
+| `mobileBreakpoint` | `768` | `mobile*` に切り替える幅。`mobileLarge` 省略時の拡大元は `mobileImage` → `large` の順にフォールバック |
 
 メソッド: `next()` `prev()` `goTo(i)` **`setItems(items)`**（バリエーション連動） `on('change')` `destroy()`
 

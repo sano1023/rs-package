@@ -5,8 +5,14 @@
 ## インストール
 
 ```bash
-npm install @parelabo/rs-lightbox
+npm login --scope=@sano1023 --auth-type=legacy --registry=https://npm.pkg.github.com
+npm config set @sano1023:registry=https://npm.pkg.github.com --location=user
+npm install @sano1023/rs-lightbox
 ```
+
+> GitHub Packages から配布しています。public パッケージもインストールには GitHub 認証が必要です。ログイン時の Password には read:packages 権限を持つ personal access token (classic) を使用します。認証不要の導入には、下記の GitHub tarball または CDN を利用できます。
+
+認証・更新の詳細は [共通インストール手順](https://github.com/sano1023/rs-package/blob/main/INSTALLING.md) を参照してください。登録済みバージョンは [GitHub Packages 一覧](https://github.com/sano1023?tab=packages&repo_name=rs-package) で確認できます。以下のパッケージ名による import は Vite などのバンドラ向けです。
 
 <details>
 <summary>npm レジストリを使わない場合（GitHub tarball 直指定）</summary>
@@ -21,8 +27,8 @@ npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-lightbox
 ### バニラ JS（ESM・バンドラあり）
 
 ```js
-import { createRSLightbox } from '@parelabo/rs-lightbox';
-import '@parelabo/rs-lightbox/rs-lightbox.css';   // スタイル（バンドラ経由）
+import { createRSLightbox } from '@sano1023/rs-lightbox';
+import '@sano1023/rs-lightbox/rs-lightbox.css';   // スタイル（バンドラ経由）
 
 createRSLightbox([{ src: '/large/01.jpg', alt: '海辺' }], { /* オプション */ });
 ```
@@ -30,8 +36,8 @@ createRSLightbox([{ src: '/large/01.jpg', alt: '海辺' }], { /* オプション
 ### `<script>` タグ（CDN・ビルド環境不要）
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@parelabo/rs-lightbox@0.1.0/dist/rs-lightbox.css">
-<script src="https://cdn.jsdelivr.net/npm/@parelabo/rs-lightbox@0.1.0/dist/rs-lightbox.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sano1023/rs-package@main/rs-lightbox/dist/rs-lightbox.css">
+<script src="https://cdn.jsdelivr.net/gh/sano1023/rs-package@main/rs-lightbox/dist/rs-lightbox.min.js"></script>
 <script>
   // 公開APIはグローバル RSLightbox に載る
   RSLightbox.createRSLightbox([{ src: '/large/01.jpg', alt: '海辺' }], { /* オプション */ });
@@ -41,8 +47,8 @@ createRSLightbox([{ src: '/large/01.jpg', alt: '海辺' }], { /* オプション
 ### Vue 3
 
 ```js
-import { RsLightbox } from '@parelabo/rs-lightbox/vue';
-import '@parelabo/rs-lightbox/rs-lightbox.css';   // スタイル（バンドラ経由）
+import { RsLightbox } from '@sano1023/rs-lightbox/vue';
+import '@sano1023/rs-lightbox/rs-lightbox.css';   // スタイル（バンドラ経由）
 ```
 
 ```vue
@@ -54,8 +60,8 @@ import '@parelabo/rs-lightbox/rs-lightbox.css';   // スタイル（バンドラ
 ### React 18 / 19
 
 ```jsx
-import { RsLightbox } from '@parelabo/rs-lightbox/react';
-import '@parelabo/rs-lightbox/rs-lightbox.css';   // スタイル（バンドラ経由）
+import { RsLightbox } from '@sano1023/rs-lightbox/react';
+import '@sano1023/rs-lightbox/rs-lightbox.css';   // スタイル（バンドラ経由）
 
 export default function App() {
   return <RsLightbox />;
@@ -89,16 +95,9 @@ php -S localhost:8099
 
 デモの画像はすべてブラウザ内（canvas）で生成されるため、ネットワーク不要で動きます。
 
-## インストール
-
-npm 公開前のため、`src/` をプロジェクトにコピーして import してください。
-
-```html
-<link rel="stylesheet" href="rs-lightbox/rs-lightbox.css">
-```
-
 ```js
-import { createRSLightbox } from './rs-lightbox/index.js';
+import { createRSLightbox } from '@sano1023/rs-lightbox';
+import '@sano1023/rs-lightbox/rs-lightbox.css';
 ```
 
 ## クイックスタート
@@ -248,7 +247,7 @@ CSS を読み込まなくても機能例外にはなりません（見た目が�
 ## Vue 3
 
 ```js
-import { RsLightbox } from './rs-lightbox/vue.js';
+import { RsLightbox } from '@sano1023/rs-lightbox/vue';
 ```
 
 ```vue
@@ -265,7 +264,7 @@ import { RsLightbox } from './rs-lightbox/vue.js';
 
 ```jsx
 import { useRef } from 'react';
-import { RsLightbox } from './rs-lightbox/react.js';
+import { RsLightbox } from '@sano1023/rs-lightbox/react';
 
 function Gallery({ items }) {
   const lb = useRef(null);

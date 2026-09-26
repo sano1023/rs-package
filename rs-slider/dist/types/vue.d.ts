@@ -226,6 +226,10 @@ export const RsGallery: import("vue").DefineComponent<import("vue").ExtractPropT
         type: (BooleanConstructor | StringConstructor)[];
         default: undefined;
     };
+    mobileBreakpoint: {
+        type: NumberConstructor;
+        default: undefined;
+    };
     ariaLabel: {
         type: StringConstructor;
         default: undefined;
@@ -277,6 +281,10 @@ export const RsGallery: import("vue").DefineComponent<import("vue").ExtractPropT
         type: (BooleanConstructor | StringConstructor)[];
         default: undefined;
     };
+    mobileBreakpoint: {
+        type: NumberConstructor;
+        default: undefined;
+    };
     ariaLabel: {
         type: StringConstructor;
         default: undefined;
@@ -292,6 +300,7 @@ export const RsGallery: import("vue").DefineComponent<import("vue").ExtractPropT
     swipe: boolean;
     keyboard: boolean;
     aspectRatio: string | boolean;
+    mobileBreakpoint: number;
     ariaLabel: string;
     items: unknown[];
     thumbs: string | boolean;

@@ -1,5 +1,5 @@
 {
-    "name": "@parelabo/rs-upload",
+    "name": "@sano1023/rs-upload",
     "version": "0.4.0",
     "description": "依存ゼロのファイルアップロードUI＋転送エンジン",
     "type": "module",
@@ -49,6 +49,7 @@
         "email": "contact@parelabo.com"
     },
     "publishConfig": {
+        "registry": "https://npm.pkg.github.com",
         "access": "public"
     },
     "types": "./dist/types/index.d.ts",

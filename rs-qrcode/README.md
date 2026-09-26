@@ -5,8 +5,14 @@
 ## インストール
 
 ```bash
-npm install @parelabo/rs-qrcode
+npm login --scope=@sano1023 --auth-type=legacy --registry=https://npm.pkg.github.com
+npm config set @sano1023:registry=https://npm.pkg.github.com --location=user
+npm install @sano1023/rs-qrcode
 ```
+
+> GitHub Packages から配布しています。public パッケージもインストールには GitHub 認証が必要です。ログイン時の Password には read:packages 権限を持つ personal access token (classic) を使用します。認証不要の導入には、下記の GitHub tarball または CDN を利用できます。
+
+認証・更新の詳細は [共通インストール手順](https://github.com/sano1023/rs-package/blob/main/INSTALLING.md) を参照してください。登録済みバージョンは [GitHub Packages 一覧](https://github.com/sano1023?tab=packages&repo_name=rs-package) で確認できます。以下のパッケージ名による import は Vite などのバンドラ向けです。
 
 <details>
 <summary>npm レジストリを使わない場合（GitHub tarball 直指定）</summary>
@@ -21,7 +27,7 @@ npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-qrcode-0
 ### バニラ JS（ESM・バンドラあり）
 
 ```js
-import { createRSQR } from '@parelabo/rs-qrcode';
+import { createRSQR } from '@sano1023/rs-qrcode';
 
 createRSQR('https://example.com', { /* オプション */ });
 ```
@@ -29,7 +35,7 @@ createRSQR('https://example.com', { /* オプション */ });
 ### `<script>` タグ（CDN・ビルド環境不要）
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/@parelabo/rs-qrcode@0.1.2/dist/rs-qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/sano1023/rs-package@main/rs-qrcode/dist/rs-qrcode.min.js"></script>
 <script>
   // 公開APIはグローバル RSQrcode に載る
   RSQrcode.createRSQR('https://example.com', { /* オプション */ });
@@ -39,7 +45,7 @@ createRSQR('https://example.com', { /* オプション */ });
 ### Vue 3
 
 ```js
-import { RsQrCode, RsBarcode } from '@parelabo/rs-qrcode/vue';
+import { RsQrCode, RsBarcode } from '@sano1023/rs-qrcode/vue';
 ```
 
 ```vue
@@ -51,7 +57,7 @@ import { RsQrCode, RsBarcode } from '@parelabo/rs-qrcode/vue';
 ### React 18 / 19
 
 ```jsx
-import { RsQrCode, RsBarcode } from '@parelabo/rs-qrcode/react';
+import { RsQrCode, RsBarcode } from '@sano1023/rs-qrcode/react';
 
 export default function App() {
   return <RsQrCode />;
@@ -81,14 +87,12 @@ php -S localhost:8099
 # → http://localhost:8099/rs-qrcode/demo/ を開く
 ```
 
-## インストール
 
-npm 公開前のため、`src/` をプロジェクトにコピーして import してください。
 
 ## クイックスタート
 
 ```js
-import { createRSQR, createRSBarcode } from './rs-qrcode/index.js';
+import { createRSQR, createRSBarcode } from '@sano1023/rs-qrcode';
 
 // QR
 const qr = createRSQR('https://example.com/products/12345', {
@@ -113,7 +117,7 @@ const ean = createRSBarcode('490123456789', { type: 'ean13' });  // チェック
 ## 一括生成
 
 ```js
-import { makeSequence, batchFromCSV } from './rs-qrcode/index.js';
+import { makeSequence, batchFromCSV } from '@sano1023/rs-qrcode';
 
 // 連番: ['RS-0001', 'RS-0002', ...]
 const codes = makeSequence({ prefix: 'RS-', start: 1, count: 50, digits: 4 });
