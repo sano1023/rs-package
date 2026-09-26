@@ -5,8 +5,12 @@
 ## インストール
 
 ```bash
-npm install @parelabo/rs-image
+npm login --scope=@sano1023 --auth-type=legacy --registry=https://npm.pkg.github.com
+npm config set @sano1023:registry=https://npm.pkg.github.com --location=user
+npm install @sano1023/rs-image
 ```
+
+> GitHub Packages から配布しています。public パッケージもインストールには GitHub 認証が必要です。ログイン時の Password には read:packages 権限を持つ personal access token (classic) を使用します。認証不要の導入には、下記の GitHub tarball または CDN を利用できます。
 
 <details>
 <summary>npm レジストリを使わない場合（GitHub tarball 直指定）</summary>
@@ -21,8 +25,8 @@ npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-image-0.
 ### バニラ JS（ESM・バンドラあり）
 
 ```js
-import { createRSImageEditor } from '@parelabo/rs-image';
-import '@parelabo/rs-image/rs-image.css';   // スタイル（バンドラ経由）
+import { createRSImageEditor } from '@sano1023/rs-image';
+import '@sano1023/rs-image/rs-image.css';   // スタイル（バンドラ経由）
 
 createRSImageEditor(document.querySelector('#app'), { /* オプション */ });
 ```
@@ -30,8 +34,8 @@ createRSImageEditor(document.querySelector('#app'), { /* オプション */ });
 ### `<script>` タグ（CDN・ビルド環境不要）
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@parelabo/rs-image@0.8.0/dist/rs-image.css">
-<script src="https://cdn.jsdelivr.net/npm/@parelabo/rs-image@0.8.0/dist/rs-image.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sano1023/rs-package@main/rs-image/dist/rs-image.css">
+<script src="https://cdn.jsdelivr.net/gh/sano1023/rs-package@main/rs-image/dist/rs-image.min.js"></script>
 <script>
   // 公開APIはグローバル RSImage に載る
   RSImage.createRSImageEditor(document.querySelector('#app'), { /* オプション */ });
@@ -41,8 +45,8 @@ createRSImageEditor(document.querySelector('#app'), { /* オプション */ });
 ### Vue 3
 
 ```js
-import { RsImageEditor } from '@parelabo/rs-image/vue';
-import '@parelabo/rs-image/rs-image.css';   // スタイル（バンドラ経由）
+import { RsImageEditor } from '@sano1023/rs-image/vue';
+import '@sano1023/rs-image/rs-image.css';   // スタイル（バンドラ経由）
 ```
 
 ```vue
@@ -54,8 +58,8 @@ import '@parelabo/rs-image/rs-image.css';   // スタイル（バンドラ経由
 ### React 18 / 19
 
 ```jsx
-import { RsImageEditor } from '@parelabo/rs-image/react';
-import '@parelabo/rs-image/rs-image.css';   // スタイル（バンドラ経由）
+import { RsImageEditor } from '@sano1023/rs-image/react';
+import '@sano1023/rs-image/rs-image.css';   // スタイル（バンドラ経由）
 
 export default function App() {
   return <RsImageEditor />;

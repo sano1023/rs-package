@@ -72,7 +72,7 @@ import '@parelabo/rs-editor/rs-editor.css';
 | [@parelabo/rs-form](./rs-form/) | 0.5.0 | ✅ | 要 | 依存ゼロのスキーマ駆動フォームビルダー |
 | [@parelabo/rs-gantt](./rs-gantt/) | 0.5.0 | ✅ | 要 | 依存ゼロの対話型プロジェクトガントチャート |
 | [@parelabo/rs-grid](./rs-grid/) | 0.4.1 | ✅ | 要 | Excel風データグリッド |
-| [@parelabo/rs-image](./rs-image/) | 0.8.0 | ✅ | 要 | 依存ゼロの画像処理＆合成エディタ |
+| [@sano1023/rs-image](./rs-image/) | 0.8.0 | ✅ | 要 | 依存ゼロの画像処理＆合成エディタ |
 | [@parelabo/rs-kana](./rs-kana/) | 0.1.0 | — | 不要 | IME変換中の読みを使う依存ゼロのカタカナ自動入力ライブラリ |
 | [@parelabo/rs-kanban](./rs-kanban/) | 0.2.0 | ✅ | 要 | 依存ゼロのカンバンボード |
 | [@parelabo/rs-lightbox](./rs-lightbox/) | 0.1.0 | ✅ | 要 | 依存ゼロ・フレームワーク非依存の画像ライトボックス |
