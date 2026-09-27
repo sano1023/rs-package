@@ -1,6 +1,6 @@
 {
     "name": "@sano1023/rs-tree",
-    "version": "0.2.0",
+    "version": "0.2.1",
     "description": "依存ゼロのツリービュー（三態チェック・D&D移動・遅延読込・検索・仮想スクロール・キーボード完備）",
     "type": "module",
     "main": "./dist/rs-tree.esm.min.js",

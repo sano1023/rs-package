@@ -103,7 +103,7 @@ import '@sano1023/rs-editor/rs-editor.css';
 | [@sano1023/rs-splitter](./rs-splitter/) | 0.1.0 | — | 要 | 依存ゼロの分割ペイン |
 | [@sano1023/rs-text-animation](./rs-text-animation/) | 0.1.0 | — | 要 | 依存ゼロのテキストアニメーションライブラリ |
 | [@sano1023/rs-tour](./rs-tour/) | 0.1.0 | ✅ | 不要 | 依存ゼロ・フレームワーク非依存のスポットライト型ガイドツアーライブラリ |
-| [@sano1023/rs-tree](./rs-tree/) | 0.2.0 | ✅ | 要 | 依存ゼロのツリービュー |
+| [@sano1023/rs-tree](./rs-tree/) | 0.2.1 | ✅ | 要 | 依存ゼロのツリービュー |
 | [@sano1023/rs-upload](./rs-upload/) | 0.4.0 | ✅ | 要 | 依存ゼロのファイルアップロードUI＋転送エンジン |
 
 各パッケージの詳しい使い方（props・イベント・メソッド）は、それぞれの README を参照してください。

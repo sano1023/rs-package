@@ -18,7 +18,7 @@ npm install @sano1023/rs-tree
 <summary>npm レジストリを使わない場合（GitHub tarball 直指定）</summary>
 
 ```bash
-npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-tree-0.2.0.tgz
+npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-tree-0.2.1.tgz
 ```
 </details>
 
@@ -85,6 +85,9 @@ export default function App() {
 - **`revert()` つき nodeMove**・複数選択（Ctrl+クリック）・disabled ノード・アイコン・入れ子 JSON 往復（`toNodes()`）
 - **ツリー操作は純関数群**（model.js）: 三態チェック・移動（循環判定）・検索を node 単体テストで固定（14件）
 - Vue 3 / React ラッパー同梱・MIT
+
+**v0.2.1 の修正**
+- 仮想スクロール中の再描画でスクロール位置が先頭へ戻る不具合を修正。末尾のノードまでスクロールできます。
 
 **v0.2 の追加**
 - **インライン名前変更**: F2 / ラベルのダブルクリック（`renamable: true`）→ Enter 確定・Esc 取消・`rename` イベント・`rename()/startRename()` API
