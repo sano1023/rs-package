@@ -5,20 +5,17 @@
 ## インストール
 
 ```bash
-npm login --scope=@sano1023 --auth-type=legacy --registry=https://npm.pkg.github.com
-npm config set @sano1023:registry=https://npm.pkg.github.com --location=user
 npm install @sano1023/rs-image
 ```
 
-> GitHub Packages から配布しています。public パッケージもインストールには GitHub 認証が必要です。ログイン時の Password には read:packages 権限を持つ personal access token (classic) を使用します。認証不要の導入には、下記の GitHub tarball または CDN を利用できます。
-
-認証・更新の詳細は [共通インストール手順](https://github.com/sano1023/rs-package/blob/main/INSTALLING.md) を参照してください。登録済みバージョンは [GitHub Packages 一覧](https://github.com/sano1023?tab=packages&repo_name=rs-package) で確認できます。以下のパッケージ名による import は Vite などのバンドラ向けです。
+npmjs.com の公開パッケージです。ログインやトークンは不要です。
+更新・旧レジストリからの移行の詳細は [共通インストール手順](https://github.com/sano1023/rs-package/blob/main/INSTALLING.md) を参照してください。登録済みバージョンは [npm](https://www.npmjs.com/package/@sano1023/rs-image) で確認できます。以下のパッケージ名による import は Vite などのバンドラ向けです。
 
 <details>
 <summary>npm レジストリを使わない場合（GitHub tarball 直指定）</summary>
 
 ```bash
-npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-image-0.8.0.tgz
+npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-image-0.9.0.tgz
 ```
 </details>
 
@@ -36,8 +33,8 @@ createRSImageEditor(document.querySelector('#app'), { /* オプション */ });
 ### `<script>` タグ（CDN・ビルド環境不要）
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sano1023/rs-package@main/rs-image/dist/rs-image.css">
-<script src="https://cdn.jsdelivr.net/gh/sano1023/rs-package@main/rs-image/dist/rs-image.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sano1023/rs-image@0.9.0/dist/rs-image.css">
+<script src="https://cdn.jsdelivr.net/npm/@sano1023/rs-image@0.9.0/dist/rs-image.min.js"></script>
 <script>
   // 公開APIはグローバル RSImage に載る
   RSImage.createRSImageEditor(document.querySelector('#app'), { /* オプション */ });
@@ -74,7 +71,7 @@ export default function App() {
 
 # rs-image
 
-依存ゼロの画像処理＆合成エディタライブラリ。**多機能なインタラクティブ画像エディタ**（トリミング・**自動トリミング**・ペン切り抜き・マジックワンド・自動切り抜き（MLアダプタ注入）・消しゴム・回転/反転・色調整・**トーンカーブ/レベル補正・色域別HSL調整・コピースタンプ・覆い焼き/焼き込み/ぼかしブラシ**・フィルタ・文字・スタンプ・図形（**ブレンドモード・影/縁取り/グロー・グラデ塗り・破線**対応）・ペン・スポイト・モザイク・フレーム、すべてリアルタイム反映）と、リサイズ・圧縮・WebP変換の処理エンジンをブラウザ完結で提供します。表示する機能は tools オプションで自由に構成できます。ビルド不要・ESモジュール。
+依存ゼロの画像処理＆合成エディタライブラリ。**多機能なインタラクティブ画像エディタ**（トリミング・**自動トリミング**・ペン切り抜き・マジックワンド・**選択して消す**・自動切り抜き（MLアダプタ注入）・消しゴム・回転/反転・色調整・**トーンカーブ/レベル補正・色域別HSL調整・コピースタンプ・覆い焼き/焼き込み/ぼかしブラシ**・フィルタ・文字・スタンプ・図形（**ブレンドモード・影/縁取り/グロー・グラデ塗り・破線**対応）・ペン・スポイト・モザイク・フレーム、すべてリアルタイム反映）と、リサイズ・圧縮・WebP変換の処理エンジンをブラウザ完結で提供します。表示する機能は tools オプションで自由に構成できます。ビルド不要・ESモジュール。
 
 - **高品質縮小**: 段階縮小（半分ずつ）＋ `imageSmoothingQuality:'high'` で大縮小でもジャギらない
 - **EXIF正立**: スマホ写真の Orientation を読み込み時に自動補正
@@ -154,9 +151,10 @@ const { blob } = await editor.export({ format: 'webp', quality: 0.9 });
 | --- | --- |
 | 選択 | レイヤークリックで選択。ドラッグ移動・四隅ハンドルで拡縮・上部ハンドルで回転・Delete削除。**Shift+クリックで複数選択**（整列・分布・一括移動/削除）、**Alt+ドラッグで複製**、**Shift+ドラッグで水平/垂直拘束**、**移動中はベース/他レイヤーの端・中央にスナップ**（ガイド線表示・Ctrlで無効）、矢印キー微調整（Shiftで10px）・Ctrl+Z/Y |
 | トリミング | ドラッグ枠・8ハンドル・暗転＋三分割グリッド。比率プリセット（`crop.ratios` で構成可）・円形 |
-| 自動トリミング | **対象をクリックするだけ**で、近い色で繋がっている範囲をひとかたまりとして選択。**許容度**で選択範囲をライブ調整し、選択範囲の輪郭と**トリミング予定エリア（外接矩形）を点線でリアルタイム表示**。**内側を残す / 内側を消す**を選んで実行。「余白を切り詰め」ONなら外接矩形まで切り詰めます（＝自動トリミング）。余白・境界ぼかし・「隣接のみ」OFF（画像全体から同系色を拾う）も指定可 |
+| 自動トリミング | 開いた瞬間に**四隅の色を背景とみなして対象を検出**し、囲むトリミング枠を自動で出します（うまく拾えなければ対象をクリック）。枠の形は**長方形（検出範囲の縦横比を保って拡縮）/ 正方形 / フリー（縦横比自由）**。枠はトリミングと同じくドラッグ移動・8ハンドルで調整でき、余白もライブ反映。**透過はせず、画像サイズを切り詰めるだけ** |
 | ペン切り抜き | ベジェのペンツール型。クリックでアンカーを置いて囲み、始点クリックで閉じて**内側を残す/消す**。なめらか補間（Catmull-Rom）・境界ぼかし・余白の切り詰め・アンカーのドラッグ調整 |
 | マジックワンド | クリックした場所と**近い色で繋がっている範囲**を透過（許容度スライダ＋数値入力・ソフト境界・1クリック=1履歴） |
+| 選択して消す | マジックワンドの「確認してから消す」版。クリックで近い色の範囲を**選択**し、**ペン切り抜きと同じ見え方（選択範囲を白の点線で囲み、外側を暗転）**でプレビューしながら許容度をライブ調整。**Shift+クリックで範囲を追加（カーソルに＋）/ Alt+クリックで除外（−）**・**ブラシで追加/除外**・境界ぼかし・「隣接のみ」OFF・**選択範囲を消す / 選択範囲以外を消す**を選んで「消す」で確定（1回=1履歴）。ベース画像にも画像レイヤーにも使える |
 | 自動切り抜き | セグメンテーションアダプタ（ML）で被写体を自動検出して背景を透過。**反転**（被写体を消す）・境界ぼかし。アダプタは注入式でコアは依存ゼロのまま |
 | 回転 | 90°左右・自由角度スライダ（劣化しない・数値入力可）・**左右/上下反転** |
 | 調整 | **明るさ・コントラスト・彩度・色相・ぼかし・ビネット**のスライダ（非破壊・`adjust.sliders` で構成可） |
@@ -186,31 +184,60 @@ const { blob } = await editor.export({ format: 'webp', quality: 0.9 });
 
 ### 自動トリミング
 
-「ペン切り抜きを手で囲むのが面倒」「背景を落として被写体の大きさに切り詰めたい」ときの道具です。
+「被写体の大きさに合わせて余白を切り詰めたい」ときの道具です。透過はしません（背景を消すなら「選択して消す」かマジックワンド）。
 
-1. ツールバーの**自動トリミング**を選ぶ
-2. キャンバス上で**残したい（または消したい）対象をクリック** — 近い色で繋がっている範囲がひとかたまりとして選ばれます
-3. **許容度**を動かすと選択範囲がその場で変わります（オレンジの輪郭＝選択範囲、点線の矩形＝トリミング予定エリア）。残らない側は暗転するので結果を見ながら詰められます
-4. **内側を残す / 内側を消す**を選んで**実行**
+1. ツールバーの**自動トリミング**を選ぶ — 四隅の色を背景とみなして対象を検出し、囲む枠がすぐ出ます（オレンジの細い点線＝検出範囲）
+2. 背景が単色でない・別の対象を切りたいときは、**対象をクリック**すると近い色で繋がっている範囲に枠を合わせ直します（「自動検出に戻す」で元に戻る）
+3. **長方形 / 正方形 / フリー** で枠の形を選び、必要ならドラッグ移動・ハンドルで調整
+4. **適用**
 
 | 設定 | 説明 |
 | --- | --- |
-| 許容度 | 0〜100。大きいほど広い色差を「同じ対象」とみなす（数値入力可・ライブ反映） |
-| 余白 | トリミング予定エリアを外側に広げる px 数 |
-| 境界ぼかし | カット境界をぼかす px 数。切り詰め枠もこの分だけ広がる |
-| 隣接のみ | OFF にすると繋がっていなくても画像全体から同系色を拾う（背景が被写体で分断されているとき） |
-| 余白を切り詰め | 「内側を残す」ときだけ有効。選択範囲の外接矩形までキャンバスを切り詰める |
+| 長方形 | 検出範囲にぴったりの枠。拡縮しても縦横比を保つ |
+| 正方形 | 対象を中心に 1:1 の枠（画像からはみ出す分は内側へ寄せる） |
+| フリー | 縦横比自由で拡縮できる |
+| 余白 | 検出範囲から外側に広げる px 数 |
 
-- 適用先は**ベース画像**です（レイヤーを個別に抜くならマジックワンド／ペン切り抜きを使ってください）
+- 余白・形を変えると枠は検出範囲から作り直されます（手で調整した枠は上書き）
 - 実行は1段の履歴になるので「元に戻す」で取り消せます。切り詰めに合わせてレイヤー位置も追従します
 
 ```js
-editor.setMode('objtrim');
-editor.objTrimStyle.tol = 40;              // 許容度
-editor.objTrimStyle.trim = true;           // 外接矩形まで切り詰める
-editor.pickObjRegion({ x: 320, y: 240 });  // 対象をクリック（image座標）
-editor.objTrimRect();                      // → トリミング予定エリア { x, y, width, height }
-editor.applyObjTrim(true);                 // true=内側を残す / false=内側を消す
+editor.setMode('objtrim');                 // 開いた時点で自動検出・枠を表示
+editor.objTrimStyle.shape = 'square';      // 'rect'=長方形 / 'square'=正方形 / 'free'=フリー
+editor.objTrimStyle.pad = 16;              // 余白
+editor.fitObjTrimRect();                   // 形・余白を変えたら枠を合わせ直す
+editor.pickObjRegion({ x: 320, y: 240 });  // 対象をクリック（image座標）。null で自動検出に戻す
+editor.objTrimRect();                      // → トリミング枠 { x, y, width, height }
+editor.applyObjTrim();                     // 適用
+```
+
+### 選択して消す
+
+マジックワンドと違い、クリックで近い色の範囲を選び、**選択範囲をプレビューで確認しながら**詰めてから消す道具です。「消す」を押すまで画像は変わりません。
+
+1. ツールバーの**選択して消す**を選ぶ（画像レイヤーを選択中ならそのレイヤー、なければベース画像が対象）
+2. 消したい（または残したい）部分を**クリック** — 近い色で繋がっている範囲が選ばれます。ペン切り抜きと同じく、**選択範囲は白の点線で囲まれ、外側が暗転**します
+3. 別の場所も選びたいときは **Shift+クリックで範囲を追加**、選びすぎた部分は **Alt+クリックで範囲から除外**（押している間はカーソルに＋ / −が付きます。後からした操作ほど優先）。普通のクリックは選び直しです
+4. **許容度**を動かすと、クリックしたすべての点の範囲がその場で選び直されます
+5. 色だけで拾いきれない部分は **ブラシで追加 / ブラシで除外** でなぞって修正（「クリックで選択」のままでも Shift/Alt を押したままドラッグすればブラシになります）。ブラシの修正は許容度を動かしても残ります
+6. **選択範囲を消す / 選択範囲以外を消す** を選んで**消す**。道具は持ったままなので続けて別の場所を選べます
+
+| 設定 | 説明 |
+| --- | --- |
+| 許容度 | 0〜100。大きいほど広い色差を同じ範囲とみなす（数値入力可・ライブ反映） |
+| ペンのサイズ | ブラシで追加・除外するときの直径（画像 px・1〜300） |
+| 境界ぼかし | 消す境界をぼかす px 数（0 でも外周1pxは色の近さに応じてなめらかに抜く） |
+| 隣接のみ | OFF にすると繋がっていなくても画像全体から同系色を拾う |
+
+```js
+editor.setMode('colorcut');
+editor.cutStyle.tol = 30;                  // 許容度
+editor.cutStyle.invert = false;            // true=選択範囲以外を消す
+editor.cutStyle.brush = 'add';             // 'pick'=クリックで選択 / 'add'=ブラシで追加 / 'sub'=ブラシで除外
+editor.pickCutRegion({ x: 10, y: 10 });    // クリック（image座標）= 選び直し
+editor.pickCutRegion({ x: 400, y: 200 }, 'add');  // Shift+クリック = 範囲を追加（'sub' で Alt+クリック = 除外）
+editor.clearCutRegion();                   // 選択解除
+editor.applyCut();                         // 消す
 ```
 
 ### ヒストリー（編集履歴パネル）
@@ -235,7 +262,7 @@ editor.clearHistory();         // 現在の状態だけ残して捨てる
 
 ### エディタAPI
 
-`setImage(src)` / `addText(text, opts)` / `addImageLayer(src, opts)` / `addShape(kind, opts)`（kind: `rect | ellipse | trapezoid | star | balloon | poly | line | arrow`。台形・星・多角形は `opts.pts` で初期頂点も指定可） / `finishShapePen()` / `convertToPoly(layer)` / `pickObjRegion(pt)` / `objTrimRect()` / `applyObjTrim(keep)` / `duplicateLayer(layer)` / `alignSelected(mode)` / `flip(axis)` / `export(ops)`（processImage の全オプションが使える） / `flatten()` / `undo()` / `redo()` / `jumpHistory(index)` / `historyList()` / `clearHistory()` / `toggleHistoryPanel(open?)` / `getState()` / `on('change', cb)` / `on('history', cb)` / `destroy()`
+`setImage(src)` / `addText(text, opts)` / `addImageLayer(src, opts)` / `addShape(kind, opts)`（kind: `rect | ellipse | trapezoid | star | balloon | poly | line | arrow`。台形・星・多角形は `opts.pts` で初期頂点も指定可） / `finishShapePen()` / `convertToPoly(layer)` / `pickObjRegion(pt)` / `fitObjTrimRect()` / `objTrimRect()` / `applyObjTrim()` / `pickCutRegion(pt)` / `clearCutRegion()` / `applyCut()` / `duplicateLayer(layer)` / `alignSelected(mode)` / `flip(axis)` / `export(ops)`（processImage の全オプションが使える） / `flatten()` / `undo()` / `redo()` / `jumpHistory(index)` / `historyList()` / `clearHistory()` / `toggleHistoryPanel(open?)` / `getState()` / `on('change', cb)` / `on('history', cb)` / `destroy()`
 
 レイヤー共通プロパティ: `opacity`（透明度） / `blend`（ブレンドモード） / `fx`（`{ shadow: {color, blur, dx, dy}, outline: {color, width}, glow: {color, blur} }`）。図形はさらに `dash`（`solid|dash|dot|dashdot`）・`fillType`（`solid|linear|radial`）・`fill2`・`gradAngle`・`radius`（角丸）・`smooth`（なめらか曲線）など。
 

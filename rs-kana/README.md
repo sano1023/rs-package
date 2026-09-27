@@ -5,14 +5,11 @@
 ## インストール
 
 ```bash
-npm login --scope=@sano1023 --auth-type=legacy --registry=https://npm.pkg.github.com
-npm config set @sano1023:registry=https://npm.pkg.github.com --location=user
 npm install @sano1023/rs-kana
 ```
 
-> GitHub Packages から配布しています。public パッケージもインストールには GitHub 認証が必要です。ログイン時の Password には read:packages 権限を持つ personal access token (classic) を使用します。認証不要の導入には、下記の GitHub tarball または CDN を利用できます。
-
-認証・更新の詳細は [共通インストール手順](https://github.com/sano1023/rs-package/blob/main/INSTALLING.md) を参照してください。登録済みバージョンは [GitHub Packages 一覧](https://github.com/sano1023?tab=packages&repo_name=rs-package) で確認できます。以下のパッケージ名による import は Vite などのバンドラ向けです。
+npmjs.com の公開パッケージです。ログインやトークンは不要です。
+更新・旧レジストリからの移行の詳細は [共通インストール手順](https://github.com/sano1023/rs-package/blob/main/INSTALLING.md) を参照してください。登録済みバージョンは [npm](https://www.npmjs.com/package/@sano1023/rs-kana) で確認できます。以下のパッケージ名による import は Vite などのバンドラ向けです。
 
 <details>
 <summary>npm レジストリを使わない場合（GitHub tarball 直指定）</summary>
@@ -35,7 +32,7 @@ createRSKana(document.querySelector('#name'), document.querySelector('#name-kana
 ### `<script>` タグ（CDN・ビルド環境不要）
 
 ```html
-<script src="https://cdn.jsdelivr.net/gh/sano1023/rs-package@main/rs-kana/dist/rs-kana.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@sano1023/rs-kana@0.1.0/dist/rs-kana.min.js"></script>
 <script>
   // 公開APIはグローバル RSKana に載る
   RSKana.createRSKana(document.querySelector('#name'), document.querySelector('#name-kana'), { /* オプション */ });

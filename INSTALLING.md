@@ -1,22 +1,36 @@
 # ライブラリのインストール・更新
 
-このコレクションのパッケージは **GitHub Packages** (`https://npm.pkg.github.com`) を配布先とし、名前を **`@sano1023/rs-*`** に統一しています。npmjs.com のアカウントは不要です。
+全32ライブラリを **npmjs.com** (`https://registry.npmjs.org/`) の公開パッケージ **`@sano1023/rs-*`** として配布します。利用者のログイン・トークンは不要です。
 
-この一覧はインストール名・手順の案内です。各バージョンが登録済みかどうかは [GitHub Packages 一覧](https://github.com/sano1023?tab=packages&repo_name=rs-package) で確認してください。README や配布用ファイルの更新だけではレジストリに登録されません。
-
-## 1. 初回のみ: GitHub 認証とレジストリ設定
-
-1. GitHub にログインし、[personal access token (classic)](https://github.com/settings/tokens) を作成します。インストール用には **`read:packages`** 権限が必要です。
-2. 次のコマンドを実行します。Username は自分の GitHub ユーザー名、Password は作成したトークンです。
+## 1. 新しい環境では設定不要
 
 ```bash
-npm login --scope=@sano1023 --auth-type=legacy --registry=https://npm.pkg.github.com
-npm config set @sano1023:registry=https://npm.pkg.github.com --location=user
+npm install @sano1023/rs-image
 ```
 
-**public のパッケージでも GitHub 認証が必要です。** トークンをアプリのソースや Git 管理対象ファイルに書かないでください。`npm login` のユーザー設定を利用します。
+### 以前 GitHub Packages を設定した環境
 
-`@sano1023` だけを GitHub Packages に向けます。全体の `registry` は変更しません。React / Vue などは通常の npm レジストリから取得します。
+使うアプリの `package.json` があるディレクトリで実行します。
+
+```bash
+npm config set @sano1023:registry=https://registry.npmjs.org/ --location=project
+npm config get @sano1023:registry
+```
+
+プロジェクトの `.npmrc` には以下の行が入ります。これは認証情報を含まないので Git 管理できます。
+
+```ini
+@sano1023:registry=https://registry.npmjs.org/
+```
+
+既存の `package-lock.json` が GitHub Packages の URL を保持している場合、設定変更だけでは取得先が変わりません。該当パッケージを一度アンインストールしてから、必要なバージョンを指定して再インストールし、lockfile もコミットしてください。
+
+```bash
+npm uninstall @sano1023/rs-image
+npm install @sano1023/rs-image@0.9.0
+```
+
+複数の rs-* を利用している場合はまとめて削除・再インストールします。GitHub Packages 側の既存パッケージは残っていますが、新しい標準の配布先は npmjs.com です。
 
 ## 2. 必要なパッケージをインストール
 
@@ -100,10 +114,10 @@ CSS が不要なパッケージもあります。各 README の API 名・CSS・
 
 ```bash
 # 登録済みバージョンを確認
-npm view @sano1023/rs-image versions --json --registry=https://npm.pkg.github.com
+npm view @sano1023/rs-image versions --json --registry=https://registry.npmjs.org/
 
 # 特定のバージョンを固定
-npm install --save-exact @sano1023/rs-image@0.8.0
+npm install --save-exact @sano1023/rs-image@0.9.0
 
 # package.json の指定範囲内で更新
 npm update @sano1023/rs-image
@@ -114,12 +128,12 @@ npm install @sano1023/rs-image@latest
 
 アプリ側の `package.json` と `package-lock.json` を合わせて管理してください。旧 `@parelabo/rs-*` を利用していた場合は、依存を `@sano1023/rs-*` に入れ替え、JavaScript / CSS の import も変更します。
 
-## GitHub 認証なしで利用する場合
+## tarball・CDN で利用する場合
 
 公開リポジトリの tarball を直接指定する方法も使えます。
 
 ```bash
-npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-image-0.8.0.tgz
+npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-image-0.9.0.tgz
 ```
 
 ビルド環境を使わない HTML では CDN から読み込めます。
@@ -139,12 +153,11 @@ npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-image-0.
 
 | 症状 | 確認すること |
 |---|---|
-| `401` / `ENEEDAUTH` | GitHub Packages にログイン済みか、トークンが期限切れでないか |
-| `403` | `read:packages` 権限と、private パッケージの場合は閲覧権限 |
-| `404` | `@sano1023` のレジストリ設定、パッケージ名、登録済みバージョン、閲覧権限 |
-| React / Vue の取得が GitHub 側で `404` | 全体の registry を GitHub に変更していないか。スコープ別に設定する |
-| GitHub のパッケージページが `404` | private の場合は所有者または閲覧権限のある GitHub アカウントでログインする |
+| GitHub 側で `401` / `403` | 旧レジストリ設定または lockfile が残っています。上記の移行手順を実行してください |
+| npm 側で `401` | npmjs.com 用の古い認証設定が残っていないか確認。公開パッケージの取得にログインは不要です |
+| `404` | パッケージ名・バージョン・取得先レジストリを確認 |
+| React / Vue の取得が GitHub 側で `404` | 全体の registry が GitHub に向いていないか確認 |
 
 公開する側の作業はソースリポジトリの `PUBLISHING.md` を参照してください。
 
-公式資料: [GitHub Packages の npm レジストリ](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-npm-registry)
+公式資料: [npm の公開パッケージ](https://docs.npmjs.com/about-public-packages/)

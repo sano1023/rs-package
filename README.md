@@ -10,20 +10,13 @@
 
 ## インストール
 
-GitHub Packages から配布します。初回は GitHub のユーザー名と、`read:packages` 権限を持つ personal access token (classic) で認証してください。Password にはトークンを入力します。npmjs.com のアカウントは不要です。
-
-```bash
-npm login --scope=@sano1023 --auth-type=legacy --registry=https://npm.pkg.github.com
-npm config set @sano1023:registry=https://npm.pkg.github.com --location=user
-```
-
-使うプロジェクトで必要なパッケージをインストールします。
+npmjs.com の公開パッケージとして配布しています。ログインやトークンは不要です。使うプロジェクトで必要なパッケージをインストールします。
 
 ```bash
 npm install @sano1023/rs-editor
 ```
 
-public パッケージでも認証が必要です。全パッケージのコマンド、バージョン指定、更新方法は [利用者向けインストール手順](./INSTALLING.md) を参照してください。下の一覧は配布ファイルの一覧です。レジストリへの登録済みバージョンは GitHub の Packages 一覧で確認してください。
+以前 GitHub Packages を設定した環境では、プロジェクトの `.npmrc` に `@sano1023:registry=https://registry.npmjs.org/` を設定してください。全パッケージのコマンド、バージョン指定、既存 lockfile の移行は [利用者向けインストール手順](./INSTALLING.md) を参照してください。
 
 npm レジストリを使わない場合は GitHub の tarball を直接指定できます。
 
@@ -83,7 +76,7 @@ import '@sano1023/rs-editor/rs-editor.css';
 | [@sano1023/rs-form](./rs-form/) | 0.5.0 | ✅ | 要 | 依存ゼロのスキーマ駆動フォームビルダー |
 | [@sano1023/rs-gantt](./rs-gantt/) | 0.5.0 | ✅ | 要 | 依存ゼロの対話型プロジェクトガントチャート |
 | [@sano1023/rs-grid](./rs-grid/) | 0.4.1 | ✅ | 要 | Excel風データグリッド |
-| [@sano1023/rs-image](./rs-image/) | 0.8.0 | ✅ | 要 | 依存ゼロの画像処理＆合成エディタ |
+| [@sano1023/rs-image](./rs-image/) | 0.9.0 | ✅ | 要 | 依存ゼロの画像処理＆合成エディタ |
 | [@sano1023/rs-kana](./rs-kana/) | 0.1.0 | — | 不要 | IME変換中の読みを使う依存ゼロのカタカナ自動入力ライブラリ |
 | [@sano1023/rs-kanban](./rs-kanban/) | 0.2.0 | ✅ | 要 | 依存ゼロのカンバンボード |
 | [@sano1023/rs-lightbox](./rs-lightbox/) | 0.1.0 | ✅ | 要 | 依存ゼロ・フレームワーク非依存の画像ライトボックス |

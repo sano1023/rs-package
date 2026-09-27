@@ -65,7 +65,7 @@
         "email": "contact@parelabo.com"
     },
     "publishConfig": {
-        "registry": "https://npm.pkg.github.com",
+        "registry": "https://registry.npmjs.org/",
         "access": "public"
     },
     "types": "./dist/types/index.d.ts",

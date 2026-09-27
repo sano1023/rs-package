@@ -27,6 +27,11 @@ export class ImageEditor {
     } | {
         x: number;
         y: number;
+        width: any;
+        height: any;
+    } | {
+        x: number;
+        y: number;
         width: number;
         height: number;
     } | null;
@@ -93,6 +98,26 @@ export class ImageEditor {
         y: any;
     } | null;
     wandTol: number;
+    cutStyle: {
+        tol: number;
+        feather: number;
+        contiguous: boolean;
+        invert: boolean;
+        brush: string;
+        size: number;
+    };
+    _cutSession: {
+        layerId: any;
+        img: ImageData;
+        w: any;
+        h: any;
+        seeds: never[];
+        seedMark: null;
+        paint: null;
+        region: null;
+        shade: null;
+        outline: null;
+    } | null;
     _segAdapter: any;
     autoCutOpts: {
         invert: boolean;
@@ -135,21 +160,15 @@ export class ImageEditor {
         range: string;
     } | null;
     objTrimStyle: {
-        tol: number;
         pad: number;
-        feather: number;
-        contiguous: boolean;
-        trim: boolean;
-        keep: boolean;
+        shape: string;
     };
     _objSession: {
         img: ImageData;
         w: any;
         h: any;
         pt: null;
-        region: null;
-        edge: null;
-        shade: null;
+        bounds: null;
     } | null;
     buildDOM(): void;
     root: any;
@@ -222,7 +241,11 @@ export class ImageEditor {
     moveLayer(id: any, dir: any): void;
     setMode(mode: any): void;
     updateToolbar(): void;
-    applyCrop(): void;
+    /**
+     * @param {string} [label] ヒストリー表示名
+     * @param {string} [type] change イベントの type
+     */
+    applyCrop(label?: string, type?: string): void;
     /** レイヤー個別トリミングの適用 */
     applyLayerCrop(): void;
     /** 回転セッション: スライダの入力ごとに元canvasから回し直す（劣化を防ぐ） */
@@ -400,6 +423,18 @@ export class ImageEditor {
     _onUp: ((e: any) => void) | undefined;
     _ro: ResizeObserver | undefined;
     _onKey: ((e: any) => void) | undefined;
+    _mods: {
+        shiftKey: any;
+        altKey: any;
+    } | {
+        shiftKey: any;
+        altKey: any;
+    } | {
+        shiftKey: any;
+        altKey: any;
+    } | null | undefined;
+    _onModKey: ((e: any) => void) | undefined;
+    _onBlur: (() => void) | undefined;
     pointerDown(e: any): void;
     pointerMove(e: any): void;
     pointerUp(e: any): void;
@@ -487,34 +522,26 @@ export class ImageEditor {
     drawShapePenUI(ctx: any, f: any): void;
     /**
      * 自動トリミングのセッション開始。
-     * ベース画像の ImageData を1度だけ読んでおき、許容度スライダのライブプレビューで使い回す
-     * （毎回 getImageData すると大きい画像でカクつくため）。
+     * ベース画像の ImageData を1度だけ読んでおき（クリックで選び直すときに使い回す）、
+     * 四隅の色を背景とみなして対象の外接矩形を検出し、トリミング枠を合わせる。
      */
     startObjTrim(): void;
+    /** 対象を検出し直してトリミング枠を合わせ直す（クリック点があればその対象、なければ四隅の色から） */
+    detectObjBounds(): void;
     /**
-     * クリックした場所のオブジェクト（近似色で繋がった範囲）を選ぶ。
-     * @param {{x: number, y: number}} ip image座標
+     * クリックした対象（近い色で繋がっている範囲）に枠を合わせる。
+     * @param {{x: number, y: number}|null} ip image座標。null なら四隅の色からの自動検出に戻す
      */
     pickObjRegion(ip: {
         x: number;
         y: number;
-    }): void;
+    } | null): void;
     /**
-     * 選択領域を計算し直してプレビューを更新する（許容度スライダから毎回呼ばれるのでデバウンス）。
-     * @param {boolean} [immediate] true なら待たずに計算する
+     * 検出範囲に余白と形を反映してトリミング枠（cropRect）を作り直す。
+     * 長方形=検出範囲の縦横比を保って拡縮 / 正方形=1:1 / フリー=縦横比自由。
      */
-    updateObjRegion(immediate?: boolean): void;
-    _objTimer: number | undefined;
-    /**
-     * 選択領域から輪郭（オレンジ）を作る。プレビューで毎フレーム作ると
-     * 大きい画像でキャンバスを作り直し続けることになるので、選択が変わったときだけ作る。
-     */
-    buildObjMask(): void;
-    /** 残らない側を暗転させるオーバーレイを作る（内側/外側の切替時にも呼ぶ） */
-    buildObjShade(): void;
-    /** 領域の塗りつぶしマスク（白＝残す側）。カット実行時にだけ作る */
-    objMaskCanvas(): HTMLCanvasElement | null;
-    /** 余白（pad）を足した「トリミング予定エリア」= 選択領域の外接矩形。未選択なら null */
+    fitObjTrimRect(): void;
+    /** トリミング予定エリア（= 今のトリミング枠）。未開始なら null */
     objTrimRect(): {
         x: number;
         y: number;
@@ -522,16 +549,160 @@ export class ImageEditor {
         height: number;
     } | null;
     /**
-     * 自動トリミングのライブプレビュー（スクリーン座標）。
-     * 選択領域を色で塗り、輪郭と「トリミング予定エリア」の外接矩形を点線で出す。
+     * 自動トリミングの補助表示（スクリーン座標）。検出した対象の外接矩形を細い点線で、
+     * クリックで指定した点をマーカーで出す（トリミング枠そのものは drawCropUI が描く）。
      */
-    drawObjTrimUI(ctx: any, f: any): void;
+    drawObjTrimUI(ctx: any): void;
     /**
-     * 自動トリミングを確定する。
-     * @param {boolean} keep true=内側（選んだ対象）を残す / false=内側を消して外側を残す
+     * 自動トリミングを確定する（トリミング枠で切り詰める。透過はしない）。
      * @returns {boolean} 適用したか
      */
-    applyObjTrim(keep: boolean): boolean;
+    applyObjTrim(): boolean;
+    /** 「選択して消す」の適用先。選択中の画像レイヤー、なければ null（=ベース画像） */
+    cutTarget(): any;
+    /**
+     * 「選択して消す」のセッション開始。
+     * 適用先の ImageData を1度だけ読んでおき、許容度スライダのライブプレビューで使い回す
+     * （毎回 getImageData すると大きい画像でカクつくため）。座標はすべて適用先の画素座標。
+     */
+    startCut(): void;
+    /** 選択中のレイヤーが変わっていたらセッションを作り直す（適用先を取り違えないように） */
+    ensureCutSession(): {
+        layerId: any;
+        img: ImageData;
+        w: any;
+        h: any;
+        seeds: never[];
+        seedMark: null;
+        paint: null;
+        region: null;
+        shade: null;
+        outline: null;
+    } | null;
+    /** セッションの適用先レイヤー（ベース画像なら null） */
+    cutLayer(sess?: {
+        layerId: any;
+        img: ImageData;
+        w: any;
+        h: any;
+        seeds: never[];
+        seedMark: null;
+        paint: null;
+        region: null;
+        shade: null;
+        outline: null;
+    } | null): any;
+    /** image座標 → 適用先の画素座標 */
+    cutPoint(ip: any, sess?: {
+        layerId: any;
+        img: ImageData;
+        w: any;
+        h: any;
+        seeds: never[];
+        seedMark: null;
+        paint: null;
+        region: null;
+        shade: null;
+        outline: null;
+    } | null): any;
+    /** 適用先の画素座標 → image座標 */
+    cutToImage(p: any, sess?: {
+        layerId: any;
+        img: ImageData;
+        w: any;
+        h: any;
+        seeds: never[];
+        seedMark: null;
+        paint: null;
+        region: null;
+        shade: null;
+        outline: null;
+    } | null): any;
+    /** レイヤー素材座標とレイヤーローカル座標（中心原点）のずれ */
+    targetOffset(layer: any): {
+        x: any;
+        y: any;
+    };
+    /** 適用先の画素座標を image座標へ写す変換を ctx に掛ける（レイヤーは見えている範囲でクリップ） */
+    applyCutTransform(ctx: any, f: any, sess?: {
+        layerId: any;
+        img: ImageData;
+        w: any;
+        h: any;
+        seeds: never[];
+        seedMark: null;
+        paint: null;
+        region: null;
+        shade: null;
+        outline: null;
+    } | null): void;
+    /**
+     * クリックした場所の近似色で繋がった範囲を選ぶ（まだ消さない）。
+     * @param {{x: number, y: number}} ip image座標
+     * @param {'replace'|'add'|'sub'} [op] replace=選び直す / add=範囲に追加（Shift+クリック） / sub=範囲から除外（Alt+クリック）
+     */
+    pickCutRegion(ip: {
+        x: number;
+        y: number;
+    }, op?: "replace" | "add" | "sub"): void;
+    /**
+     * クリック点1つ分の近似色の範囲を seedMark に重ねる（1=追加 / 2=除外。後のクリックほど優先）。
+     * clearPaint=true なら、重なるブラシの塗りのうち逆向きのものを消す（後からした操作を優先するため）。
+     * @returns {boolean} 範囲が取れたか（透明な画素をクリックしたときは false）
+     */
+    applyCutSeed(sess: any, seed: any, clearPaint: any): boolean;
+    /**
+     * 選択領域を計算し直してプレビューを更新する（許容度スライダから毎回呼ばれるのでデバウンス）。
+     * クリックした点をすべて新しい許容度で選び直す。ブラシの塗りは別に持っているので消えない。
+     * @param {boolean} [immediate] true なら待たずに計算する
+     */
+    updateCutRegion(immediate?: boolean): void;
+    _cutTimer: number | undefined;
+    /** 選択をすべて解除する（クリックした点もブラシの塗りも捨てる） */
+    clearCutRegion(): void;
+    /** クリックで選んだ範囲とブラシの塗りを合成して最終領域（mark・面積・外接矩形）を作り直す */
+    rebuildCutRegion(): void;
+    /**
+     * ブラシで a→b の線分カプセル内を選択範囲に追加（value=1）／除外（value=-1）する。a, b は image座標。
+     * なぞるたびに画像全体を作り直すと大きい画像でカクつくので、変わった矩形だけを更新する
+     * （外接矩形は追加方向だけ差分で広げ、正確な値と輪郭の点線は pointerUp の rebuildCutRegion で出す）。
+     */
+    paintCutSegment(aImg: any, bImg: any, value: any): void;
+    /**
+     * 選択領域から暗転オーバーレイと輪郭（点線用の Path2D）を作る。プレビューで毎フレーム作ると
+     * 大きい画像で作り直し続けることになるので、選択が変わったときだけ作る。
+     */
+    buildCutMask(): void;
+    /**
+     * 暗転オーバーレイのうち矩形 (x0,y0)-(x1,y1) の画素だけを描き直す。
+     * ペン切り抜きと同じく、選択範囲の外側を暗くする（消すのが内側か外側かに関わらず同じ見え方）。
+     */
+    drawCutOverlay(x0: any, y0: any, x1: any, y1: any): void;
+    /** 領域の塗りつぶしマスク（白＝選択範囲）。消す実行時にだけ作る */
+    cutMaskCanvas(): HTMLCanvasElement | null;
+    /**
+     * 今クリック/ドラッグしたら何が起きるか（修飾キー込み）。
+     * Shift=追加・Alt=除外（Photoshop と同じ）。修飾キーなしは「クリックで選択」なら選び直し、ブラシならその向き。
+     * @param {{shiftKey?: boolean, altKey?: boolean}|null} [e]
+     * @returns {'replace'|'add'|'sub'}
+     */
+    cutOp(e?: {
+        shiftKey?: boolean;
+        altKey?: boolean;
+    } | null): "replace" | "add" | "sub";
+    /** 「選択して消す」のカーソル。追加なら＋、除外なら−の付いた十字にする */
+    updateCutCursor(): void;
+    /**
+     * 「選択して消す」のライブプレビュー（スクリーン座標）。
+     * ペン切り抜きと同じ見え方: 選択範囲の外側を暗転し、境界を白の点線で囲む。クリック点・ブラシ円も出す。
+     */
+    drawCutUI(ctx: any, f: any): void;
+    /**
+     * 「選択して消す」を確定する（選択範囲を透明にする。invert なら選択範囲以外を透明にする）。
+     * 確定後も道具は持ったままにして、続けて別の場所を選べるようにする。
+     * @returns {boolean} 適用したか
+     */
+    applyCut(): boolean;
     /**
      * セグメンテーションアダプタを設定する（rs-livecam と同じ契約）。
      * @param {{name: string, segment: (canvas: HTMLCanvasElement) => any}|null} adapter

@@ -1,6 +1,6 @@
 {
     "name": "@sano1023/rs-image",
-    "version": "0.8.0",
+    "version": "0.9.0",
     "description": "依存ゼロの画像処理＆合成エディタ（リサイズ・圧縮・トリミング・円形切り抜き・WebP変換・レイヤー合成）",
     "type": "module",
     "main": "./dist/rs-image.esm.min.js",
@@ -49,7 +49,7 @@
         "email": "contact@parelabo.com"
     },
     "publishConfig": {
-        "registry": "https://npm.pkg.github.com",
+        "registry": "https://registry.npmjs.org/",
         "access": "public"
     },
     "types": "./dist/types/index.d.ts",
