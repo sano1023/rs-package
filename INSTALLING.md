@@ -2,6 +2,16 @@
 
 全32ライブラリを **npmjs.com** (`https://registry.npmjs.org/`) の公開パッケージ **`@sano1023/rs-*`** として配布します。利用者のログイン・トークンは不要です。
 
+## npmjs.com の登録状況（2026-09-27）
+
+**25件は登録・認証なしインストール検証済みです。** `rs-image@0.9.0` も利用できます。
+
+以下の7件は npm 側の公開レート制限（429）により初回登録待ちです。現時点では npmjs.com からインストールできません。
+
+`rs-sign` / `rs-slider` / `rs-splitter` / `rs-text-animation` / `rs-tour` / `rs-tree` / `rs-upload`
+
+登録待ちの間も GitHub Pages のデモ・既存の GitHub 配布物は利用できます。登録が完了したらこの記録を更新します。
+
 ## 1. 新しい環境では設定不要
 
 ```bash
@@ -63,13 +73,13 @@ npm install @sano1023/rs-image@0.9.0
 | [rs-scanner](./rs-scanner/README.md) | `npm install @sano1023/rs-scanner` |
 | [rs-select](./rs-select/README.md) | `npm install @sano1023/rs-select` |
 | [rs-sheet](./rs-sheet/README.md) | `npm install @sano1023/rs-sheet` |
-| [rs-sign](./rs-sign/README.md) | `npm install @sano1023/rs-sign` |
-| [rs-slider](./rs-slider/README.md) | `npm install @sano1023/rs-slider` |
-| [rs-splitter](./rs-splitter/README.md) | `npm install @sano1023/rs-splitter` |
-| [rs-text-animation](./rs-text-animation/README.md) | `npm install @sano1023/rs-text-animation` |
-| [rs-tour](./rs-tour/README.md) | `npm install @sano1023/rs-tour` |
-| [rs-tree](./rs-tree/README.md) | `npm install @sano1023/rs-tree` |
-| [rs-upload](./rs-upload/README.md) | `npm install @sano1023/rs-upload` |
+| [rs-sign](./rs-sign/README.md)（初回登録待ち） | `npm install @sano1023/rs-sign` |
+| [rs-slider](./rs-slider/README.md)（初回登録待ち） | `npm install @sano1023/rs-slider` |
+| [rs-splitter](./rs-splitter/README.md)（初回登録待ち） | `npm install @sano1023/rs-splitter` |
+| [rs-text-animation](./rs-text-animation/README.md)（初回登録待ち） | `npm install @sano1023/rs-text-animation` |
+| [rs-tour](./rs-tour/README.md)（初回登録待ち） | `npm install @sano1023/rs-tour` |
+| [rs-tree](./rs-tree/README.md)（初回登録待ち） | `npm install @sano1023/rs-tree` |
+| [rs-upload](./rs-upload/README.md)（初回登録待ち） | `npm install @sano1023/rs-upload` |
 
 複数をまとめて指定することもできます。
 
