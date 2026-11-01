@@ -15,7 +15,7 @@ npmjs.com の公開パッケージです。ログインやトークンは不要�
 <summary>npm レジストリを使わない場合（GitHub tarball 直指定）</summary>
 
 ```bash
-npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-slider-0.1.0.tgz
+npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-slider-0.1.1.tgz
 ```
 </details>
 
@@ -33,8 +33,8 @@ createRSSlider(document.querySelector('#app'), { /* オプション */ });
 ### `<script>` タグ（CDN・ビルド環境不要）
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sano1023/rs-slider@0.1.0/dist/rs-slider.css">
-<script src="https://cdn.jsdelivr.net/npm/@sano1023/rs-slider@0.1.0/dist/rs-slider.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sano1023/rs-slider@0.1.1/dist/rs-slider.css">
+<script src="https://cdn.jsdelivr.net/npm/@sano1023/rs-slider@0.1.1/dist/rs-slider.min.js"></script>
 <script>
   // 公開APIはグローバル RSSlider に載る
   RSSlider.createRSSlider(document.querySelector('#app'), { /* オプション */ });

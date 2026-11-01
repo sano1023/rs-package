@@ -12,6 +12,20 @@
 
 登録待ちの間も GitHub Pages のデモ・既存の GitHub 配布物は利用できます。登録が完了したらこの記録を更新します。
 
+## tarball の復旧と更新（2026-11-01）
+
+- `rs-image-0.6.0.tgz` は過去の Git blob をそのまま復元しました。既存 lockfile の `sha512-T1mutL/JtUSMDlFaCXRVR/YRGFFmFcYdUbw07MYZ7ZEAku0nsfJATlJFDxAVe86kXRR7qzN8zO26esVKcQNt5g==` と一致します。画像エディタを 0.8.0 / 0.9.0 に更新する必要はありません。
+- `rs-slider` の現行実装は `0.1.1` として別 tarball にしました。既存の `rs-slider-0.1.0.tgz` は変更しません。`0.1.1` の npmjs.com 登録は現在、公開者の本人認証待ちです。
+- 公開済み tarball は同名で上書きせず、古い版も残します。README・型定義だけの変更でも版番号を上げます。
+
+旧 `@parelabo/rs-slider` の依存名・import を維持したまま更新する場合は、アプリの `package.json` を次のように変更して lockfile を再生成してください。
+
+```json
+"@parelabo/rs-slider": "https://github.com/sano1023/rs-package/raw/main/tarballs/rs-slider-0.1.1.tgz"
+```
+
+過去の差し替えの影響がある `rs-chart` / `rs-diagram` / `rs-lightbox` / `rs-tour` は、現在の配布内容を確認して lockfile の integrity を更新してください。別の空キャッシュを指定した `npm ci --cache <新しい一時ディレクトリ>` で再現性を検証できます。既存の共有 npm キャッシュを全削除する必要はありません。tarball の直接取得に GitHub Packages のトークンは不要ですが、アプリの別の依存が GitHub Packages を使用する場合、その取得には引き続き認証が必要です。
+
 ## 1. 新しい環境では設定不要
 
 ```bash

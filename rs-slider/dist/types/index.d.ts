@@ -5,4 +5,4 @@ export { createRSMarquee } from "./marquee.js";
 export { createRSMasonry } from "./masonry.js";
 export { createRSCoverflow } from "./coverflow.js";
 export { createRSStories } from "./stories.js";
-export const VERSION: "0.1.0";
+export const VERSION: "0.1.1";

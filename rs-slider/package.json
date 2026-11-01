@@ -1,6 +1,6 @@
 {
     "name": "@sano1023/rs-slider",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "description": "依存ゼロの画像スライダーコレクション（基本/フェード/ヒーロー/カード・サムネイル/商品ギャラリー・フルスクリーン・無限ループ/マルチ行・Masonry・3Dカバーフロー・ストーリーズ）",
     "type": "module",
     "main": "./dist/rs-slider.esm.min.js",

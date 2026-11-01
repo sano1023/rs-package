@@ -92,7 +92,7 @@ import '@sano1023/rs-editor/rs-editor.css';
 | [@sano1023/rs-select](./rs-select/) | 0.1.0 | ✅ | 要 | 依存ゼロの高機能セレクトボックス |
 | [@sano1023/rs-sheet](./rs-sheet/) | 0.5.0 | ✅ | 要 | 本格数式エンジン内蔵・依存ゼロのセル指向スプレッドシートライブラリ |
 | [@sano1023/rs-sign](./rs-sign/) | 0.4.0 | ✅ | 要 | 電子署名SaaSの画面部品網羅を目指す、依存ゼロの署名パッド＋電子印鑑ライブラリ |
-| [@sano1023/rs-slider](./rs-slider/) | 0.1.0 | ✅ | 要 | 依存ゼロの画像スライダーコレクション |
+| [@sano1023/rs-slider](./rs-slider/) | 0.1.1 | ✅ | 要 | 依存ゼロの画像スライダーコレクション |
 | [@sano1023/rs-splitter](./rs-splitter/) | 0.1.0 | — | 要 | 依存ゼロの分割ペイン |
 | [@sano1023/rs-text-animation](./rs-text-animation/) | 0.1.0 | — | 要 | 依存ゼロのテキストアニメーションライブラリ |
 | [@sano1023/rs-tour](./rs-tour/) | 0.1.0 | ✅ | 不要 | 依存ゼロ・フレームワーク非依存のスポットライト型ガイドツアーライブラリ |
