@@ -2,20 +2,20 @@
 
 全32ライブラリを **npmjs.com** (`https://registry.npmjs.org/`) の公開パッケージ **`@sano1023/rs-*`** として配布します。利用者のログイン・トークンは不要です。
 
-## npmjs.com の登録状況（2026-09-27）
+## npmjs.com の登録状況（2026-11-01）
 
-**25件は登録・認証なしインストール検証済みです。** `rs-image@0.9.0` も利用できます。
+**26件は登録・認証なしインストール検証済みです。** `rs-slider@0.1.1` と `rs-image@0.9.0` も利用できます。
 
-以下の7件は npm 側の公開レート制限（429）により初回登録待ちです。現時点では npmjs.com からインストールできません。
+以下の6件は前回の公開時のレート制限（429）により初回登録待ちで、今回も未登録（404）を確認しています。現時点では npmjs.com からインストールできません。
 
-`rs-sign` / `rs-slider` / `rs-splitter` / `rs-text-animation` / `rs-tour` / `rs-tree` / `rs-upload`
+`rs-sign` / `rs-splitter` / `rs-text-animation` / `rs-tour` / `rs-tree` / `rs-upload`
 
 登録待ちの間も GitHub Pages のデモ・既存の GitHub 配布物は利用できます。登録が完了したらこの記録を更新します。
 
 ## tarball の復旧と更新（2026-11-01）
 
 - `rs-image-0.6.0.tgz` は過去の Git blob をそのまま復元しました。既存 lockfile の `sha512-T1mutL/JtUSMDlFaCXRVR/YRGFFmFcYdUbw07MYZ7ZEAku0nsfJATlJFDxAVe86kXRR7qzN8zO26esVKcQNt5g==` と一致します。画像エディタを 0.8.0 / 0.9.0 に更新する必要はありません。
-- `rs-slider` の現行実装は `0.1.1` として別 tarball にしました。既存の `rs-slider-0.1.0.tgz` は変更しません。`0.1.1` の npmjs.com 登録は現在、公開者の本人認証待ちです。
+- `rs-slider` の現行実装は `0.1.1` として別 tarball にしました。既存の `rs-slider-0.1.0.tgz` は変更しません。`@sano1023/rs-slider@0.1.1` は npmjs.com にも登録済みで、認証なしの install / ci と GitHub tarball との SHA-512 一致を検証しています。
 - 公開済み tarball は同名で上書きせず、古い版も残します。README・型定義だけの変更でも版番号を上げます。
 
 旧 `@parelabo/rs-slider` の依存名・import を維持したまま更新する場合は、アプリの `package.json` を次のように変更して lockfile を再生成してください。
@@ -88,7 +88,7 @@ npm install @sano1023/rs-image@0.9.0
 | [rs-select](./rs-select/README.md) | `npm install @sano1023/rs-select` |
 | [rs-sheet](./rs-sheet/README.md) | `npm install @sano1023/rs-sheet` |
 | [rs-sign](./rs-sign/README.md)（初回登録待ち） | `npm install @sano1023/rs-sign` |
-| [rs-slider](./rs-slider/README.md)（初回登録待ち） | `npm install @sano1023/rs-slider` |
+| [rs-slider](./rs-slider/README.md) | `npm install @sano1023/rs-slider` |
 | [rs-splitter](./rs-splitter/README.md)（初回登録待ち） | `npm install @sano1023/rs-splitter` |
 | [rs-text-animation](./rs-text-animation/README.md)（初回登録待ち） | `npm install @sano1023/rs-text-animation` |
 | [rs-tour](./rs-tour/README.md)（初回登録待ち） | `npm install @sano1023/rs-tour` |
