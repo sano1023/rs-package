@@ -80,6 +80,28 @@ export class Editor {
     focus(): void;
     undo(): boolean;
     redo(): boolean;
+    /** 本文が変わるまで有効な、このエディタ専用の選択ブックマーク。 */
+    captureSelection(): Readonly<{}> | null;
+    _selectionBookmark: Readonly<{}> | undefined;
+    restoreSelection(bookmark?: Readonly<{}> | undefined): boolean;
+    isEnabled(name: any): boolean;
+    getToolState(name: any): {
+        active: boolean;
+        enabled: boolean;
+    };
+    /**
+     * メニュー型ツールは単一項目でもメニューを表示する。
+     * @param {string} name
+     * @param {{ anchor?: HTMLElement }} [options]
+     * @returns {boolean}
+     */
+    openTool(name: string, { anchor }?: {
+        anchor?: HTMLElement;
+    }): boolean;
+    /** @param {string | false} definition */
+    setToolbar(definition?: string | false): boolean;
+    /** @param {string | false} definition */
+    setFloatingToolbar(definition?: string | false): boolean;
     exec(name: any): boolean;
     isActive(name: any): boolean;
     setReadonly(v: any): void;

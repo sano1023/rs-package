@@ -1,2 +1,2 @@
-/*! rs-editor v0.6.0 | (c) ryusuke.sano | 利用無償・改変/再配布禁止 (Free to use, no modification/redistribution) — see LICENSE.txt */
-import{a}from"../chunks/chunk-RYRRCSNC.js";import"../chunks/chunk-PLDGAVA6.js";export{a as color};
+/*! rs-editor v0.7.0 | (c) ryusuke.sano | 利用無償・改変/再配布禁止 (Free to use, no modification/redistribution) — see LICENSE.txt */
+import{a}from"../chunks/chunk-EYRJP7JY.js";import"../chunks/chunk-CHWD7STY.js";export{a as color};

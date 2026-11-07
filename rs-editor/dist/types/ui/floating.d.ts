@@ -8,6 +8,8 @@ export class FloatingToolbar {
     el: HTMLDivElement;
     toolbar: Toolbar;
     _update: () => void;
+    _hide: () => void;
+    _unwatch: () => void;
     update(): void;
     hide(): void;
     destroy(): void;

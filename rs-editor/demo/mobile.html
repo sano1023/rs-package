@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="ja">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>rs-editor 外部操作・モバイルデモ</title>
+<link rel="stylesheet" href="../dist/rs-editor.css">
+<style>
+body { margin: 16px; font: 16px/1.6 system-ui; background: #f8fafc; color: #172033; }
+main { max-width: 800px; margin: auto; } button { padding: 10px 14px; margin: 3px; font: inherit; }
+#panel { padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; margin: 12px 0; }
+.rse-content { min-height: 250px; } #status { min-height: 1.6em; }
+</style>
+<main>
+<h1>外部操作・モバイルデモ</h1>
+<p>本文を選択して「操作パネル」を開き、太字や文字色を変更できます。画像の右下ハンドルは指でもドラッグできます。</p>
+<button id="open">操作パネル</button><button id="layout">PC / スマホ表示切替</button>
+<div id="panel" hidden><button data-tool="bold">太字</button><button data-tool="forecolor">文字色</button><button data-tool="table">表</button><button data-tool="image">画像</button><button id="undo">元に戻す</button></div>
+<p id="status" role="status"></p>
+<textarea id="editor"><p>ここを選択して、外部の操作パネルから編集してください。</p><p>ツールバーを切り替えても本文と履歴は維持されます。</p></textarea>
+</main>
+<script type="module">
+import { createRSEditor } from '../dist/rs-editor.esm.min.js';
+const editor = createRSEditor('#editor', { toolbar: 'undo redo | bold italic | image table', floatingToolbar: false });
+window.editor = editor;
+const open = document.querySelector('#open'), panel = document.querySelector('#panel'), status = document.querySelector('#status');
+let bookmark, mobile = true;
+const capture = () => { bookmark = editor.captureSelection() || bookmark; };
+open.addEventListener('pointerdown', capture);
+// Tab が本文を離れる前にも保存する。
+editor.contentEl.addEventListener('keydown', (e) => { if (e.key === 'Tab') capture(); });
+open.addEventListener('click', () => { panel.hidden = !panel.hidden; });
+for (const button of panel.querySelectorAll('[data-tool]')) button.addEventListener('click', () => {
+    if (!editor.restoreSelection(bookmark)) { status.textContent = '本文で編集する位置を選び直してください。'; return; }
+    status.textContent = '';
+    editor.openTool(button.dataset.tool, { anchor: button });
+});
+const refresh = () => {
+    capture();
+    for (const button of panel.querySelectorAll('[data-tool]')) {
+        const state = editor.getToolState(button.dataset.tool);
+        button.disabled = !state.enabled;
+        button.setAttribute('aria-pressed', String(state.active));
+    }
+};
+editor.on('selectionchange', refresh); editor.on('change', refresh); refresh();
+document.querySelector('#undo').onclick = () => editor.undo();
+document.querySelector('#layout').onclick = () => {
+    mobile = !mobile;
+    editor.setToolbar(mobile ? false : 'undo redo | bold italic | forecolor | image table');
+    editor.setFloatingToolbar(mobile ? false : 'bold italic | link');
+};
+</script>
+</html>

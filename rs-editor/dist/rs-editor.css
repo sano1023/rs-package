@@ -966,3 +966,7 @@
     vertical-align: middle;
     border-top: 1px solid currentColor;
 }
+
+/* タッチ制御はリサイズハンドルに限定し、本文のスクロール・選択を維持する。 */
+.rse-img-handle { touch-action: none; width: 24px; height: 24px; right: -12px; bottom: -12px; }
+.rse-dialog-actions { position: sticky; bottom: 0; background: var(--rse-bg); padding: 8px 0; flex-wrap: wrap; }

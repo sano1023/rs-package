@@ -15,7 +15,7 @@ npmjs.com の公開パッケージです。ログインやトークンは不要�
 <summary>npm レジストリを使わない場合（GitHub tarball 直指定）</summary>
 
 ```bash
-npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-editor-0.6.0.tgz
+npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-editor-0.7.0.tgz
 ```
 </details>
 
@@ -33,8 +33,8 @@ createRSEditor(document.querySelector('#app'), { /* オプション */ });
 ### `<script>` タグ（CDN・ビルド環境不要）
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sano1023/rs-editor@0.6.0/dist/rs-editor.css">
-<script src="https://cdn.jsdelivr.net/npm/@sano1023/rs-editor@0.6.0/dist/rs-editor.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sano1023/rs-editor@0.7.0/dist/rs-editor.css">
+<script src="https://cdn.jsdelivr.net/npm/@sano1023/rs-editor@0.7.0/dist/rs-editor.min.js"></script>
 <script>
   // 公開APIはグローバル RSEditor に載る
   RSEditor.createRSEditor(document.querySelector('#app'), { /* オプション */ });
@@ -380,3 +380,43 @@ createRSEditor('#content', { toolbar: '… | stamp', plugins: [stamp] });
 ## ライセンス
 
 MIT © ryusuke.sano
+
+### v0.7.0: 外部操作パネルとタッチ操作
+
+| メソッド | 説明 |
+|---|---|
+| `captureSelection()` | 現在の選択範囲（逆方向の選択・挿入位置を含む）を保存し、不透明なブックマークを返す。本文外・ソースモード・IME変換中は `null` |
+| `restoreSelection(bookmark?)` | 保存位置を復元。引数省略時は最後の保存位置。成功は `true`、失敗は `false` |
+| `openTool(name, { anchor }?)` | メニュー型ツールのメニューを指定要素の近くに表示。単一項目でも表示する。通常ツールは `exec` と同じ。成功は `true` |
+| `isEnabled(name)` | readonly・ソースモード・プラグインの `isDisabled` を含む実行可否 |
+| `getToolState(name)` | `{ active, enabled }`。`isActive(name)` も引き続き使用可能 |
+| `setToolbar(definition)` | 本文・選択・undo/redo 履歴を維持してボタン定義を変更。`false` / `''` で非表示 |
+| `setFloatingToolbar(definition)` | 選択時ツールバーを変更。`false` / `''` で非表示 |
+
+外部パネルへフォーカスを移す**前**に保存してください。ブックマークは同じエディタ・同じ本文に限り有効です。本文変更後・破棄後・ソースモード・IME変換中の復元は失敗します。失敗時は挿入・書式変更を中止し、利用者に本文内で位置を選び直してもらってください。ブックマークの内容を変更・永続化しないでください。
+
+```js
+let selection;
+openPanel.addEventListener('pointerdown', () => {
+    selection = editor.captureSelection();
+});
+// キーボードでパネルを開く場合も、本文からフォーカスを移す前に保存する。
+boldButton.addEventListener('click', () => {
+    if (editor.restoreSelection(selection) && editor.isEnabled('bold')) editor.exec('bold');
+});
+colorButton.addEventListener('click', () => {
+    if (editor.restoreSelection(selection)) editor.openTool('forecolor', { anchor: colorButton });
+});
+// 画像選択・アップロードなどの非同期処理後も同じ手順で挿入できる。
+// if (editor.restoreSelection(selection)) editor.commands.insertImage({ src: uploadedURL });
+
+editor.setToolbar('undo redo | bold italic | image table');
+editor.setFloatingToolbar(false);
+```
+
+`exec()` は従来どおりメニューの先頭の実行可能な項目を実行します。メニューを表示する用途には `openTool()` を使います。メニュー選択時にも実行可否と保存位置を再検証します。
+
+画像リサイズはマウス・指・ペン共通の Pointer Events に対応し、pointer capture、キャンセル、capture 喪失、ウィンドウ非アクティブ化・破棄時に終了します。途中までの変更も1回の undo で戻せます。`touch-action: none` はハンドルだけに適用します。
+メニュー・選択ツールバー・ダイアログは VisualViewport の resize/scroll に追従します。小さな画面では内部スクロールを使用し、ダイアログの操作ボタンを下部に固定表示します。
+
+動作例: [外部操作・モバイルデモ](./demo/mobile.html)
