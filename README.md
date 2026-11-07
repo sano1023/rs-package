@@ -21,7 +21,7 @@ npm install @sano1023/rs-editor
 npm レジストリを使わない場合は GitHub の tarball を直接指定できます。
 
 ```bash
-npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-editor-0.7.0.tgz
+npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-editor-0.8.0.tgz
 ```
 
 ## 使い方
@@ -72,7 +72,7 @@ import '@sano1023/rs-editor/rs-editor.css';
 | [@sano1023/rs-cmdk](./rs-cmdk/) | 0.1.0 | — | 要 | 依存ゼロのコマンドパレット |
 | [@sano1023/rs-datepicker](./rs-datepicker/) | 0.4.0 | ✅ | 要 | 日本語ファースト・依存ゼロの日付ピッカー |
 | [@sano1023/rs-diagram](./rs-diagram/) | 0.6.0 | ✅ | 要 | 依存ゼロのSVG作図・ダイアグラムライブラリ |
-| [@sano1023/rs-editor](./rs-editor/) | 0.7.0 | ✅ | 要 | プラグインアーキテクチャを持つ、依存ゼロのWYSIWYGエディタライブラリ |
+| [@sano1023/rs-editor](./rs-editor/) | 0.8.0 | ✅ | 要 | プラグインアーキテクチャを持つ、依存ゼロのWYSIWYGエディタライブラリ |
 | [@sano1023/rs-form](./rs-form/) | 0.5.0 | ✅ | 要 | 依存ゼロのスキーマ駆動フォームビルダー |
 | [@sano1023/rs-gantt](./rs-gantt/) | 0.5.0 | ✅ | 要 | 依存ゼロの対話型プロジェクトガントチャート |
 | [@sano1023/rs-grid](./rs-grid/) | 0.4.1 | ✅ | 要 | Excel風データグリッド |

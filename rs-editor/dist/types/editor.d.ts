@@ -60,8 +60,8 @@ export class Editor {
         tableDeleteRow: (...args: any[]) => any;
         tableDeleteCol: (...args: any[]) => any;
         tableDelete: (...args: any[]) => any;
-        undo: () => any;
-        redo: () => any;
+        undo: (...args: any[]) => any;
+        redo: (...args: any[]) => any;
         toggleSource: () => any;
     };
     toolbar: Toolbar;

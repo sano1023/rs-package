@@ -14,6 +14,7 @@ export namespace plugins {
     export { autolink };
     export { autosave };
     export { toc };
+    export { box };
     export { checklist };
     export { callout };
     export { slashmenu };
@@ -42,6 +43,7 @@ import { wordcount } from './plugins/wordcount.js';
 import { autolink } from './plugins/autolink.js';
 import { autosave } from './plugins/autosave.js';
 import { toc } from './plugins/toc.js';
+import { box } from './plugins/box.js';
 import { checklist } from './plugins/checklist.js';
 import { callout } from './plugins/callout.js';
 import { slashmenu } from './plugins/slashmenu.js';

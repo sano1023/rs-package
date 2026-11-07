@@ -970,3 +970,33 @@
 /* タッチ制御はリサイズハンドルに限定し、本文のスクロール・選択を維持する。 */
 .rse-img-handle { touch-action: none; width: 24px; height: 24px; right: -12px; bottom: -12px; }
 .rse-dialog-actions { position: sticky; bottom: 0; background: var(--rse-bg); padding: 8px 0; flex-wrap: wrap; }
+
+/* Saved content: usable outside the editing surface as well. */
+.rse-toc { border: 1px solid #cbd5e1; border-radius: 8px; padding: 18px 22px; margin: 20px 0; background: #f8fafc; color: #1e293b; }
+.rse-toc .rse-toc-title { font-weight: 700; margin-bottom: 8px; }
+.rse-toc ol, .rse-content .rse-toc ol { list-style: none; counter-reset: toc; padding-left: 0; margin: 0; }
+.rse-toc ol ol, .rse-content .rse-toc ol ol { padding-left: 1.4em; }
+.rse-toc li, .rse-content .rse-toc li[data-level] { margin: 6px 0; padding-left: 0; counter-increment: toc; }
+.rse-toc[data-numbered="1"] li::before { content: counters(toc, '.') '. '; font-variant-numeric: tabular-nums; }
+.rse-toc a { color: #1d4ed8; text-decoration: underline; overflow-wrap: anywhere; }
+.rse-content .rse-toc[hidden] { display: block !important; }
+.rse-content .rse-toc[data-outline-warning]:not([data-outline-warning=""])::after { content: attr(data-outline-warning); display: block; font-size: 12px; color: #92400e; margin-top: 10px; }
+.rse-box { --box-color: #2563eb; --box-bg: #eff6ff; border: 1px solid var(--box-color); border-radius: 8px; padding: 18px; margin: 16px 0; overflow-wrap: anywhere; }
+.rse-box[data-color="green"] { --box-color: #15803d; --box-bg: #f0fdf4; }
+.rse-box[data-color="orange"] { --box-color: #c2410c; --box-bg: #fff7ed; }
+.rse-box[data-color="gray"] { --box-color: #64748b; --box-bg: #f8fafc; }
+.rse-box[data-rse-box="fill"] { border-color: transparent; background: var(--box-bg); }
+.rse-box[data-rse-box="line"] { border: 0; border-left: 4px solid var(--box-color); border-radius: 0; background: var(--box-bg); }
+.rse-box[data-rse-box="title"]::before { content: attr(data-title); display: block; color: var(--box-color); font-weight: 700; border-bottom: 1px solid var(--box-color); padding-bottom: 8px; margin-bottom: 12px; }
+.rse-box[data-rse-box="icon"] { background: var(--box-bg); }
+.rse-box[data-rse-box="icon"]::before { content: attr(data-symbol) ' ' attr(data-title); display: block; font-weight: 700; margin-bottom: 8px; }
+.rse-box > :first-child { margin-top: 0; }
+.rse-box > :last-child { margin-bottom: 0; }
+.rse-box img { max-width: 100%; height: auto; }
+.rse-box-presets { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; margin: 12px 0; }
+.rse-box-preset { border: 1px solid #cbd5e1; border-radius: 6px; background: white; padding: 4px; cursor: pointer; text-align: left; }
+.rse-box-preset[aria-pressed="true"] { outline: 2px solid #2563eb; }
+.rse-box-preset .rse-box { display: block; padding: 8px; margin: 4px; font-size: 12px; }
+.rse-block-actions { z-index: 25; display: flex; flex-wrap: wrap; gap: 4px; padding: 6px; border: 1px solid #cbd5e1; border-radius: 8px; background: white; box-shadow: 0 4px 20px #0f172a26; }
+.rse-block-actions[hidden] { display: none; }
+.rse-block-actions button { padding: 10px; border: 0; background: #f1f5f9; color: #172033; border-radius: 4px; cursor: pointer; font: inherit; font-size: 13px; }

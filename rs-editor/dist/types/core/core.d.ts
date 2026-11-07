@@ -133,5 +133,6 @@ export class ContentEditableCore {
     updateEmpty(): void;
     setReadonly(v: any): void;
     destroy(): void;
+    destroyed: boolean | undefined;
 }
 import { History } from './history.js';

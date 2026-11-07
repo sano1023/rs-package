@@ -15,7 +15,7 @@ npmjs.com の公開パッケージです。ログインやトークンは不要�
 <summary>npm レジストリを使わない場合（GitHub tarball 直指定）</summary>
 
 ```bash
-npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-editor-0.7.0.tgz
+npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-editor-0.8.0.tgz
 ```
 </details>
 
@@ -33,8 +33,8 @@ createRSEditor(document.querySelector('#app'), { /* オプション */ });
 ### `<script>` タグ（CDN・ビルド環境不要）
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sano1023/rs-editor@0.7.0/dist/rs-editor.css">
-<script src="https://cdn.jsdelivr.net/npm/@sano1023/rs-editor@0.7.0/dist/rs-editor.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sano1023/rs-editor@0.8.0/dist/rs-editor.css">
+<script src="https://cdn.jsdelivr.net/npm/@sano1023/rs-editor@0.8.0/dist/rs-editor.min.js"></script>
 <script>
   // 公開APIはグローバル RSEditor に載る
   RSEditor.createRSEditor(document.querySelector('#app'), { /* オプション */ });
@@ -203,7 +203,7 @@ createRSEditor('#content', {
 | `wordcount` | なし | ステータスバーに文字数・単語数を表示 |
 | `autolink` | なし | URL入力＋スペース/Enterで自動リンク化 |
 | `autosave` | なし | localStorageへの下書き自動保存と復元バー（`autosaveKey` で保存キー指定） |
-| `toc` | `toc` | 目次ブロックの挿入/削除。挿入位置はメニューで選択（カーソル位置 / 先頭=タイトル直下）。h1〜h3 から自動生成・変更に自動追従。見出しに id（日本語対応スラッグ）を自動付与するので保存HTMLのままページ内ジャンプが動く |
+| `toc` | `toc` | 目次ブロックの挿入/削除。挿入位置はメニューで選択（カーソル位置 / 先頭=タイトル直下）。h2/h3 の2階層から自動生成。見出し ID を維持して更新・ページ内ジャンプに対応（v0.8.0 の詳細は下記） |
 
 ### 拡張プラグイン（v0.5・opt-in）
 
@@ -368,7 +368,7 @@ createRSEditor('#content', { toolbar: '… | stamp', plugins: [stamp] });
 - Word の箇条書きは段落として取り込まれる（リスト構造の再構築はしない）
 - ブロック要素を含むHTMLを段落の途中に `insertContent` すると、現在のブロックの直後に挿入される
 - アンカーは出力HTMLに `contenteditable="false"` とZWSPフィラーを含む
-- toc プラグインは h1〜h3 の id を見出しテキスト由来のスラッグで管理する（手書きの id は上書きされる）
+- toc プラグインは h2/h3 を対象とし、既存 ID は重複がない限り保持する
 - divider のダイアログの色はブラウザ標準のカラーピッカー（16進のみ）。`rgb()` や色名を使う場合は `pluginOptions.divider` / `setJSON` で指定する
 - 末尾がテーブルやカスタムブロックの場合、続きを書けるように空段落を自動で維持する（出力HTMLにも `<p><br></p>` が含まれる）
 - codesample（シンタックスハイライト・要ハイライタ）、pagebreak、directionality、help は未実装。必要なAPIサーフェス（カスタムノード・UI拡張・キーマップ）は実装済みプラグインで証明済みで、同じ書き方で追加できる
@@ -420,3 +420,37 @@ editor.setFloatingToolbar(false);
 メニュー・選択ツールバー・ダイアログは VisualViewport の resize/scroll に追従します。小さな画面では内部スクロールを使用し、ダイアログの操作ボタンを下部に固定表示します。
 
 動作例: [外部操作・モバイルデモ](./demo/mobile.html)
+
+### v0.8.0: 自動目次とボックス
+
+```js
+import { createRSEditor } from '@sano1023/rs-editor';
+import { toc } from '@sano1023/rs-editor/plugins/toc';
+import { box } from '@sano1023/rs-editor/plugins/box';
+import '@sano1023/rs-editor/rs-editor.css';
+
+const editor = createRSEditor('#content', {
+    plugins: [toc, box],
+    toolbar: 'undo redo | h2 h3 | bold italic | bullist numlist | image | toc box',
+    pluginOptions: {
+        toc: { title: '目次', subheadings: true, numbered: true, positions: ['top', 'caret'] },
+    },
+});
+```
+
+script タグ版では `RSEditor.plugins.toc` / `RSEditor.plugins.box` を指定します。通常版への自動追加はありません。既存の `callout`（単一段落の色付き装飾）も引き続き使用できます。
+
+- **目次**: h2 が親、h3 が子のリンク付きリスト。h1 は記事タイトルとして除外します。見出しの追加・改名・並べ替えに自動追従し、既存の見出し ID を維持します。同じ文書内で重複した ID は後続の見出しに新規 ID を付けます。
+- 「目次を挿入」は最初の本文直下 h2 の前（導入文の後）に置きます。h2 がない場合は記事タイトルの直後、タイトルもなければ先頭です。「カーソル位置」も選べます。`autoInsert: true` は初期化時の自動挿入を有効にします。通常は利用者が挿入します。
+- 目次をクリックすると「設定」「削除」が表示されます。設定はタイトル・小見出し・番号。削除しても本文は残ります。先頭に h3 がある場合は最上位に表示し、編集画面で階層の案内を表示します。
+- 見出しがない目次は保存 HTML に `hidden` を付け、公開時には隠します。編集画面では案内を表示し、後から見出しを追加できます。
+- **ボックス**: 枠線・背景色・左ライン・タイトル付き・アイコン付きの5種類。見本から選び、色・タイトル・アイコンを設定します。選択した段落群をまとめて囲み、未選択時は空のボックスを追加します。ボックス内を選択している場合はそのボックスの設定を変更します。
+- ボックス内では複数段落・リスト・画像・書式変更を保持します。「外側に段落を追加」で下へ移動でき、「囲みを解除」は中身を残します。「中身ごと削除」は確認後に実行し、undo で戻せます。
+- 編集用の操作ボタンは保存 HTML に含まれません。公開ページでも同じ CSS を読み込むと目次・ボックスの装飾が適用されます。固定ヘッダーがあるサイトでは公開側の見出しに `scroll-margin-top` を設定してください。
+- プラグインを外して再読み込みするとカスタム構造を保持できません。編集・保存・再編集には同じ `toc` / `box` を登録してください。
+
+0.7.0 のレビュー修正も含みます。外部メニューを開く前の保存位置復元、IME・readonly・破棄後の操作ガード、非同期画像アップロードの挿入位置と順序保持、モーダルの Tab 移動制御を改善しました。目次は保存通知より前に同期し、HTML ソース編集とプレビューでも見出しリンクを維持します。
+
+互換性: 既存目次も h2/h3 の2階層へ更新され、h1 の項目は除外されます。旧 HTML の見出し ID は重複がない限り維持します。ボックスは新しい opt-in プラグインです。
+
+[自動目次・ボックスのデモ](./demo/blocks.html)
