@@ -16,7 +16,7 @@ main { max-width:900px; padding:32px 18px 120px; margin:auto; } h1 { font-size:3
 <h1>自動目次とボックス</h1>
 <p class="lead">見出しを直すと目次も更新されます。文章を選んでボックスで囲み、見た目を選んでみてください。</p>
 <textarea id="editor"><h1>読みやすい記事をつくる</h1><p>これは導入文です。目次は、この導入文と最初の大見出しの間に入ります。</p><h2>準備する</h2><p>必要な情報を集め、文章の流れを整理します。</p><h3>情報を集める</h3><p>伝えたいことを箇条書きにしてみましょう。</p><h3>構成を考える</h3><p>大見出しと小見出しで話題を整理します。</p><h2>記事を書く</h2><p>この段落と次の段落を選択すると、まとめてボックスで囲めます。</p><p>ボックス内でも文章やリスト、画像を編集できます。</p></textarea>
-<div class="actions"><button id="save">保存して開き直す</button><button id="show">公開表示を確認</button><button id="layout">ツールバーを切り替える</button></div>
+<div class="actions"><button id="box-designs">新しいボックス・リンクカードの見本</button><button id="save">保存して開き直す</button><button id="show">公開表示を確認</button><button id="layout">ツールバーを切り替える</button></div>
 <p id="status" role="status">「目次」から挿入、「ボックス」から見本を選べます。</p>
 <div id="preview" hidden></div>
 </main>
@@ -24,11 +24,13 @@ main { max-width:900px; padding:32px 18px 120px; margin:auto; } h1 { font-size:3
 import {createRSEditor} from '../dist/esm/index.js';
 import {toc} from '../dist/esm/plugins/toc.js';
 import {box} from '../dist/esm/plugins/box.js';
-const editor=createRSEditor('#editor',{plugins:[toc,box],toolbar:'undo redo | h2 h3 | bold italic | bullist numlist | image | toc box | code',floatingToolbar:false});
+import {linkcard} from '../dist/esm/plugins/linkcard.js';
+const editor=createRSEditor('#editor',{plugins:[toc,box,linkcard],toolbar:'undo redo | h2 h3 | bold italic | bullist numlist | image | toc box linkcard | code',floatingToolbar:false});
 window.editor=editor;
+document.querySelector('#box-designs').onclick=()=>editor.setHTML("<h1>ボックスとリンクカードの見本</h1><nav data-rse-toc=\"1\"></nav><h2>アイコン付きボックス（大）</h2>\n<div data-rse-box=\"icon-large\" data-icon=\"info\" data-color=\"orange\" data-title=\"ちょっとしたヒント\"><p>アイコンが枠線からはみ出すデザインです。ここをクリックして「ボックスの設定」で、色とアイコンを変更できます。</p></div>\n<div data-rse-box=\"icon-large\" data-icon=\"check\" data-color=\"green\" data-title=\"チェックポイント\"><ul><li>本文はそのまま編集できます</li><li>段落・リスト・画像をまとめて囲めます</li></ul></div>\n<div data-rse-box=\"icon-large\" data-icon=\"warn\" data-color=\"red\" data-title=\"確認しておきたいこと\"><p>注意・メモ・疑問・バツのアイコンも選べます。</p></div>\n<h2>キャプション付きボックス</h2>\n<div data-rse-box=\"caption\" data-title=\"キャプション：上部の帯\" data-color=\"blue\"><p>タイトルを帯で大きく見せるスタイルです。本文に<strong>太字</strong>やリンクを使えます。</p></div>\n<div data-rse-box=\"caption-tab\" data-title=\"キャプション：タブ\" data-color=\"green\"><p>コンパクトなタイトルと、淡い背景色を組み合わせたスタイルです。</p></div>\n<div data-rse-box=\"caption-border\" data-title=\"キャプション：枠線上の見出し\" data-color=\"orange\"><p>タイトルを枠線に重ねて、すっきりと見せるスタイルです。</p></div>\n<h2>「詳しくはこちら！」のリンクカード</h2>\n<div data-rse-linkcard=\"1\" data-url=\"./blocks.html\" data-title=\"自動目次とボックスの使い方\" data-description=\"見出しから目次を作り、文章をボックスで囲む操作を試せます。公開表示ではカード全体がリンクになります。\" data-image=\"./article-sample.svg\" data-label=\"詳しくはこちら！\"></div>\n<p>カードをクリックして「リンクカードの設定」で、URL・タイトル・説明文・画像を変更できます。編集画面ではクリックしてもページを移動しません。</p>\n");
 const status=document.querySelector('#status'),preview=document.querySelector('#preview');
 document.querySelector('#save').onclick=()=>{const html=editor.getHTML();editor.setHTML(html);status.textContent='本文・目次・ボックスを保存した HTML から復元しました。';};
 document.querySelector('#show').onclick=()=>{preview.innerHTML=editor.getHTML();preview.hidden=!preview.hidden;status.textContent=preview.hidden?'公開表示を閉じました。':'この下が保存された HTML の公開表示です。';};
-let compact=false;document.querySelector('#layout').onclick=()=>{compact=!compact;editor.setToolbar(compact?'undo redo | toc box':'undo redo | h2 h3 | bold italic | bullist numlist | image | toc box | code');};
+let compact=false;document.querySelector('#layout').onclick=()=>{compact=!compact;editor.setToolbar(compact?'undo redo | toc box linkcard':'undo redo | h2 h3 | bold italic | bullist numlist | image | toc box linkcard | code');};
 </script>
 </html>

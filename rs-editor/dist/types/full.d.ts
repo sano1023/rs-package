@@ -15,6 +15,7 @@ export namespace plugins {
     export { autosave };
     export { toc };
     export { box };
+    export { linkcard };
     export { checklist };
     export { callout };
     export { slashmenu };
@@ -44,6 +45,7 @@ import { autolink } from './plugins/autolink.js';
 import { autosave } from './plugins/autosave.js';
 import { toc } from './plugins/toc.js';
 import { box } from './plugins/box.js';
+import { linkcard } from './plugins/linkcard.js';
 import { checklist } from './plugins/checklist.js';
 import { callout } from './plugins/callout.js';
 import { slashmenu } from './plugins/slashmenu.js';

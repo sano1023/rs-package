@@ -59,8 +59,10 @@
 </head>
 <body>
 <div class="page">
-    <h1>rs-editor <small>v0.6 デモ — 依存ゼロ・プラグイン式WYSIWYGエディタ</small></h1>
+    <h1>rs-editor <small>v0.9 デモ — 依存ゼロ・プラグイン式WYSIWYGエディタ</small></h1>
     <p class="lead">
+        <strong>v0.9：大きなアイコン・キャプション付きボックス・リンクカード</strong>を追加しました。見出しを書き換えると目次が更新されます。ボックスをクリックすると、設定・囲み解除・外側への段落追加ができます。
+        <br><a href="./blocks.html">目次・ボックス専用デモ</a> ／ <a href="./mobile.html">外部操作・タッチ操作デモ</a><br>
         標準機能（〜v0.2）: undo / redo・書式・文字色 / 背景色・見出し・配置・引用・コードブロック・リスト・インデント・リンク・画像（アップロード / リサイズ）・表・HTMLソース表示・フローティングツールバー・Markdownショートカット。
         <br>v0.3 の opt-in プラグイン: 特殊文字・絵文字・日付挿入・NBSP・検索置換（Ctrl+F）・プレビュー・ブロック可視化・全画面・アンカー・動画埋め込み・目次（見出しから自動生成）・文字数カウント・自動リンク・下書き自動保存。最後の「⭐」はカスタムプラグインの例です。
         <br><strong>v0.5 の新機能</strong>: 空の段落で「/」を押すと<strong>スラッシュコマンド</strong>、段落ホバーで<strong>⠿ドラッグ並べ替え</strong>。ツールバーに<strong>チェックリスト・コールアウト・書式ペインター・脚注・コメント・リビジョン履歴（差分付き）・ルビ・文字種変換・日本語校正・縦書きプレビュー</strong>を追加。
@@ -69,16 +71,40 @@
 
     <textarea id="content">
 &lt;h1&gt;rs-editor へようこそ&lt;/h1&gt;
-&lt;p&gt;これは &lt;strong&gt;依存ゼロ&lt;/strong&gt; の &lt;em&gt;WYSIWYGエディタ&lt;/em&gt; です。&lt;u&gt;下線&lt;/u&gt;や&lt;s&gt;取り消し線&lt;/s&gt;、&lt;a href="https://example.com"&gt;リンク&lt;/a&gt;も使えます。&lt;/p&gt;
-&lt;ul&gt;&lt;li&gt;箇条書き 1&lt;/li&gt;&lt;li&gt;箇条書き 2&lt;/li&gt;&lt;/ul&gt;
+&lt;p&gt;自動目次とボックスを試せるサンプルです。目次の項目は、下の大見出し・小見出しから自動生成されます。&lt;/p&gt;
+&lt;nav data-rse-toc="1"&gt;&lt;/nav&gt;
+&lt;h2&gt;アイコン付きボックス（大）&lt;/h2&gt;
+&lt;div data-rse-box="icon-large" data-icon="info" data-color="orange" data-title="ちょっとしたヒント"&gt;&lt;p&gt;アイコンが枠線からはみ出すデザインです。ここをクリックして「ボックスの設定」で、色とアイコンを変更できます。&lt;/p&gt;&lt;/div&gt;
+&lt;div data-rse-box="icon-large" data-icon="check" data-color="green" data-title="チェックポイント"&gt;&lt;ul&gt;&lt;li&gt;本文はそのまま編集できます&lt;/li&gt;&lt;li&gt;段落・リスト・画像をまとめて囲めます&lt;/li&gt;&lt;/ul&gt;&lt;/div&gt;
+&lt;div data-rse-box="icon-large" data-icon="warn" data-color="red" data-title="確認しておきたいこと"&gt;&lt;p&gt;注意・メモ・疑問・バツのアイコンも選べます。&lt;/p&gt;&lt;/div&gt;
+&lt;h2&gt;キャプション付きボックス&lt;/h2&gt;
+&lt;div data-rse-box="caption" data-title="キャプション：上部の帯" data-color="blue"&gt;&lt;p&gt;タイトルを帯で大きく見せるスタイルです。本文に&lt;strong&gt;太字&lt;/strong&gt;やリンクを使えます。&lt;/p&gt;&lt;/div&gt;
+&lt;div data-rse-box="caption-tab" data-title="キャプション：タブ" data-color="green"&gt;&lt;p&gt;コンパクトなタイトルと、淡い背景色を組み合わせたスタイルです。&lt;/p&gt;&lt;/div&gt;
+&lt;div data-rse-box="caption-border" data-title="キャプション：枠線上の見出し" data-color="orange"&gt;&lt;p&gt;タイトルを枠線に重ねて、すっきりと見せるスタイルです。&lt;/p&gt;&lt;/div&gt;
+&lt;h2&gt;「詳しくはこちら！」のリンクカード&lt;/h2&gt;
+&lt;div data-rse-linkcard="1" data-url="./blocks.html" data-title="自動目次とボックスの使い方" data-description="見出しから目次を作り、文章をボックスで囲む操作を試せます。公開表示ではカード全体がリンクになります。" data-image="./article-sample.svg" data-label="詳しくはこちら！"&gt;&lt;/div&gt;
+&lt;p&gt;カードをクリックして「リンクカードの設定」で、URL・タイトル・説明文・画像を変更できます。編集画面ではクリックしてもページを移動しません。&lt;/p&gt;
+
+&lt;h2&gt;自動目次を試す&lt;/h2&gt;
+&lt;p&gt;この大見出しの文字を編集してみてください。目次の表示が更新され、リンク先は維持されます。&lt;/p&gt;
+&lt;h3&gt;小見出しを編集する&lt;/h3&gt;
+&lt;p&gt;小見出しは目次内で一段下に表示されます。目次をクリックすると、タイトル・小見出し・番号の設定を変更できます。&lt;/p&gt;
+&lt;h3&gt;リンクで移動する&lt;/h3&gt;
+&lt;p&gt;目次の項目を押すと、対応する見出しへ移動します。&lt;/p&gt;
+&lt;h2&gt;ボックスを試す&lt;/h2&gt;
+&lt;div data-rse-box="title" data-title="ポイント" data-color="blue"&gt;&lt;p&gt;ボックスの中でも&lt;strong&gt;太字&lt;/strong&gt;やリンクを使えます。&lt;/p&gt;&lt;p&gt;複数段落をまとめて囲めます。ここで Enter を押して段落を追加してみてください。&lt;/p&gt;&lt;ul&gt;&lt;li&gt;見た目は9種類から選べます&lt;/li&gt;&lt;li&gt;囲みを解除しても中身は残ります&lt;/li&gt;&lt;/ul&gt;&lt;/div&gt;
+&lt;p&gt;この段落と次の段落を選択し、ツールバー先頭付近の「ボックス（▣）」を押すと、新しいボックスで囲めます。&lt;/p&gt;
+&lt;p&gt;文章を選択せずに押すと、空のボックスを追加できます。&lt;/p&gt;
+&lt;h2&gt;従来の機能も試す&lt;/h2&gt;
 &lt;blockquote&gt;&lt;p&gt;引用ブロックの例。&lt;/p&gt;&lt;/blockquote&gt;
 &lt;hr data-rse-color="#ef4444" data-rse-thickness="3" data-rse-line="dashed"&gt;
-&lt;p&gt;上は区切り線（v0.6）。クリックで選択、ダブルクリックでスタイル編集できます。&lt;/p&gt;
+&lt;p&gt;上は区切り線です。ダブルクリックでスタイルを編集できます。&lt;/p&gt;
 </textarea>
 
     <div class="panel">
         <h2>操作</h2>
         <div class="controls">
+            <button id="btn-block-sample">目次・ボックスのサンプルに戻す</button>
             <button id="btn-set-html">setHTML(サンプル)</button>
             <button id="btn-set-json">setJSON(サンプル)</button>
             <button id="btn-roundtrip">ラウンドトリップ検査</button>
@@ -116,6 +142,8 @@
     import { autolink } from '../dist/esm/plugins/autolink.js';
     import { autosave } from '../dist/esm/plugins/autosave.js';
     import { toc } from '../dist/esm/plugins/toc.js';
+    import { box } from '../dist/esm/plugins/box.js';
+    import { linkcard } from '../dist/esm/plugins/linkcard.js';
     // v0.5: ブロック体験（Notion風）
     import { checklist } from '../dist/esm/plugins/checklist.js';
     import { callout } from '../dist/esm/plugins/callout.js';
@@ -150,6 +178,7 @@
     const outHtml = document.getElementById('out-html');
     const outJson = document.getElementById('out-json');
     const changeCountEl = document.getElementById('change-count');
+    const blockSample = document.getElementById('content').value;
     window.__changes = 0;
 
     function refresh(html) {
@@ -161,8 +190,8 @@
         window.__changes = 0;
         changeCountEl.textContent = '0';
         window.editor = createRSEditor('#content', {
-            toolbar: 'undo redo | bold italic underline strikethrough | forecolor backcolor formatpainter | h1 h2 h3 | alignleft aligncenter alignright | blockquote codeblock callout | bullist numlist checklist | outdent indent | link image table media anchor toc footnote | comment revisions | ruby jpconvert proofread tategaki | divider charmap emoticons insertdatetime nonbreaking | searchreplace preview visualblocks fullscreen | code | stamp',
-            plugins: [charmap, emoticons, insertdatetime, nonbreaking, searchreplace, preview, visualblocks, fullscreen, anchor, media, toc, wordcount, autolink, autosave, stamp,
+            toolbar: 'undo redo | toc box linkcard | bold italic underline strikethrough | forecolor backcolor formatpainter | h1 h2 h3 | alignleft aligncenter alignright | blockquote codeblock callout | bullist numlist checklist | outdent indent | link image table media anchor footnote | comment revisions | ruby jpconvert proofread tategaki | divider charmap emoticons insertdatetime nonbreaking | searchreplace preview visualblocks fullscreen | code | stamp',
+            plugins: [charmap, emoticons, insertdatetime, nonbreaking, searchreplace, preview, visualblocks, fullscreen, anchor, media, toc, box, linkcard, wordcount, autolink, autosave, stamp,
                 checklist, callout, slashmenu, dragblock, formatpainter, footnote, comments, revisions, ruby, jpconvert, proofread, tategaki, divider],
             autosaveKey: 'rs-editor-demo-draft',
             placeholder: '本文を入力…',
@@ -184,6 +213,11 @@
     create();
 
     // ---- 操作ボタン
+    document.getElementById('btn-block-sample').addEventListener('click', () => {
+        if (window.editor.destroyed) create();
+        window.editor.setHTML(blockSample);
+        refresh();
+    });
     document.getElementById('btn-set-html').addEventListener('click', () => {
         window.editor.setHTML('<h2>setHTML で入れ替え</h2>\n<p>この内容は <strong>setHTML()</strong> で流し込みました。<br>改行も使えます。</p>\n<ol>\n<li>番号付き 1</li>\n<li>番号付き 2</li>\n</ol>');
         refresh();

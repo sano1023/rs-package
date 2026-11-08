@@ -15,7 +15,7 @@ npmjs.com の公開パッケージです。ログインやトークンは不要�
 <summary>npm レジストリを使わない場合（GitHub tarball 直指定）</summary>
 
 ```bash
-npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-editor-0.8.0.tgz
+npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-editor-0.9.0.tgz
 ```
 </details>
 
@@ -33,8 +33,8 @@ createRSEditor(document.querySelector('#app'), { /* オプション */ });
 ### `<script>` タグ（CDN・ビルド環境不要）
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sano1023/rs-editor@0.8.0/dist/rs-editor.css">
-<script src="https://cdn.jsdelivr.net/npm/@sano1023/rs-editor@0.8.0/dist/rs-editor.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sano1023/rs-editor@0.9.0/dist/rs-editor.css">
+<script src="https://cdn.jsdelivr.net/npm/@sano1023/rs-editor@0.9.0/dist/rs-editor.min.js"></script>
 <script>
   // 公開APIはグローバル RSEditor に載る
   RSEditor.createRSEditor(document.querySelector('#app'), { /* オプション */ });
@@ -454,3 +454,22 @@ script タグ版では `RSEditor.plugins.toc` / `RSEditor.plugins.box` を指定
 互換性: 既存目次も h2/h3 の2階層へ更新され、h1 の項目は除外されます。旧 HTML の見出し ID は重複がない限り維持します。ボックスは新しい opt-in プラグインです。
 
 [自動目次・ボックスのデモ](./demo/blocks.html)
+
+### v0.9.0: 大きなアイコン・キャプション・リンクカード
+
+- `box` に「アイコン付き（大）」と、キャプションの帯・タブ・枠上の3スタイルを追加（計9種類）。大きなアイコンは枠線をまたぐ丸型のバッジです。ヒント・チェック・注意・メモ・バツ・疑問の6種類、色は6色。見本を見ながら変更でき、本文・選択・undo を保持します。
+- キャプションはボックスの設定からタイトルを入力します。タイトルは本文の見出し（h2/h3）とは別で、目次に含みません。
+- 関連記事は `linkcard` プラグインで挿入します。「✓ 詳しくはこちら！」の見出し、URL、記事タイトル、説明文、画像URL、同じタブ／新しいタブを設定できます。説明・画像は任意、枠上の見出しは空欄で非表示。URLだけからのタイトル・画像の自動取得は行いません。
+- 編集中はカードのリンクへ移動せず、クリックで設定・外側への段落追加・削除を表示します。公開表示ではカード全体がリンクになります。保存HTML／JSONとundo／redoに対応。編集・再読込には同じプラグインを登録してください。
+- 公開ページでも `rs-editor.css` を読み込んでください。背景が白以外の場合は親要素に `--rse-block-surface` を設定すると、枠線に重なるアイコンの縁・見出し背景を合わせられます。
+
+```js
+import { linkcard } from '@sano1023/rs-editor/plugins/linkcard';
+createRSEditor('#content', {
+    plugins: [toc, box, linkcard],
+    toolbar: 'undo redo | h2 h3 | bold image | toc box linkcard',
+});
+// script タグ版: RSEditor.plugins.linkcard
+```
+
+[ボックス・カードの見本を含むデモ](./demo/index.html)

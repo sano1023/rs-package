@@ -17,4 +17,5 @@ export function editBox(doc: any, pos: any, action: any, attrs: any): boolean | 
         head: any;
     };
 };
+export function serializeBox(n: any, children: any): string;
 export const box: any;
