@@ -1,7 +1,7 @@
 # ライブラリのインストール・更新
 
 <!-- rs-editor-release:start -->
-**rs-editor 0.9.1:** GitHubの配布物・デモを更新しました。npmjs.comへの登録は公開者の本人認証待ちです（npmのlatestは0.7.0）。0.9.1を先に利用する場合は `npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-editor-0.9.1.tgz` を指定してください。
+**rs-editor 0.9.1:** npmjs.com・GitHub配布・デモを更新しました。`npm install @sano1023/rs-editor@0.9.1` で利用できます。npmとGitHubの配布ハッシュ一致、および認証なしのinstall/ciを確認済みです。
 <!-- rs-editor-release:end -->
 
 全32ライブラリを **npmjs.com** (`https://registry.npmjs.org/`) の公開パッケージ **`@sano1023/rs-*`** として配布します。利用者のログイン・トークンは不要です。
