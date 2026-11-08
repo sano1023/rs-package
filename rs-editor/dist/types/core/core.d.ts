@@ -27,6 +27,9 @@ export class ContentEditableCore {
     _onKeyDown: (e: any) => void;
     _onPaste: (e: any) => void;
     _onDrop: (e: any) => void;
+    _onCopy: (e: any) => void;
+    _onCut: (e: any) => void;
+    _onPointerDown: () => void;
     _onSelChange: () => void;
     _onFocus: () => void;
     _onBlur: () => void;

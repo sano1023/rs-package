@@ -55,11 +55,35 @@
     .status { font-size: 12px; color: #64748b; margin-top: 8px; }
     .status b.ok { color: #16a34a; }
     .status b.ng { color: #dc2626; }
+    .review-note { color:#92400e; font-size:13px; }
+    .demo-tabs { display:flex; flex-wrap:wrap; gap:8px; margin:20px 0; }
+    .demo-tabs button { font:inherit; font-size:14px; padding:12px 16px; border:1px solid #cbd5e1; border-radius:8px; background:#fff; cursor:pointer; }
+    .demo-tabs [aria-selected="true"] { color:#fff; background:#1d4ed8; border-color:#1d4ed8; }
+    .v07-controls { margin:12px 0; }
+    #v07-panel { position:sticky; top:8px; z-index:30; padding:12px; background:#eaf1ff; border:1px solid #c8d8f8; border-radius:8px; box-shadow:0 4px 12px #1e3a8a12; }
+    #v07-panel[hidden] { display:none; }
+    #demo-v07 .controls button { min-height:44px; touch-action:manipulation; }
+    #demo-v07 .controls button:disabled { opacity:.5; cursor:default; }
+    #demo-v07 [aria-pressed="true"] { background:#dbeafe; border-color:#2563eb; }
+    .v07-options { display:grid; gap:12px; margin:18px 0; font-size:14px; }
+    .v07-bookmark { padding:16px; border:1px solid #cbd5e1; border-radius:8px; background:white; margin-top:20px; font-size:14px; }
+    .v07-bookmark summary { cursor:pointer; font-weight:600; }
+    .v07-other-label { display:block; margin-top:14px; }
+    #v07-other { display:block; width:100%; box-sizing:border-box; padding:10px; margin-top:6px; font:inherit; border:1px solid #94a3b8; border-radius:6px; }
+    #v07-message { min-height:1.6em; font-size:14px; }
+    #demo-v07 { line-height:1.7; }
+    #demo-v07.v07-narrow { max-width:390px; }
 </style>
 </head>
 <body>
 <div class="page">
-    <h1>rs-editor <small>v0.9 デモ — 依存ゼロ・プラグイン式WYSIWYGエディタ</small></h1>
+    <h1>rs-editor <small>v0.9.1 デモ — 依存ゼロ・プラグイン式WYSIWYGエディタ</small></h1>
+    <p class="review-note">v0.9.1：編集操作・外部UI連携の修正</p>
+    <div class="demo-tabs" role="tablist" aria-label="確認するデモ">
+        <button id="tab-all" role="tab" aria-controls="demo-all" aria-selected="true">目次・ボックス・全機能</button>
+        <button id="tab-v07" role="tab" aria-controls="demo-v07" aria-selected="false" tabindex="-1">v0.7：外部操作・タッチ</button>
+    </div>
+    <section id="demo-all" role="tabpanel" aria-labelledby="tab-all">
     <p class="lead">
         <strong>v0.9：大きなアイコン・キャプション付きボックス・リンクカード</strong>を追加しました。見出しを書き換えると目次が更新されます。ボックスをクリックすると、設定・囲み解除・外側への段落追加ができます。
         <br><a href="./blocks.html">目次・ボックス専用デモ</a> ／ <a href="./mobile.html">外部操作・タッチ操作デモ</a><br>
@@ -68,6 +92,13 @@
         <br><strong>v0.5 の新機能</strong>: 空の段落で「/」を押すと<strong>スラッシュコマンド</strong>、段落ホバーで<strong>⠿ドラッグ並べ替え</strong>。ツールバーに<strong>チェックリスト・コールアウト・書式ペインター・脚注・コメント・リビジョン履歴（差分付き）・ルビ・文字種変換・日本語校正・縦書きプレビュー</strong>を追加。
         <br><strong>v0.6 の新機能</strong>: <strong>区切り線</strong>（ツールバーの ─ ボタン）。プリセットから挿入するか「スタイルを指定して挿入…」で<strong>色・太さ・線種・幅</strong>をプレビューしながら設定できます。挿入した線はクリックで選択、ダブルクリックで再編集、Backspaceで削除。
     </p>
+
+    <details class="review-note">
+        <summary>今回の修正を試す</summary>
+        <p>ボックス内へ文章を貼り付け、そのまま入力を続けてください。カード・目次の直後の空行で Backspace を押すと、その空行だけを削除します。末尾の入力用空行は、後ろに書き足せるように残します。文字のある段落の先頭では、1回目で青枠の選択、2回目でブロックの削除になります（Esc で解除）。青枠のまま文字・Enter・日本語入力を始めても、カードや前後の本文は残ります。</p>
+        <label><input id="upload-delay" type="checkbox"> 画像アップロードの完了を5秒遅らせる（確認用）</label>
+        <p>上の項目をオンにして画像ファイルを挿入し、待っている間に本文を編集すると、画像が保留されます。挿入したい場所を選び、通知の「現在の位置に挿入」を押してください。ファイルはこのデモ内で読み込み、サーバーには送りません。</p>
+    </details>
 
     <textarea id="content">
 &lt;h1&gt;rs-editor へようこそ&lt;/h1&gt;
@@ -123,9 +154,12 @@
         <h2>getJSON() の出力（リアルタイム）</h2>
         <pre class="out" id="out-json"></pre>
     </div>
+    </section>
+    <section id="demo-v07" role="tabpanel" aria-labelledby="tab-v07" hidden></section>
 </div>
 
 <script type="module">
+    import { mountExternalDemo } from './external-demo.js';
     import { createRSEditor, definePlugin } from '../dist/esm/index.js';
     // v0.3: 拡張プラグイン（opt-in で読み込む）
     import { charmap } from '../dist/esm/plugins/charmap.js';
@@ -198,7 +232,8 @@
             // デモ用アップロード: サーバーへ送らず DataURL に変換して埋め込む
             imageUploadHandler: (file) => new Promise((resolve, reject) => {
                 const reader = new FileReader();
-                reader.onload = () => resolve(reader.result);
+                const delay = document.getElementById('upload-delay').checked ? 5000 : 0;
+                reader.onload = () => setTimeout(() => resolve(reader.result), delay);
                 reader.onerror = reject;
                 reader.readAsDataURL(file);
             }),
@@ -211,6 +246,21 @@
         refresh();
     }
     create();
+
+    const tabs=[document.getElementById('tab-all'),document.getElementById('tab-v07')];
+    const panels=[document.getElementById('demo-all'),document.getElementById('demo-v07')];
+    function selectDemo(index) {
+        tabs.forEach((tab,i)=>{tab.setAttribute('aria-selected',String(i===index));tab.tabIndex=i===index?0:-1;panels[i].hidden=i!==index;});
+        if(index===1) mountExternalDemo(panels[1]);
+        // Close menus and re-evaluate selection popups when an editor becomes hidden.
+        for(const ed of [window.editor,window.externalEditor]) if(ed && !ed.destroyed) ed.setToolbar(ed.config.toolbar);
+        window.dispatchEvent(new Event('resize'));
+    }
+    tabs.forEach((tab,index)=>{
+        tab.onclick=()=>selectDemo(index);
+        tab.onkeydown=e=>{if(['ArrowLeft','ArrowRight','Home','End'].includes(e.key)){e.preventDefault();const next=e.key==='Home'?0:e.key==='End'?1:1-index;tabs[next].focus();selectDemo(next);}};
+    });
+    if(location.hash==='#v07') selectDemo(1);
 
     // ---- 操作ボタン
     document.getElementById('btn-block-sample').addEventListener('click', () => {

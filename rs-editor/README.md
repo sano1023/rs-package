@@ -15,7 +15,7 @@ npmjs.com の公開パッケージです。ログインやトークンは不要�
 <summary>npm レジストリを使わない場合（GitHub tarball 直指定）</summary>
 
 ```bash
-npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-editor-0.9.0.tgz
+npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-editor-0.9.1.tgz
 ```
 </details>
 
@@ -33,8 +33,8 @@ createRSEditor(document.querySelector('#app'), { /* オプション */ });
 ### `<script>` タグ（CDN・ビルド環境不要）
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sano1023/rs-editor@0.9.0/dist/rs-editor.css">
-<script src="https://cdn.jsdelivr.net/npm/@sano1023/rs-editor@0.9.0/dist/rs-editor.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sano1023/rs-editor@0.9.1/dist/rs-editor.css">
+<script src="https://cdn.jsdelivr.net/npm/@sano1023/rs-editor@0.9.1/dist/rs-editor.min.js"></script>
 <script>
   // 公開APIはグローバル RSEditor に載る
   RSEditor.createRSEditor(document.querySelector('#app'), { /* オプション */ });
@@ -71,7 +71,7 @@ export default function App() {
 
 # rs-editor
 
-プラグインアーキテクチャを持つ、依存ゼロのWYSIWYGエディタライブラリです（現在 v0.6）。
+プラグインアーキテクチャを持つ、依存ゼロのWYSIWYGエディタライブラリです（現在 v0.9.1）。
 
 - **依存ゼロ**: ランタイム依存なし。ビルド済みの ESモジュールをパッケージから import できる
 - **プラグインアーキテクチャ**: 太字などの組み込み機能もすべて同じプラグインAPIで実装（利用者が数行で機能を追加できる）
@@ -84,7 +84,7 @@ export default function App() {
 - **v0.5 の上位プラグイン（opt-in）**: **コメント**（選択範囲にアンカー・サイドパネルで一覧/解決・HTML属性だけで保存されるので外部ストア不要）／**脚注**（自動採番・文末リストに自動同期）／**フォーマットペインター**（書式コピー→次の選択に適用）／**リビジョン履歴**（版の保存・単語レベル差分・復元）— いずれも opt-in で追加できます
 - **v0.6 の追加（opt-in）**: **区切り線（divider）** — 色・太さ・線種（実線/破線/点線/二重線）・幅を指定できる `<hr>`。プリセットのドロップダウン＋プレビュー付きダイアログ、本文の区切り線はクリック選択→ダブルクリックで編集・Backspaceで削除
 - **v0.5 の日本語特化（opt-in）**: **ルビ**（ふりがな挿入・クリック編集）／**文字種変換**（全半角・ひらカタ・半角カナ→全角）／**かんたん校正**（全角英数・半角カナ・句読点混在・カタカナ長音ゆれ・ら抜き言葉を辞書レスで検出、ワンクリック/一括修正）／**縦書きプレビュー**
-- **ライセンス**: MIT
+- **ライセンス**: 無償（商用可）。改変・再配布不可。詳細は [LICENSE.txt](./LICENSE.txt) を参照してください。
 
 対応ブラウザ: 最新の Chrome / Edge / Safari / Firefox（IE・旧ブラウザは非対応）
 
@@ -366,11 +366,11 @@ createRSEditor('#content', { toolbar: '… | stamp', plugins: [stamp] });
 - リスト項目・テーブルセル内では見出し/引用への変換は効かない
 - テーブルのセル結合UIは未実装（貼り付けられた colspan/rowspan は保持される）
 - Word の箇条書きは段落として取り込まれる（リスト構造の再構築はしない）
-- ブロック要素を含むHTMLを段落の途中に `insertContent` すると、現在のブロックの直後に挿入される
+- ブロック要素を含むHTMLを段落の途中に `insertContent` すると、現在のブロックの直後に挿入される。ボックス・引用内では同じコンテナ内を維持する
 - アンカーは出力HTMLに `contenteditable="false"` とZWSPフィラーを含む
 - toc プラグインは h2/h3 を対象とし、既存 ID は重複がない限り保持する
 - divider のダイアログの色はブラウザ標準のカラーピッカー（16進のみ）。`rgb()` や色名を使う場合は `pluginOptions.divider` / `setJSON` で指定する
-- 末尾がテーブルやカスタムブロックの場合、続きを書けるように空段落を自動で維持する（出力HTMLにも `<p><br></p>` が含まれる）
+- 末尾がテーブルやカスタムブロックの場合、続きを書けるように空段落を補う（出力HTMLにも `<p><br></p>` が含まれる）。カード・目次の末尾空段落は書き足すために維持する
 - codesample（シンタックスハイライト・要ハイライタ）、pagebreak、directionality、help は未実装。必要なAPIサーフェス（カスタムノード・UI拡張・キーマップ）は実装済みプラグインで証明済みで、同じ書き方で追加できる
 
 ## 検証
@@ -379,7 +379,7 @@ createRSEditor('#content', { toolbar: '… | stamp', plugins: [stamp] });
 
 ## ライセンス
 
-MIT © ryusuke.sano
+無償（商用可）。改変・再配布不可。詳細は [LICENSE.txt](./LICENSE.txt) を参照してください。
 
 ### v0.7.0: 外部操作パネルとタッチ操作
 
@@ -473,3 +473,12 @@ createRSEditor('#content', {
 ```
 
 [ボックス・カードの見本を含むデモ](./demo/index.html)
+
+### v0.9.1: 編集操作の安定性と外部UI連携
+
+- リンクカード・目次に隣接する、文字のある段落の先頭で Backspace、末尾で Delete を押すと、最初の1回はブロックを青枠で選択します。もう一度削除キーを押すとそのブロックだけを削除し、前後の段落は結合しません。Esc・選択移動で解除できます。ブラウザのキャレットは Delete なら手前の段落末尾、Backspace なら後ろの段落先頭を優先して保ち、文字・Enter・IME入力で青枠だけを解除します。コピー・切り取りも対象ブロックだけに作用します。
+- カード・目次の直後の空段落で Backspace を押すと、その空段落を削除します。ただし末尾の入力用空行は維持し、カードの後ろに書き足せる状態を保ちます。この空行で Backspace を押してもカードは選択・削除されません。明示的な範囲削除と操作バーの削除は従来どおりです。
+- ファイル選択・貼り付け・ドロップの画像アップロードは開始時の位置を使用します。本文の編集・ソースモード・readonly・IME変換等で戻れなければ、画像を保留して通知します。本文の挿入先を選び「現在の位置に挿入」か「画像を破棄」を押してください。失敗も通知します。成功通知は最新の1件にまとめて3秒後に消し、編集用イベントリスナーは成功時に解除します。保留と失敗（一部成功を含む）の通知は閉じるまで残します。保留はエディタの生存中のみで、HTML保存や再読み込みには含まれません。
+- 外部ファイル選択画面からも `editor.uploadFiles(files, { bookmark, alt }?)` を利用できます。元の位置に挿入できた場合は Promise が true、保留・失敗は false。`uploadstatus` イベントは `{ status, count, failed, message }` を返します（uploading / inserted / pending / failed / discarded）。count は保留中の枚数です。
+- アプリ側のモーダルなどへフォーカスが移ると、エディタのメニュー・ブロック操作バー・選択時ツールバーを閉じます。エディタに戻るまで、スクロールや選択イベントだけで再表示されることはありません。Popover API があるブラウザでは最上位層を使用するため、フォーカスを移さないトーストや読み込み表示より手前に出る場合があります。編集を遮断するアプリ側モーダルは、表示時にそのモーダルへフォーカスを移してください。
+- Android実機およびデスクトップOSの日本語IMEによる確認は**未実施**です。接続可能なAndroid端末・デスクトップIME環境がなく、ブラウザの自動検証・IMEイベント模擬は実機検証を代替しません。Chrome 122/157のCDPでは、カード・目次の選択直後の文字/Enter/日本語入力、変換確定・取消、keyCode 229、undoを確認しました。実IME確認時は、この手順に加えてボックス内の日本語入力・変換取消・確定・Enter・Backspace・undo、アップロード完了と変換の重なり、キーボード表示中のメニューを確認します。

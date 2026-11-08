@@ -70,6 +70,7 @@ export class Editor {
     off(event: any, cb: any): this;
     emit(event: any, ...args: any[]): void;
     getHTML(): any;
+    _normalizedSource: any;
     setHTML(html: any): void;
     getJSON(): {
         type: any;
@@ -113,6 +114,16 @@ export class Editor {
     pluginOptions(name: any): any;
     /** ペースト/ドロップされたファイルを imageUploadHandler で取り込む。処理したら true */
     handleFiles(files: any): boolean;
+    /**
+     * 画像をアップロード。元の位置に戻れない場合は通知して挿入待ちにする。
+     * @param {Iterable<File>} files
+     * @param {{bookmark?: object|null, alt?: string}} options
+     * @returns {Promise<boolean>}
+     */
+    uploadFiles(files: Iterable<File>, options?: {
+        bookmark?: object | null;
+        alt?: string;
+    }): Promise<boolean>;
     handleKeymap(e: any): boolean;
     destroy(): void;
 }

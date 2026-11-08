@@ -9,6 +9,10 @@ export class FloatingToolbar {
     toolbar: Toolbar;
     _update: () => void;
     _hide: () => void;
+    _focusWatch: {
+        readonly active: boolean;
+        destroy(): void;
+    };
     _unwatch: () => void;
     update(): void;
     hide(): void;
