@@ -19,6 +19,6 @@ export function setViewportPosition(el: any, left: any, top: any, size?: {}): vo
 export function hideViewportLayer(el: any): void;
 /** A top-layer popup must stop participating when its editor loses ownership of focus. */
 export function watchPopupFocus(wrapper: any, leave: any, anchors?: any[]): {
-    readonly active: boolean;
+    readonly active: any;
     destroy(): void;
 };

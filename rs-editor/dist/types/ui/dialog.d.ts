@@ -16,7 +16,7 @@
  *     指定時は submit ボタンの代わりに描画され、Promise はボタン側が api.close() を呼ぶまで解決しない。
  *     api = { close(result), values(), setStatus(text) }
  */
-export function openDialog(wrapperEl: any, { title, fields, submitLabel, cancelLabel, removeLabel, body, modal, actions, }: {
+export function openDialog(wrapperEl: any, { title, fields, submitLabel, cancelLabel, removeLabel, body, modal, actions, width, }: {
     title: any;
     fields?: never[] | undefined;
     submitLabel?: string | undefined;
@@ -25,4 +25,5 @@ export function openDialog(wrapperEl: any, { title, fields, submitLabel, cancelL
     body?: null | undefined;
     modal?: boolean | undefined;
     actions?: null | undefined;
+    width?: null | undefined;
 }): Promise<any>;

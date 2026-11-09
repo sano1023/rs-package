@@ -15,7 +15,7 @@ npmjs.com の公開パッケージです。ログインやトークンは不要�
 <summary>npm レジストリを使わない場合（GitHub tarball 直指定）</summary>
 
 ```bash
-npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-editor-0.9.1.tgz
+npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-editor-0.9.2.tgz
 ```
 </details>
 
@@ -33,8 +33,8 @@ createRSEditor(document.querySelector('#app'), { /* オプション */ });
 ### `<script>` タグ（CDN・ビルド環境不要）
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sano1023/rs-editor@0.9.1/dist/rs-editor.css">
-<script src="https://cdn.jsdelivr.net/npm/@sano1023/rs-editor@0.9.1/dist/rs-editor.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sano1023/rs-editor@0.9.2/dist/rs-editor.css">
+<script src="https://cdn.jsdelivr.net/npm/@sano1023/rs-editor@0.9.2/dist/rs-editor.min.js"></script>
 <script>
   // 公開APIはグローバル RSEditor に載る
   RSEditor.createRSEditor(document.querySelector('#app'), { /* オプション */ });
@@ -71,7 +71,7 @@ export default function App() {
 
 # rs-editor
 
-プラグインアーキテクチャを持つ、依存ゼロのWYSIWYGエディタライブラリです（現在 v0.9.1）。
+プラグインアーキテクチャを持つ、依存ゼロのWYSIWYGエディタライブラリです（現在 v0.9.2）。
 
 - **依存ゼロ**: ランタイム依存なし。ビルド済みの ESモジュールをパッケージから import できる
 - **プラグインアーキテクチャ**: 太字などの組み込み機能もすべて同じプラグインAPIで実装（利用者が数行で機能を追加できる）
@@ -257,7 +257,7 @@ createRSEditor('#content', {
 
 ### メニューのカスタマイズ — `pluginOptions`
 
-ドロップダウンメニューの中身はプラグイン別オプションで差し替えられます。選択肢が1つだけになった場合はメニューを出さず直接実行されます。
+ドロップダウンメニューの中身はプラグイン別オプションで差し替えられます。選択肢が1つでもメニューを表示します。先頭の項目を直接実行する場合は `exec(name)` を使います。
 
 ```js
 createRSEditor('#content', {
@@ -473,6 +473,14 @@ createRSEditor('#content', {
 ```
 
 [ボックス・カードの見本を含むデモ](./demo/index.html)
+
+### v0.9.2: レビューで見つかった編集・選択・目次の修正
+
+- 選択ブックマークはDOMの位置と方向を保持し、メニューを開いても選択が動きません。本文変更後の古い選択や、一時的なブロック選択クラスによる挿入失敗を修正しました。
+- div形式の貼り付け後のキャレット、カード・目次の後ろの入力行、入れ子引用のEnter、ボックス内の書式変換・Markdown入力を修正しました。動画の段落とボックス最後の入力行をBackspaceで誤削除しません。
+- 複数・入れ子の目次とボックスは操作した対象を編集します。目次の保存時同期は不要なDOM変更をせず、自動挿入は初期フォーカスや変更イベントに影響しません。
+- 選択なしのアップロードと同じ位置への並行アップロードに対応しました。ダイアログ表示中に完了した画像は保留され、ダイアログを閉じた後に挿入位置を選べます。
+- 非表示ツールバーの余白、狭い画面での操作バーの重なり、プレビューの幅、外部UIから戻った際の操作バー表示、既存目次の番号表示を修正しました。
 
 ### v0.9.1: 編集操作の安定性と外部UI連携
 

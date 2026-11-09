@@ -198,6 +198,7 @@
 }
 
 .rse-dialog {
+    width: max-content;
     margin-top: 56px;
     background: var(--rse-bg);
     border: 1px solid var(--rse-border);
@@ -496,7 +497,9 @@
 
 .rse-preview {
     max-height: 55vh;
-    min-width: 380px;
+    width: 720px;
+    max-width: 100%;
+    box-sizing: border-box;
     overflow: auto;
     border: 1px solid var(--rse-border);
     border-radius: 6px;
@@ -978,7 +981,7 @@
 .rse-toc ol, .rse-content .rse-toc ol { list-style: none; counter-reset: toc; padding-left: 0; margin: 0; }
 .rse-toc ol ol, .rse-content .rse-toc ol ol { padding-left: 1.4em; }
 .rse-toc li, .rse-content .rse-toc li[data-level] { margin: 6px 0; padding-left: 0; counter-increment: toc; }
-.rse-toc[data-numbered="1"] li::before { content: counters(toc, '.') '. '; font-variant-numeric: tabular-nums; }
+.rse-toc:not([data-numbered="0"]) li::before { content: counters(toc, '.') '. '; font-variant-numeric: tabular-nums; }
 .rse-toc a { color: #1d4ed8; text-decoration: underline; overflow-wrap: anywhere; }
 .rse-content .rse-toc[hidden] { display: block !important; }
 .rse-content .rse-toc[data-outline-warning]:not([data-outline-warning=""])::after { content: attr(data-outline-warning); display: block; font-size: 12px; color: #92400e; margin-top: 10px; }
@@ -1044,6 +1047,7 @@
 .rse-box[data-icon="note"] { --box-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22white%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m5%2015%2011-11%204%204L9%2019l-5%201%201-5Zm9-9%204%204M5%2015l4%204%22%2F%3E%3C%2Fsvg%3E"); }
 .rse-block-actions { z-index: 25; display: flex; flex-wrap: wrap; gap: 4px; padding: 6px; border: 1px solid #cbd5e1; border-radius: 8px; background: white; box-shadow: 0 4px 20px #0f172a26; }
 .rse-block-actions[hidden] { display: none; }
+.rse-toolbar[hidden] { display: none; }
 .rse-block-actions button { padding: 10px; border: 0; background: #f1f5f9; color: #172033; border-radius: 4px; cursor: pointer; font: inherit; font-size: 13px; }
 
 /* Reset only the browser popover defaults; preserve each component's own theme. */

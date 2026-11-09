@@ -66,6 +66,7 @@ export class Editor {
     };
     toolbar: Toolbar;
     floating: FloatingToolbar | null;
+    _selectionBookmark: Readonly<{}> | null;
     on(event: any, cb: any): this;
     off(event: any, cb: any): this;
     emit(event: any, ...args: any[]): void;
@@ -83,8 +84,7 @@ export class Editor {
     redo(): boolean;
     /** 本文が変わるまで有効な、このエディタ専用の選択ブックマーク。 */
     captureSelection(): Readonly<{}> | null;
-    _selectionBookmark: Readonly<{}> | undefined;
-    restoreSelection(bookmark?: Readonly<{}> | undefined): boolean;
+    restoreSelection(bookmark?: Readonly<{}> | null): boolean;
     isEnabled(name: any): boolean;
     getToolState(name: any): {
         active: boolean;
