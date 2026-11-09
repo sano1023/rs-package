@@ -1,3 +1,3 @@
-export function closeMenus(): void;
+export function closeMenus(wrapper: any): void;
 export function openMenu(anchorBtn: any, wrapperEl: any, items: any, { columns, onAction }?: {}): any;
-export function isMenuOpen(): boolean;
+export function isMenuOpen(wrapper: any): any;

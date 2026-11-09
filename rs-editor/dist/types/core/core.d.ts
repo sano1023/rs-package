@@ -14,7 +14,7 @@ export class ContentEditableCore {
     lastInputType: any;
     lastInputTime: number;
     savedDomSel: {
-        anchorNode: Node;
+        anchorNode: Node | null;
         anchorOffset: number;
         focusNode: Node | null;
         focusOffset: number;
@@ -47,6 +47,7 @@ export class ContentEditableCore {
     setJSON(json: any, { addToHistory }?: {
         addToHistory?: boolean | undefined;
     }): void;
+    normalize(): void;
     render(doc: any): void;
     /** 現在の選択を線形位置で返す（エディタ外なら null） */
     getSelectionRange(): {
@@ -123,6 +124,7 @@ export class ContentEditableCore {
     onPaste(e: any): void;
     onDrop(e: any): void;
     onSelectionChange(): void;
+    rememberSelection(): boolean;
     /** code_block 内の Enter: \\n を挿入。空行（直前が改行）の末尾で Enter するとブロックを抜ける */
     handleCodeBlockEnter(): void;
     /** タイプ入力後、書式トグル用に置いた ZWSP を掃除する */

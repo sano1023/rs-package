@@ -101,8 +101,8 @@ export class Editor {
     }): boolean;
     /** @param {string | false} definition */
     setToolbar(definition?: string | false): boolean;
-    /** @param {string | false} definition */
-    setFloatingToolbar(definition?: string | false): boolean;
+    /** @param {string | boolean} definition */
+    setFloatingToolbar(definition?: string | boolean): boolean;
     exec(name: any): boolean;
     isActive(name: any): boolean;
     setReadonly(v: any): void;

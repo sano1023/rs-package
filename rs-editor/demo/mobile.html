@@ -23,7 +23,7 @@ import { createRSEditor } from '../dist/rs-editor.esm.min.js';
 const editor = createRSEditor('#editor', { toolbar: 'undo redo | bold italic | image table', floatingToolbar: false });
 window.editor = editor;
 const open = document.querySelector('#open'), panel = document.querySelector('#panel'), status = document.querySelector('#status');
-let bookmark, mobile = true;
+let bookmark, mobile = false;
 const capture = () => { bookmark = editor.captureSelection() || bookmark; };
 open.addEventListener('pointerdown', capture);
 // Tab が本文を離れる前にも保存する。

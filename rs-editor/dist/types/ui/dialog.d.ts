@@ -26,4 +26,4 @@ export function openDialog(wrapperEl: any, { title, fields, submitLabel, cancelL
     modal?: boolean | undefined;
     actions?: null | undefined;
     width?: null | undefined;
-}): Promise<any>;
+}, editor?: null): Promise<any>;

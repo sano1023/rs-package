@@ -26,7 +26,9 @@ export function buildParents(doc: any): WeakMap<object, any>;
  * DOM要素をパースしてドキュメントモデルを返す。
  * テキスト/アトムノードには `_dom`（由来のDOMノード）を残す（位置マップ用。出力時には無視される）。
  */
-export function parseDOM(rootEl: any, schema: any): {
+export function parseDOM(rootEl: any, schema: any, { padTail }?: {
+    padTail?: boolean | undefined;
+}): {
     type: string;
     children: any;
 };

@@ -15,7 +15,7 @@ npmjs.com の公開パッケージです。ログインやトークンは不要�
 <summary>npm レジストリを使わない場合（GitHub tarball 直指定）</summary>
 
 ```bash
-npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-editor-0.9.2.tgz
+npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-editor-0.9.3.tgz
 ```
 </details>
 
@@ -33,8 +33,8 @@ createRSEditor(document.querySelector('#app'), { /* オプション */ });
 ### `<script>` タグ（CDN・ビルド環境不要）
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sano1023/rs-editor@0.9.2/dist/rs-editor.css">
-<script src="https://cdn.jsdelivr.net/npm/@sano1023/rs-editor@0.9.2/dist/rs-editor.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sano1023/rs-editor@0.9.3/dist/rs-editor.css">
+<script src="https://cdn.jsdelivr.net/npm/@sano1023/rs-editor@0.9.3/dist/rs-editor.min.js"></script>
 <script>
   // 公開APIはグローバル RSEditor に載る
   RSEditor.createRSEditor(document.querySelector('#app'), { /* オプション */ });
@@ -71,7 +71,7 @@ export default function App() {
 
 # rs-editor
 
-プラグインアーキテクチャを持つ、依存ゼロのWYSIWYGエディタライブラリです（現在 v0.9.2）。
+プラグインアーキテクチャを持つ、依存ゼロのWYSIWYGエディタライブラリです（現在 v0.9.3）。
 
 - **依存ゼロ**: ランタイム依存なし。ビルド済みの ESモジュールをパッケージから import できる
 - **プラグインアーキテクチャ**: 太字などの組み込み機能もすべて同じプラグインAPIで実装（利用者が数行で機能を追加できる）
@@ -388,10 +388,10 @@ createRSEditor('#content', { toolbar: '… | stamp', plugins: [stamp] });
 | `captureSelection()` | 現在の選択範囲（逆方向の選択・挿入位置を含む）を保存し、不透明なブックマークを返す。本文外・ソースモード・IME変換中は `null` |
 | `restoreSelection(bookmark?)` | 保存位置を復元。引数省略時は最後の保存位置。成功は `true`、失敗は `false` |
 | `openTool(name, { anchor }?)` | メニュー型ツールのメニューを指定要素の近くに表示。単一項目でも表示する。通常ツールは `exec` と同じ。成功は `true` |
-| `isEnabled(name)` | readonly・ソースモード・プラグインの `isDisabled` を含む実行可否 |
+| `isEnabled(name)` | readonly・ソースモード・IME変換中・プラグインの `isDisabled` を含む実行可否 |
 | `getToolState(name)` | `{ active, enabled }`。`isActive(name)` も引き続き使用可能 |
 | `setToolbar(definition)` | 本文・選択・undo/redo 履歴を維持してボタン定義を変更。`false` / `''` で非表示 |
-| `setFloatingToolbar(definition)` | 選択時ツールバーを変更。`false` / `''` で非表示 |
+| `setFloatingToolbar(definition)` | 選択時ツールバーを変更。`true` / 引数省略で標準ボタン、`false` / `''` で非表示 |
 
 外部パネルへフォーカスを移す**前**に保存してください。ブックマークは同じエディタ・同じ本文に限り有効です。本文変更後・破棄後・ソースモード・IME変換中の復元は失敗します。失敗時は挿入・書式変更を中止し、利用者に本文内で位置を選び直してもらってください。ブックマークの内容を変更・永続化しないでください。
 
@@ -414,7 +414,7 @@ editor.setToolbar('undo redo | bold italic | image table');
 editor.setFloatingToolbar(false);
 ```
 
-`exec()` は従来どおりメニューの先頭の実行可能な項目を実行します。メニューを表示する用途には `openTool()` を使います。メニュー選択時にも実行可否と保存位置を再検証します。
+`exec()` は従来どおりメニューの先頭の実行可能な項目を実行します。メニューを表示する用途には `openTool()` を使います。メニュー選択時にも実行可否を再検証し、その時点の本文選択を使用します。選択が本文外へ移っていれば、最後に本文内で選択した位置を使用します。ダイアログや非同期処理用の `restoreSelection()` は、引き続き本文が変わったブックマークを拒否します。
 
 画像リサイズはマウス・指・ペン共通の Pointer Events に対応し、pointer capture、キャンセル、capture 喪失、ウィンドウ非アクティブ化・破棄時に終了します。途中までの変更も1回の undo で戻せます。`touch-action: none` はハンドルだけに適用します。
 メニュー・選択ツールバー・ダイアログは VisualViewport の resize/scroll に追従します。小さな画面では内部スクロールを使用し、ダイアログの操作ボタンを下部に固定表示します。
@@ -440,7 +440,7 @@ const editor = createRSEditor('#content', {
 
 script タグ版では `RSEditor.plugins.toc` / `RSEditor.plugins.box` を指定します。通常版への自動追加はありません。既存の `callout`（単一段落の色付き装飾）も引き続き使用できます。
 
-- **目次**: h2 が親、h3 が子のリンク付きリスト。h1 は記事タイトルとして除外します。見出しの追加・改名・並べ替えに自動追従し、既存の見出し ID を維持します。同じ文書内で重複した ID は後続の見出しに新規 ID を付けます。
+- **目次**: h2 が親、h3 が子のリンク付きリスト。h1 は記事タイトルとして除外します。見出しの追加・改名・並べ替えに自動追従し、既存の見出し ID を維持します。EnterによるIDの重複では元の空でない見出しを優先し、新しくできた側に別のIDを付けます。
 - 「目次を挿入」は最初の本文直下 h2 の前（導入文の後）に置きます。h2 がない場合は記事タイトルの直後、タイトルもなければ先頭です。「カーソル位置」も選べます。`autoInsert: true` は初期化時の自動挿入を有効にします。通常は利用者が挿入します。
 - 目次をクリックすると「設定」「削除」が表示されます。設定はタイトル・小見出し・番号。削除しても本文は残ります。先頭に h3 がある場合は最上位に表示し、編集画面で階層の案内を表示します。
 - 見出しがない目次は保存 HTML に `hidden` を付け、公開時には隠します。編集画面では案内を表示し、後から見出しを追加できます。
@@ -473,6 +473,162 @@ createRSEditor('#content', {
 ```
 
 [ボックス・カードの見本を含むデモ](./demo/index.html)
+
+### v0.9.3の使い方・更新時の確認
+
+```bash
+npm install @sano1023/rs-editor@0.9.3
+```
+
+既存のHTML・JSONを引き続き読み込めます。新しい操作を有効にするフラグは不要です。目次・ボックス・脚注・リンクカード・検索置換は、それぞれのプラグインを登録して利用してください。
+
+#### 選択位置を保存して外部UIから操作する
+
+本文から外部パネルへフォーカスを移す前に `captureSelection()` を呼び、操作直前に `restoreSelection()` の戻り値を確認します。[外部操作のコード例](#v070-外部操作パネルとタッチ操作)も参照してください。同じ本文の再描画でテキストノードが結合されても、選んだ文字と選択方向を維持します。本文が編集されて位置が無効になった場合は `false` を返すので、本文内で選び直してください。
+
+```js
+// 本文を選択している間に保存する。
+const bookmark = editor.captureSelection();
+
+// 外部パネルから太字を適用する場合。
+if (bookmark && editor.restoreSelection(bookmark) && editor.isEnabled('bold')) {
+    editor.exec('bold');
+}
+editor.setFloatingToolbar(true); // 標準の選択時ツールバーを表示可能にする
+```
+
+メニュー型のツールは `openTool('forecolor', { anchor: button })` のように開きます。メニューからの操作は、その時点の本文選択（本文外へ移った場合は最後の本文選択）に作用します。IME変換中は通常のツールバーボタンが無効表示になります。外部ボタンも `getToolState(name).enabled` または `isEnabled(name)` に合わせ、変換確定後に実行してください。
+
+#### 複数画像のアップロードと保留
+
+`imageUploadHandler` はファイルごとに呼び出され、画像URLの文字列または `URL` オブジェクトを返します。例の `/api/images` は利用側で用意するアップロードAPIで、成功時に `{ "url": "https://..." }` を返す想定です。
+
+```js
+const editor = createRSEditor('#content', {
+    imageUploadHandler: async (file) => {
+        const body = new FormData();
+        body.append('file', file);
+        const response = await fetch('/api/images', { method: 'POST', body });
+        if (!response.ok) throw new Error('画像をアップロードできませんでした');
+        const { url } = await response.json();
+        if (typeof url !== 'string' || !url.trim()) throw new Error('画像URLがありません');
+        return url;
+    },
+});
+
+// filesはFileListまたはFileの配列。外部ファイル選択UIを開く前に位置を保存する。
+const bookmark = editor.captureSelection();
+// ファイル選択が終わった後に実行する。
+const inserted = await editor.uploadFiles(files, { bookmark, alt: '記事の画像' });
+// true: 1枚以上挿入できた。false: 未挿入（失敗・取消・全件保留など）。
+```
+
+- `a.png → slow.png → c.png` の順に渡した場合、aが完了すれば先に挿入します。cだけが先に完了してもslowを追い越さず、slowの完了後に残りを順に挿入します。
+- 処理中の「キャンセル」は未完了分だけを取り消します。aとcが完了済みなら両方を残し、slowの遅れて届いた結果は挿入しません。アップロード通信自体は停止しません。
+- 本文の変更、readonly、ソースモード、IME変換中、メニュー・ダイアログ表示中などで安全に挿入できない画像は保留します。本文の挿入位置を選び、「現在の位置に挿入」を押すと再開できます。「画像を破棄」は保留画像を捨てます。保留は再読み込みやエディタ破棄では失われます。
+- 同じ位置への別々のアップロードも開始順に挿入します。別の位置で開始した処理は、先行処理で本文が変わると保留になる場合があります。先行処理が止まっていても、準備済み画像は通知のボタンから明示的に挿入・破棄できます。
+- 部分挿入後に残りが保留・失敗しても戻り値は `true` です。全画像の成功判定には通知または `uploadstatus` を利用してください。イベントの `count` は挿入待ちとして保留している枚数、`failed` は失敗枚数です。成功通知は3秒後に消え、保留・失敗通知は残ります。
+
+```js
+editor.on('uploadstatus', ({ status, count, failed, message }) => {
+    // status: uploading / inserted / pending / failed / discarded
+    document.querySelector('#upload-status').textContent = message;
+});
+```
+
+#### React / Vueで自動目次を使う
+
+`pluginOptions.toc.autoInsert: true` で、マウント時に目次を追加します。初期値の同期で目次は消えず、初期化だけではフォーカス・変更通知・undo履歴を発生させません。そのため、編集前に保存する場合も、親の初期HTMLではなくラッパーの `getHTML()` から正規化済みHTMLを取得してください。`autoInsert` は初期化時の設定です。後から外部の `value` / `modelValue` で本文を置き換える際に目次も残す場合は、そのHTMLに目次を含めてください。
+
+React:
+
+```jsx
+import React from 'react';
+import { RsEditor } from '@sano1023/rs-editor/react';
+import { toc } from '@sano1023/rs-editor/plugins/toc';
+import '@sano1023/rs-editor/rs-editor.css';
+
+export function ArticleEditor({ onSave }) {
+    const [html, setHtml] = React.useState('<h2 id="intro">はじめに</h2><p>本文</p>');
+    const editorRef = React.useRef(null);
+    return <>
+        <RsEditor ref={editorRef} value={html} onChange={setHtml}
+            plugins={[toc]} pluginOptions={{ toc: { autoInsert: true } }} />
+        <button onClick={() => onSave(editorRef.current.getHTML())}>保存</button>
+    </>;
+}
+```
+
+Vue:
+
+```vue
+<script setup>
+import { ref } from 'vue';
+import { RsEditor } from '@sano1023/rs-editor/vue';
+import { toc } from '@sano1023/rs-editor/plugins/toc';
+import '@sano1023/rs-editor/rs-editor.css';
+const emit = defineEmits(['save']);
+const html = ref('<h2 id="intro">はじめに</h2><p>本文</p>');
+const editorRef = ref(null);
+const plugins = [toc];
+const pluginOptions = { toc: { autoInsert: true } };
+</script>
+<template>
+    <RsEditor ref="editorRef" v-model="html" :plugins="plugins" :plugin-options="pluginOptions" />
+    <button @click="emit('save', editorRef.getHTML())">保存</button>
+</template>
+```
+
+#### 本文の編集操作
+
+| 操作 | v0.9.3の動作 |
+|---|---|
+| カード・目次・区切り線を含む範囲をリスト化／コード化 | 原子ブロックを保持し、前後の本文を別々に変換する |
+| 複数の引用をまとめて選択し引用ボタンを押す | 全部が引用なら解除。一部だけ引用なら1つにまとめ、入れ子を増やさない |
+| 引用内の一部を選択してボックスを適用 | 選択した段落を引用の内側で囲む。キャレットだけなら同じ引用内に空のボックスを追加する |
+| 選択が既存ボックスの内外をまたぐ | 選択方向に関係なく新規挿入。既存ボックスの色・タイトルを入れ子として残す |
+| 範囲全体が同じボックスの中 | そのボックスの設定を開く |
+| カード直前の空段落でDelete | 空段落を削除し、カードを残す |
+| カード直後の末尾の空引用でBackspace | 引用を解除し、続きを書ける通常段落を残す |
+| セルやリスト項目の内側でBackspace／Delete | 外側のカード・目次を選択しない。表・リストの編集動作を優先する |
+| 見出しの先頭でEnter | 元の見出しに既存IDを保つ。前にできた見出しには別のIDを付ける |
+| 検索・置換後にダイアログを閉じる | 検索結果や置換後の選択を保ち、その位置から入力を続けられる |
+
+検索置換は `searchreplace` プラグインを登録し、Ctrl+F（MacではCommand+F）または検索置換ボタンで開きます。表・ボックス等の構造変更はundoで戻せます。
+
+#### JSON保存・読み込み
+
+`editor.getJSON()` の結果を保存し、同じプラグイン構成で `editor.setJSON(saved)` に渡してください。`_number`・`_dom`など、`_`から始まる内部フィールドは入力時に無視します。脚注番号は本文の順番から自動で振り直すため、JSONに番号を設定する必要はありません。HTML・JSONの入力は許可した構造に正規化され、イベントハンドラー属性や危険なURLは本文へ取り込みません。
+
+```js
+// footnoteプラグインを登録したeditorに渡す例。
+editor.setJSON({
+    type: 'doc',
+    children: [{
+        type: 'paragraph',
+        children: [
+            { type: 'text', text: '補足のある文章' },
+            { type: 'footnote_ref', attrs: { note: '補足説明' } },
+        ],
+    }],
+});
+const saved = editor.getJSON();
+```
+
+### v0.9.3: 選択・構造編集・アップロード・JSON入力の修正
+
+- `setJSON()` の内部フィールドを除去し、HTML入力と同じサニタイズを通します。脚注番号もエスケープし、一瞬だけ不正な要素が本文へ入る問題を防ぎます。
+- 選択ブックマークは線形位置と方向を保持し、再描画による隣接テキストノードの結合後も同じ文字を復元します。検索・置換ダイアログを閉じても最新の選択を維持します。
+- セル・リスト項目内の削除で外のカードや目次を選択しません。リスト・コード変換は原子ブロックの前後で分け、カード等を保持します。カード直前の空行のDeleteと、カード直後の空引用のBackspaceを修正し、後者は入力行を残して引用を解除します。
+- 複数引用の解除と混在選択の引用化、引用内のボックス挿入、選択方向に依存しないボックス判定を修正しました。選択が既存のボックスをまたぐ場合は、その装飾を入れ子のボックスとして保持します。
+- Enterで見出しが分割されても元の見出しIDを維持します。React/Vueの自動目次を初期値の同期で消さず、初期フォーカス・変更通知・undo履歴も発生させません。
+- メニューは開いた時点の古い選択へ戻さず、現在または最後の本文選択へ適用します。ボックス・引用の境界を含む選択の変換と貼り付け、ボックス内での表・区切り線・目次の挿入と削除、カード内にキャレットがあるときの挿入を修正しました。
+- アップロードは先頭から完了した分を順に挿入します。途中の未完了画像を追い越さず、処理中の「キャンセル」は未完了分だけを取り消して完了済み画像を残します（ハンドラの通信自体は停止しません）。戻り値は1枚以上挿入できた場合にtrue、未挿入・全件保留の場合はfalseです。先行アップロードを待つ画像も、準備完了後は現在位置への挿入・破棄を選べます。メニュー・ダイアログ表示中の自動挿入は保留します。失敗やアプリ側コールバックの例外が後続処理を止めず、MIME型が空の明示選択ファイルとURLオブジェクトの結果にも対応します。
+- 脚注を含む目次の同期、再読み込み時の見出し ID、目次削除後の選択位置、確認ダイアログの初期フォーカスとキャンセル後の復帰、補助平面文字を含むタイトルの長さ制限を修正しました。
+- コメントの一時ハイライトがダイアログを無効にする問題、ボックス内の脚注一覧の重複、カード直前のボックス削除後の入力位置、`setFloatingToolbar(true)`の空表示を修正しました。目次同期で毎回ページ全体のIDを走査しません。
+- IME変換中はツールバーボタンを無効表示にします。keyCode 229の削除はbeforeinput側で判断し、原子ブロックの二段階削除を維持します。Android実機・OSの日本語IMEは未検証で、合成イベントとChromeのCDP検証のみです。
+- 3回目の検証: ユニット136件（新規24件）、Chrome 157のブラウザ9ファイル（PC・タッチ表示）が成功。`test/review3-regressions.*`に再現ケース、入力安全性、DOMとモデルの位置対応、React/Vueマウントの回帰テストを追加しました。
+- 0.9.2に対する2・3回目の再レビュー修正を含みます。操作と連携例は上記「v0.9.3の使い方・更新時の確認」を参照してください。
 
 ### v0.9.2: レビューで見つかった編集・選択・目次の修正
 
