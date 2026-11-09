@@ -1,7 +1,7 @@
 # ライブラリのインストール・更新
 
 <!-- rs-editor-release:start -->
-**rs-editor 0.9.3:** レビュー修正と使い方の説明をGitHub配布・デモへ反映します。npmjs.comは公開時の本人認証待ちです（確認済みのlatestは0.9.2）。0.9.3のnpm取得・配布ハッシュ一致・認証なしinstall/ciを確認後、この案内を更新します。
+**rs-editor 0.9.3:** JSON入力・選択保持・引用／ボックス・目次・画像アップロードの修正をnpmjs.com・GitHub配布・デモへ反映しました。`npm install @sano1023/rs-editor@0.9.3` で利用できます。[README](./rs-editor/README.md)に操作手順とReact/Vueの連携例を掲載しています。npmとGitHubの配布ハッシュ一致、および認証なしのinstall/ciを確認済みです。
 <!-- rs-editor-release:end -->
 
 全32ライブラリを **npmjs.com** (`https://registry.npmjs.org/`) の公開パッケージ **`@sano1023/rs-*`** として配布します。利用者のログイン・トークンは不要です。
