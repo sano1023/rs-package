@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>rs-editor シンプルUI（スマホ向け）デモ</title>
+<link rel="stylesheet" href="../dist/rs-editor.css">
+<style>
+    body {
+        font-family: system-ui, -apple-system, "Segoe UI", "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+        margin: 0;
+        background: #fffaf3;
+        color: #3b2f2a;
+    }
+    .page { max-width: 720px; margin: 0 auto; padding: 20px 16px 80px; }
+    h1 { font-size: 20px; margin: 0 0 6px; }
+    .lead { color: #7c6f66; font-size: 13px; line-height: 1.7; margin: 0 0 16px; }
+    .switch { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 16px; }
+    .switch button {
+        appearance: none; font: inherit; font-size: 14px; padding: 10px 18px; cursor: pointer;
+        border: 1px solid #f5d9b8; border-radius: 999px; background: #fff; color: #9a5a17;
+    }
+    .switch button[aria-pressed="true"] { background: #f97316; border-color: #f97316; color: #fff; font-weight: 700; }
+    .switch label { font-size: 13px; color: #7c6f66; display: flex; align-items: center; gap: 6px; }
+    .card { background: #fff; border: 1px solid #f5d9b8; border-radius: 14px; padding: 18px 18px 14px; }
+    .title {
+        width: 100%; box-sizing: border-box; border: 0; outline: 0; padding: 0; background: transparent;
+        font: inherit; font-size: 22px; font-weight: 700; color: inherit;
+    }
+    .title::placeholder { color: #d6cbc2; }
+    .hint { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 4px 12px; font-size: 12px; color: #9b8f86; margin: 10px 0 12px; padding-bottom: 12px; border-bottom: 1px solid #f7e6d0; }
+    /* テーマ: rs-editor の CSS 変数だけで色を合わせる */
+    .card .rse {
+        --rse-accent: #f97316;
+        --rse-border: #f5d9b8;
+        --rse-btn-hover-bg: #fff1e0;
+        --rse-btn-active-bg: #ffe2c2;
+        --rse-toolbar-bg: #fffaf3;
+        --rse-placeholder: #c9bdb3;
+        --rse-insert-color: #b0763a;
+        --rse-min-height: 240px;
+    }
+    .card .rse-content img { border-radius: 10px; }
+    details { margin-top: 18px; font-size: 13px; color: #7c6f66; }
+    pre.out {
+        background: #2b211c; color: #f6e9dc; border-radius: 8px; padding: 12px 14px; font-size: 12px; line-height: 1.6;
+        white-space: pre-wrap; word-break: break-all; max-height: 260px; overflow-y: auto;
+    }
+    .status { font-size: 12px; color: #9b8f86; margin-top: 10px; min-height: 1.6em; }
+</style>
+</head>
+<body>
+<div class="page">
+    <h1>シンプルUI（スマホ向け）</h1>
+    <p class="lead">
+        固定ツールバーを出さず、<b>空の行の丸ボタン</b>で写真・区切り線を追加し（「＋」から見出し・表・ボックスなども挿入できます）、<b>文字を選択</b>すると文字色などの装飾バーが出ます。
+        下のボタンは <code>editor.setUI('simple' | 'standard')</code> を呼ぶだけで、本文・選択・undo 履歴はそのままです。
+        どちらのUIでも同じプラグイン・同じ保存形式なので、通常のエディタで作った表やボックスもそのまま残ります。
+    </p>
+    <div class="switch" role="group" aria-label="UIの切替">
+        <button type="button" data-ui="simple">シンプル</button>
+        <button type="button" data-ui="standard">通常</button>
+        <label><input type="checkbox" id="auto"> 画面幅 640px 以下で自動的にシンプルにする</label>
+    </div>
+
+    <div class="card">
+        <input class="title" placeholder="タイトル" aria-label="タイトル">
+        <div class="hint"><span>下書き</span><span>空の行の「＋」で写真や表、テキスト選択で装飾できます</span></div>
+        <textarea id="editor">
+<p>今日は公園まで散歩しました。<strong>とても良い天気</strong>で、たくさん歩けました。</p>
+<h2>通常のエディタで作った内容</h2>
+<p><span style="color: #e06666">文字色</span>や表・ボックスは、シンプルUIでもそのまま表示・保存されます。</p>
+<div class="rse-box" data-rse-box="fill" data-color="orange"><p>ボックスの中身も編集できます。</p></div>
+<table><tbody><tr><th>項目</th><th>メモ</th></tr><tr><td>体重</td><td>4.2kg</td></tr></tbody></table>
+<p></p>
+        </textarea>
+    </div>
+    <p class="status" id="status" role="status"></p>
+
+    <details>
+        <summary>保存されるHTML（どちらのUIでも同じ形式）</summary>
+        <pre class="out" id="html"></pre>
+    </details>
+</div>
+
+<script type="module">
+    import { createRSEditor } from '../dist/esm/index.js';
+    import { divider } from '../dist/esm/plugins/divider.js';
+    import { box } from '../dist/esm/plugins/box.js';
+
+    // デモ用: サーバーへ送らず data URL にする。実際はアップロードAPIのURLを返す。
+    const toDataURL = (file) => new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(reader.error);
+        reader.readAsDataURL(file);
+    });
+
+    const phone = matchMedia('(max-width: 640px)');
+    const editor = createRSEditor('#editor', {
+        // プラグインはUIに関係なく1回だけ登録する（= 保存形式が共通になる）
+        plugins: [divider, box],
+        placeholder: '本文を入力…',
+        imageUploadHandler: toDataURL,
+        // 通常UIのツールバー
+        toolbar: 'undo redo | bold italic underline strikethrough | forecolor backcolor | h2 h3 | bullist numlist blockquote | link image table | divider box',
+        // 最初に表示するUI。simple: {...} でシンプルUI側のボタンを変えられる
+        ui: phone.matches ? 'simple' : 'standard',
+        // シンプルUIのボタンは通常UIとは別に決められる。"..." より後ろはメニュー（空の行は「＋」、選択時は「…」）にまとまる
+        // simple: { floatingToolbar: 'bold forecolor heading ... italic link', insertToolbar: 'photo divider ... h2 table box' },
+    });
+    window.editor = editor;
+
+    const buttons = [...document.querySelectorAll('[data-ui]')];
+    const auto = document.querySelector('#auto');
+    const status = document.querySelector('#status');
+    const out = document.querySelector('#html');
+    const render = () => {
+        for (const button of buttons) button.setAttribute('aria-pressed', String(button.dataset.ui === editor.ui));
+        out.textContent = editor.getHTML();
+    };
+    for (const button of buttons) button.addEventListener('click', () => {
+        auto.checked = false;
+        editor.setUI(button.dataset.ui);
+    });
+    const applyAuto = () => { if (auto.checked) editor.setUI(phone.matches ? 'simple' : 'standard'); };
+    auto.addEventListener('change', applyAuto);
+    phone.addEventListener('change', applyAuto);
+    editor.on('uichange', (name) => {
+        status.textContent = name === 'simple' ? 'シンプルUIに切り替えました' : '通常UIに切り替えました';
+        render();
+    });
+    editor.on('change', render);
+    editor.on('uploadstatus', ({ message }) => { status.textContent = message; });
+    render();
+</script>
+</body>
+</html>

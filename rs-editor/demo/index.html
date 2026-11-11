@@ -73,12 +73,21 @@
     #v07-message { min-height:1.6em; font-size:14px; }
     #demo-v07 { line-height:1.7; }
     #demo-v07.v07-narrow { max-width:390px; }
+    .whats-new { margin:16px 0 12px; padding:14px 16px; border:1px solid #bfdbfe; border-radius:10px; background:#eff6ff; font-size:14px; line-height:1.7; }
+    .whats-new h2 { font-size:15px; margin:0 0 8px; }
+    .whats-new ul { margin:8px 0 0; padding-left:1.3em; color:#334155; font-size:13px; }
+    .ui-switch { display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
+    .ui-switch button { appearance:none; font:inherit; font-size:14px; min-height:40px; padding:8px 16px; border:1px solid #93c5fd; border-radius:999px; background:#fff; color:#1e3a8a; cursor:pointer; }
+    .ui-switch button[aria-pressed="true"] { background:#1d4ed8; border-color:#1d4ed8; color:#fff; font-weight:700; }
+    .ui-switch .open-dialog { border-radius:8px; border-color:#cbd5e1; color:#1e293b; }
+    .ui-switch .sep { width:1px; height:24px; background:#bfdbfe; margin:0 4px; }
+    #ui-status { font-size:12px; color:#475569; min-height:1.5em; margin-top:6px; }
 </style>
 </head>
 <body>
 <div class="page">
-    <h1>rs-editor <small>v0.9.3 デモ — 依存ゼロ・プラグイン式WYSIWYGエディタ</small></h1>
-    <p class="review-note">v0.9.3：選択の復元・引用とボックス・見出しID・画像の順次挿入・JSON入力の修正</p>
+    <h1>rs-editor <small>v0.10.0 デモ — 依存ゼロ・プラグイン式WYSIWYGエディタ</small></h1>
+    <p class="review-note">v0.10.0：スマホ向けのシンプルUIを追加し、設定画面（モーダル）の幅を広げました。下の「v0.10.0 の変更を確認する」で切り替えられます → <a href="./simple.html">シンプルUI専用のデモ</a></p>
     <div class="demo-tabs" role="tablist" aria-label="確認するデモ">
         <button id="tab-all" role="tab" aria-controls="demo-all" aria-selected="true">目次・ボックス・全機能</button>
         <button id="tab-v07" role="tab" aria-controls="demo-v07" aria-selected="false" tabindex="-1">v0.7：外部操作・タッチ</button>
@@ -86,7 +95,7 @@
     <section id="demo-all" role="tabpanel" aria-labelledby="tab-all">
     <p class="lead">
         <strong>v0.9：大きなアイコン・キャプション付きボックス・リンクカード</strong>を追加しました。見出しを書き換えると目次が更新されます。ボックスをクリックすると、設定・囲み解除・外側への段落追加ができます。
-        <br><a href="./blocks.html">目次・ボックス専用デモ</a> ／ <a href="./mobile.html">外部操作・タッチ操作デモ</a><br>
+        <br><a href="./simple.html">シンプルUI（スマホ向け）デモ</a> ／ <a href="./blocks.html">目次・ボックス専用デモ</a> ／ <a href="./mobile.html">外部操作・タッチ操作デモ</a><br>
         標準機能（〜v0.2）: undo / redo・書式・文字色 / 背景色・見出し・配置・引用・コードブロック・リスト・インデント・リンク・画像（アップロード / リサイズ）・表・HTMLソース表示・フローティングツールバー・Markdownショートカット。
         <br>v0.3 の opt-in プラグイン: 特殊文字・絵文字・日付挿入・NBSP・検索置換（Ctrl+F）・プレビュー・ブロック可視化・全画面・アンカー・動画埋め込み・目次（見出しから自動生成）・文字数カウント・自動リンク・下書き自動保存。最後の「⭐」はカスタムプラグインの例です。
         <br><strong>v0.5 の新機能</strong>: 空の段落で「/」を押すと<strong>スラッシュコマンド</strong>、段落ホバーで<strong>⠿ドラッグ並べ替え</strong>。ツールバーに<strong>チェックリスト・コールアウト・書式ペインター・脚注・コメント・リビジョン履歴（差分付き）・ルビ・文字種変換・日本語校正・縦書きプレビュー</strong>を追加。
@@ -99,6 +108,29 @@
         <label><input id="upload-delay" type="checkbox"> 画像アップロードの完了を5秒遅らせる（確認用）</label>
         <p>上の項目をオンにして画像ファイルを挿入し、待っている間に本文を編集すると、画像が保留されます。挿入したい場所を選び、通知の「現在の位置に挿入」を押してください。ファイルはこのデモ内で読み込み、サーバーには送りません。</p>
     </details>
+
+    <section class="whats-new" aria-label="今回の変更を確認する">
+        <h2>v0.10.0 の変更を確認する</h2>
+        <div class="ui-switch" role="group" aria-label="UIの切替">
+            <span>UI:</span>
+            <button type="button" data-ui="standard" aria-pressed="true">通常</button>
+            <button type="button" data-ui="simple" aria-pressed="false">シンプル（スマホ向け）</button>
+            <span class="sep" aria-hidden="true"></span>
+            <span>設定画面:</span>
+            <button type="button" class="open-dialog" data-open="linkcard">リンクカード</button>
+            <button type="button" class="open-dialog" data-open="box">ボックス</button>
+            <button type="button" class="open-dialog" data-open="link">リンク</button>
+        </div>
+        <div id="ui-status" role="status"></div>
+        <ul>
+            <li><strong>シンプルUI</strong>: ツールバーが消えます。「通常」に戻しても本文・undo 履歴はそのままです（<code>editor.setUI('simple' | 'standard')</code>）。</li>
+            <li><strong>空の行をクリック</strong>: 行の横に「写真」「区切り線」と<strong>「＋」</strong>が出ます。「＋」のメニューから、見出し・リスト・表・ボックス・リンクカード・目次など、通常UIと同じものを挿入できます（設定が必要なものは設定画面が開きます）。</li>
+            <li><strong>文字を選択</strong>: 太字・文字色・見出しなどの装飾バーが出ます。幅に入らないボタンは自動で<strong>「…」</strong>メニューにまとまります（スマホ幅で確認できます）。</li>
+            <li>どのボタンを並べ、どれをメニューに入れるかは、通常UIのツールバーとは別に <code>simple: { insertToolbar, floatingToolbar }</code> で決められます。このデモでは既定の並びに「ルビ」「コメント」「⭐スタンプ」を足しています。</li>
+            <li><strong>ドラッグ並べ替えの「⠿」</strong>: 本文にマウスを載せたときだけ、ブロックの左外に出ます（文字に重なりません）。</li>
+            <li><strong>設定画面（モーダル）の幅</strong>: PC では 480px 以上（リンクカード・ボックスは 600px）、スマホでは画面幅いっぱいに広がります。上の「設定画面」のボタンは、どちらのUIでも本文の選択位置のまま開けます。</li>
+        </ul>
+    </section>
 
     <textarea id="content">
 &lt;h1&gt;rs-editor へようこそ&lt;/h1&gt;
@@ -220,10 +252,27 @@
         outJson.textContent = JSON.stringify(window.editor.getJSON(), null, 2);
     }
 
+    // ---- v0.10: UIの切替（通常 / シンプル）。editor.setUI() を呼ぶだけで、本文・選択・履歴は維持される
+    const uiButtons = [...document.querySelectorAll('.ui-switch [data-ui]')];
+    const uiStatus = document.getElementById('ui-status');
+    let currentUI = 'standard';
+    function showUI(name) {
+        currentUI = name;
+        for (const button of uiButtons) button.setAttribute('aria-pressed', String(button.dataset.ui === name));
+    }
+
     function create() {
         window.__changes = 0;
         changeCountEl.textContent = '0';
         window.editor = createRSEditor('#content', {
+            ui: currentUI,
+            // シンプルUIのボタンは、通常UIのツールバー（下の toolbar）とは別に決められる。省略すると既定の並びになる
+            simple: {
+                // 文字を選択したとき: 先頭から幅に入るだけ並び、残りは自動で「…」メニューへ
+                floatingToolbar: 'bold italic strikethrough forecolor heading bullist numlist blockquote backcolor underline link ruby comment',
+                // 空の行: "..." より前は1タップのボタン、後ろは「＋」メニュー（'|' はメニューの区切り線）
+                insertToolbar: 'photo divider ... h2 h3 bullist numlist checklist blockquote codeblock | table box callout linkcard toc media | stamp',
+            },
             toolbar: 'undo redo | toc box linkcard | bold italic underline strikethrough | forecolor backcolor formatpainter | h1 h2 h3 | alignleft aligncenter alignright | blockquote codeblock callout | bullist numlist checklist | outdent indent | link image table media anchor footnote | comment revisions | ruby jpconvert proofread tategaki | divider charmap emoticons insertdatetime nonbreaking | searchreplace preview visualblocks fullscreen | code | stamp',
             plugins: [charmap, emoticons, insertdatetime, nonbreaking, searchreplace, preview, visualblocks, fullscreen, anchor, media, toc, box, linkcard, wordcount, autolink, autosave, stamp,
                 checklist, callout, slashmenu, dragblock, formatpainter, footnote, comments, revisions, ruby, jpconvert, proofread, tategaki, divider],
@@ -243,9 +292,28 @@
                 refresh(html);
             },
         });
+        window.editor.on('uichange', (name) => {
+            showUI(name);
+            uiStatus.textContent = name === 'simple'
+                ? 'シンプルUIに切り替えました。空の行をクリック、または文字を選択してみてください。'
+                : '通常UIに切り替えました。';
+        });
         refresh();
     }
     create();
+
+    for (const button of uiButtons) button.addEventListener('click', () => {
+        if (window.editor.destroyed) create();
+        window.editor.setUI(button.dataset.ui);
+    });
+    // 設定画面を開くボタン: mousedown で本文の選択を保ったまま、ツールバーのボタンと同じ処理を実行する
+    for (const button of document.querySelectorAll('.ui-switch [data-open]')) {
+        button.addEventListener('mousedown', (e) => e.preventDefault());
+        button.addEventListener('click', () => {
+            if (window.editor.destroyed) create();
+            if (!window.editor.exec(button.dataset.open)) uiStatus.textContent = 'readonly・ソース表示中は開けません。';
+        });
+    }
 
     const tabs=[document.getElementById('tab-all'),document.getElementById('tab-v07')];
     const panels=[document.getElementById('demo-all'),document.getElementById('demo-v07')];
@@ -253,7 +321,7 @@
         tabs.forEach((tab,i)=>{tab.setAttribute('aria-selected',String(i===index));tab.tabIndex=i===index?0:-1;panels[i].hidden=i!==index;});
         if(index===1) mountExternalDemo(panels[1]);
         // Close menus and re-evaluate selection popups when an editor becomes hidden.
-        for(const ed of [window.editor,window.externalEditor]) if(ed && !ed.destroyed) ed.setToolbar(ed.config.toolbar);
+        for(const ed of [window.editor,window.externalEditor]) if(ed && !ed.destroyed) ed.setToolbar(ed.ui === 'simple' ? false : ed.config.toolbar);
         window.dispatchEvent(new Event('resize'));
     }
     tabs.forEach((tab,index)=>{

@@ -11,6 +11,22 @@ export const RsEditor: import("vue").DefineComponent<import("vue").ExtractPropTy
         type: (StringConstructor | BooleanConstructor)[];
         default: undefined;
     };
+    insertToolbar: {
+        type: (StringConstructor | BooleanConstructor)[];
+        default: undefined;
+    };
+    insertPlacement: {
+        type: StringConstructor;
+        default: undefined;
+    };
+    ui: {
+        type: StringConstructor;
+        default: undefined;
+    };
+    simple: {
+        type: ObjectConstructor;
+        default: undefined;
+    };
     placeholder: {
         type: StringConstructor;
         default: undefined;
@@ -37,7 +53,7 @@ export const RsEditor: import("vue").DefineComponent<import("vue").ExtractPropTy
     };
 }>, () => import("vue").VNode<import("vue").RendererNode, import("vue").RendererElement, {
     [key: string]: any;
-}>, {}, {}, {}, import("vue").ComponentOptionsMixin, import("vue").ComponentOptionsMixin, ("focus" | "blur" | "update:modelValue" | "change" | "init" | "selectionchange")[], "focus" | "blur" | "update:modelValue" | "change" | "init" | "selectionchange", import("vue").PublicProps, Readonly<import("vue").ExtractPropTypes<{
+}>, {}, {}, {}, import("vue").ComponentOptionsMixin, import("vue").ComponentOptionsMixin, ("focus" | "blur" | "selectionchange" | "change" | "update:modelValue" | "init" | "uichange")[], "focus" | "blur" | "selectionchange" | "change" | "update:modelValue" | "init" | "uichange", import("vue").PublicProps, Readonly<import("vue").ExtractPropTypes<{
     modelValue: {
         type: StringConstructor;
         default: string;
@@ -48,6 +64,22 @@ export const RsEditor: import("vue").DefineComponent<import("vue").ExtractPropTy
     };
     floatingToolbar: {
         type: (StringConstructor | BooleanConstructor)[];
+        default: undefined;
+    };
+    insertToolbar: {
+        type: (StringConstructor | BooleanConstructor)[];
+        default: undefined;
+    };
+    insertPlacement: {
+        type: StringConstructor;
+        default: undefined;
+    };
+    ui: {
+        type: StringConstructor;
+        default: undefined;
+    };
+    simple: {
+        type: ObjectConstructor;
         default: undefined;
     };
     placeholder: {
@@ -77,17 +109,22 @@ export const RsEditor: import("vue").DefineComponent<import("vue").ExtractPropTy
 }>> & Readonly<{
     onFocus?: ((...args: any[]) => any) | undefined;
     onBlur?: ((...args: any[]) => any) | undefined;
-    "onUpdate:modelValue"?: ((...args: any[]) => any) | undefined;
-    onChange?: ((...args: any[]) => any) | undefined;
-    onInit?: ((...args: any[]) => any) | undefined;
     onSelectionchange?: ((...args: any[]) => any) | undefined;
+    onChange?: ((...args: any[]) => any) | undefined;
+    "onUpdate:modelValue"?: ((...args: any[]) => any) | undefined;
+    onInit?: ((...args: any[]) => any) | undefined;
+    onUichange?: ((...args: any[]) => any) | undefined;
 }>, {
     readonly: boolean;
+    simple: Record<string, any>;
     plugins: unknown[];
     toolbar: string;
     floatingToolbar: string | boolean;
+    insertToolbar: string | boolean;
+    ui: string;
     pluginOptions: Record<string, any>;
     modelValue: string;
+    insertPlacement: string;
     placeholder: string;
     autosaveKey: string;
     imageUploadHandler: Function;

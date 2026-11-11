@@ -1,7 +1,7 @@
 # ライブラリのインストール・更新
 
 <!-- rs-editor-release:start -->
-**rs-editor 0.9.3:** JSON入力・選択保持・引用／ボックス・目次・画像アップロードの修正をnpmjs.com・GitHub配布・デモへ反映しました。`npm install @sano1023/rs-editor@0.9.3` で利用できます。[README](./rs-editor/README.md)に操作手順とReact/Vueの連携例を掲載しています。npmとGitHubの配布ハッシュ一致、および認証なしのinstall/ciを確認済みです。
+**rs-editor 0.10.0:** スマホ向けのシンプルUI（`ui: 'simple'` / `editor.setUI()`）、空の行の挿入メニュー、選択時の装飾バー、設定画面（モーダル）の幅を追加しました。npmjs.com・GitHub配布・デモへ反映済みで、`npm install @sano1023/rs-editor@0.10.0` で利用できます。使い方とサンプルは[README](./rs-editor/README.md)の v0.10.0 の節を参照してください。シンプルUIのデモは [simple.html](./rs-editor/demo/simple.html) です。
 <!-- rs-editor-release:end -->
 
 全32ライブラリを **npmjs.com** (`https://registry.npmjs.org/`) の公開パッケージ **`@sano1023/rs-*`** として配布します。利用者のログイン・トークンは不要です。

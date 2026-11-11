@@ -15,7 +15,7 @@ npmjs.com の公開パッケージです。ログインやトークンは不要�
 <summary>npm レジストリを使わない場合（GitHub tarball 直指定）</summary>
 
 ```bash
-npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-editor-0.9.3.tgz
+npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-editor-0.10.0.tgz
 ```
 </details>
 
@@ -33,8 +33,8 @@ createRSEditor(document.querySelector('#app'), { /* オプション */ });
 ### `<script>` タグ（CDN・ビルド環境不要）
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sano1023/rs-editor@0.9.3/dist/rs-editor.css">
-<script src="https://cdn.jsdelivr.net/npm/@sano1023/rs-editor@0.9.3/dist/rs-editor.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sano1023/rs-editor@0.10.0/dist/rs-editor.css">
+<script src="https://cdn.jsdelivr.net/npm/@sano1023/rs-editor@0.10.0/dist/rs-editor.min.js"></script>
 <script>
   // 公開APIはグローバル RSEditor に載る
   RSEditor.createRSEditor(document.querySelector('#app'), { /* オプション */ });
@@ -71,7 +71,7 @@ export default function App() {
 
 # rs-editor
 
-プラグインアーキテクチャを持つ、依存ゼロのWYSIWYGエディタライブラリです（現在 v0.9.3）。
+プラグインアーキテクチャを持つ、依存ゼロのWYSIWYGエディタライブラリです（現在 v0.10.0）。
 
 - **依存ゼロ**: ランタイム依存なし。ビルド済みの ESモジュールをパッケージから import できる
 - **プラグインアーキテクチャ**: 太字などの組み込み機能もすべて同じプラグインAPIで実装（利用者が数行で機能を追加できる）
@@ -83,6 +83,7 @@ export default function App() {
 - **v0.5 のブロック体験（opt-in）**: **スラッシュコマンド**（空段落で `/` → ブロック挿入メニュー・文字入力で絞り込み・↑↓Enter操作）／**チェックリスト**（☑クリックでトグル）／**コールアウト**（💡情報・⚠️注意・✅成功・📝メモの色付きボックス）／**ブロックのドラッグ並べ替え**（⠿ハンドル・undo対応）
 - **v0.5 の上位プラグイン（opt-in）**: **コメント**（選択範囲にアンカー・サイドパネルで一覧/解決・HTML属性だけで保存されるので外部ストア不要）／**脚注**（自動採番・文末リストに自動同期）／**フォーマットペインター**（書式コピー→次の選択に適用）／**リビジョン履歴**（版の保存・単語レベル差分・復元）— いずれも opt-in で追加できます
 - **v0.6 の追加（opt-in）**: **区切り線（divider）** — 色・太さ・線種（実線/破線/点線/二重線）・幅を指定できる `<hr>`。プリセットのドロップダウン＋プレビュー付きダイアログ、本文の区切り線はクリック選択→ダブルクリックで編集・Backspaceで削除
+- **v0.10 のシンプルUI（スマホ向け）**: 固定ツールバーを出さず、**空の行の丸ボタン**（写真・区切り線・「＋」メニュー）と**選択時の装飾バー**だけで書ける note 風のUI。ボタンの並びは通常UIとは別に設定できる。`editor.setUI('simple' | 'standard')` で通常UIと切り替えられ、本文・履歴・保存形式は共通（→ [使い方](#v0100-シンプルuiスマホ向けとui切替)）
 - **v0.5 の日本語特化（opt-in）**: **ルビ**（ふりがな挿入・クリック編集）／**文字種変換**（全半角・ひらカタ・半角カナ→全角）／**かんたん校正**（全角英数・半角カナ・句読点混在・カタカナ長音ゆれ・ら抜き言葉を辞書レスで検出、ワンクリック/一括修正）／**縦書きプレビュー**
 - **ライセンス**: 無償（商用可）。改変・再配布不可。詳細は [LICENSE.txt](./LICENSE.txt) を参照してください。
 
@@ -142,6 +143,10 @@ editor.destroy();              // 元の textarea / div に戻す
 | `onChange` | `(html) => void` | 内容変更時（IME変換中は発火しない） |
 | `imageUploadHandler` | `(file) => Promise<url>` | 画像アップロード連携。設定すると画像ダイアログのファイル選択・画像ファイルのペースト/ドロップが有効になる |
 | `floatingToolbar` | string \| `false` | 選択時ポップアップのボタン定義。既定 `'bold italic underline strikethrough | link'`、`false` で無効化 |
+| `insertToolbar` | string \| `false` | 空の行にキャレットがあるとき、行の横に出す挿入ボタン。既定 `false`（通常UIでは出さない） |
+| `insertPlacement` | `'auto'` \| `'inline'` | 挿入ボタンの位置。`'auto'` は左に余白があれば行の左外、なければ行の右端。`'inline'` は常に行の右端 |
+| `ui` | `'standard'` \| `'simple'` | 最初に表示するUI。`'simple'` はスマホ向けのシンプルUI（[v0.10.0](#v0100-シンプルuiスマホ向けとui切替)） |
+| `simple` | `{ toolbar, floatingToolbar, insertToolbar }` | シンプルUI側のボタン定義（省略時は既定のシンプルUI） |
 
 ### Editor メソッド
 
@@ -155,17 +160,20 @@ editor.destroy();              // 元の textarea / div に戻す
 | `focus()` / `setReadonly(v)` / `destroy()` | 基本操作 |
 | `toggleSource(force?)` | WYSIWYG ⇔ HTMLソース編集の切替 |
 | `exec(name)` / `isActive(name)` | ツールバーボタンの実行 / 押下状態 |
-| `on(event, cb)` / `off(event, cb)` | `change` `selectionchange` `focus` `blur` `init` `destroy` `sourcemode` |
+| `setUI(name)` / `ui` | UIの切替（`'standard'` / `'simple'`）と現在のUI。本文・選択・undo/redo 履歴は維持 |
+| `on(event, cb)` / `off(event, cb)` | `change` `selectionchange` `focus` `blur` `init` `destroy` `sourcemode` `uichange` |
 | `commands.*` | プラグイン向けコマンド群（`toggleMark` `setHeading` `toggleList` `setLink` `setColor` `setBgColor` `setAlign` `indent` `outdent` `insertTable` `tableAddRow/Col` `tableDeleteRow/Col` `tableDelete` など） |
 
 ### 標準ツールバーボタン
 
-`undo redo bold italic underline strikethrough forecolor backcolor h1 h2 h3 paragraph alignleft aligncenter alignright blockquote codeblock bullist numlist outdent indent link unlink image table code`
+`undo redo bold italic underline strikethrough forecolor backcolor h1 h2 h3 heading paragraph alignleft aligncenter alignright blockquote codeblock bullist numlist outdent indent link unlink image photo table code`
 
 - `forecolor` / `backcolor` はパレットのドロップダウン（「色を解除」つき）
 - `table` はドロップダウンで挿入・行/列の追加削除・表の削除。セル内は `Tab / Shift+Tab` で移動し、最終セルの `Tab` は行を追加
 - `indent` / `outdent` はリスト内ではネスト操作、段落・見出しではインデント（最大8段）
 - 画像はクリックで選択し、右下ハンドルのドラッグでリサイズ（width属性・縦横比維持）
+- 定義の中に `...` を書くと、それより後ろのボタンは「…」メニューにまとまる（v0.10。例: `'undo redo | bold italic ... table media code'`）
+- `heading` はレベルを選ばない見出しボタン（段落 ⇔ h2）。`photo` はダイアログを挟まず端末の写真・画像ファイルを選んでアップロードする（`imageUploadHandler` が必要）。どちらもシンプルUIの既定ボタン
 
 ショートカット: `Ctrl+B/I/U`（太字/斜体/下線）、`Ctrl+Shift+X`（取り消し線）、`Ctrl+K`（リンク）、`Ctrl+Z / Ctrl+Y`（undo/redo）、リスト内 `Tab / Shift+Tab`（ネスト/解除）。コードブロック内は `Enter` で改行、空行でもう一度 `Enter` すると抜けます。引用内も空行で `Enter` すると引用の外に出ます（途中なら引用が分割される）。
 
@@ -306,6 +314,7 @@ createRSEditor('#content', { toolbar: '… | stamp', plugins: [stamp] });
 ```
 
 - `buttons` のキーがツールバー定義文字列で使う名前になる
+- ボタンに `onInsert(editor)` を定義すると、空の行の挿入ボタン（`insertToolbar`）から押されたときだけその動作を実行する（省略時は `onAction`／メニューの先頭項目）。キャレットの行へ挿入するための入口（例: `toc`）
 - `keymaps` の修飾キーは `Mod`（Ctrl/⌘）/ `Shift` / `Alt`
 - `schema.nodes` に `{ inline, match(el), parse(el), serialize(node) }` を登録すると独自ノード種別を保存・復元できる
 
@@ -375,7 +384,7 @@ createRSEditor('#content', { toolbar: '… | stamp', plugins: [stamp] });
 
 ## 検証
 
-`node --test rs-editor/test/` によるモデルレベルのテスト（divider: 17項目 — 属性の正規化・HTML/JSON往復・サニタイズ・挿入/編集/削除の変形）に加え、Playwright による自動テスト（v0.1: 29項目 + v0.2: 21項目 + v0.3: 16項目 + toc: 9項目 + ブロック脱出UX: 12項目 + pluginOptions: 8項目 + v0.5: 18項目）で、基本操作・HTML/JSONラウンドトリップ・ペースト浄化・undo/redo・テーブル操作・色/配置/インデント・Markdownショートカット・フローティングツールバー・画像アップロード/リサイズ・全拡張プラグイン（v0.5の12本は実クリック/実ドラッグ/実キー入力で検証）に加え、日本語IME受け入れテスト（変換中の change 抑制 / 1変換=1履歴 / 太字継続 / リスト内変換→Enter）を CDP の IME エミュレーションで確認済み。
+`node --test rs-editor/test/*.test.mjs` によるモデルレベルのテスト（divider: 17項目 — 属性の正規化・HTML/JSON往復・サニタイズ・挿入/編集/削除の変形）に加え、Playwright による自動テスト（v0.1: 29項目 + v0.2: 21項目 + v0.3: 16項目 + toc: 9項目 + ブロック脱出UX: 12項目 + pluginOptions: 8項目 + v0.5: 18項目）で、基本操作・HTML/JSONラウンドトリップ・ペースト浄化・undo/redo・テーブル操作・色/配置/インデント・Markdownショートカット・フローティングツールバー・画像アップロード/リサイズ・全拡張プラグイン（v0.5の12本は実クリック/実ドラッグ/実キー入力で検証）に加え、日本語IME受け入れテスト（変換中の change 抑制 / 1変換=1履歴 / 太字継続 / リスト内変換→Enter）を CDP の IME エミュレーションで確認済み。
 
 ## ライセンス
 
@@ -474,13 +483,265 @@ createRSEditor('#content', {
 
 [ボックス・カードの見本を含むデモ](./demo/index.html)
 
+### v0.10.0: シンプルUI（スマホ向け）とUI切替
+
+スマホでは通常のツールバーが数段に折り返して本文が狭くなるため、固定ツールバーを出さないUIを追加しました。
+
+- **空の行**にキャレットを置くと、その行の横に丸い挿入ボタンが出ます。「写真」「区切り線」は1タップで挿入し、**「＋」**のメニューからは見出し・リスト・表・ボックス・リンクカード・目次など、通常UIと同じものを挿入できます（設定が必要なものは設定画面が開きます）。
+- **文字を選択**すると装飾バー（太字・斜体・取り消し線・文字色・見出し・箇条書き・番号付きリスト・引用・背景色・下線・リンク）が出ます。幅に入らないボタンは自動で**「…」**メニューにまとまります。
+- どのボタンを並べ、どれをメニューに入れるかは、通常UIのツールバーとは別に設定できます（→ [ボタンを変える](#ボタンを変える)）。
+- 切り替わるのはボタンの出し方だけです。プラグイン・保存形式（HTML / JSON）・ショートカット・Markdown入力は通常UIと共通です。
+
+#### この版で変わったこと（一覧）
+
+| 種類 | 内容 | 通常UIへの影響 | 説明 |
+|---|---|---|---|
+| 追加 | シンプルUIと、`setUI()` による通常UIとの切替 | なし（`ui` を指定しなければ従来どおり） | [サンプル](#そのまま使えるサンプル)・[切替](#いつ切り替えるかはアプリ側で決める)・[互換性](#通常uiとの互換性) |
+| 追加 | 空の行の挿入ボタンと「＋」メニュー（`insertToolbar`） | 指定したときだけ出る | [ボタンを変える](#ボタンを変える) |
+| 追加 | 選択時バーの文字色・背景色など。幅に入らないボタンは「…」メニューへ自動で移る | シンプルUIのみ | [ボタンを変える](#ボタンを変える) |
+| 追加 | ツールバー定義の `...`（それ以降を「その他」メニューにまとめる） | 書いたときだけ | [ボタンを変える](#ボタンを変える) |
+| 追加 | `photo`・`heading` ボタン、プラグイン用の `onInsert`・`openDialog({ width })` | 使ったときだけ | [早見表](#v0100-で増えた設定api早見表) |
+| 変更 | 設定画面（モーダル）の幅。PCは480px以上、スマホは画面幅いっぱい | **あり** | [修正の詳細](#合わせて直したこと確認状況) |
+| 修正 | 選択時バーをキーボードで操作できない（`Tab` で移動できる） | **あり** | [表示のルール](#表示のルール) |
+| 修正 | ドラッグ並べ替えの「⠿」が文字に重なる | **あり** | [修正の詳細](#合わせて直したこと確認状況) |
+| 修正 | カラーパレットの列ずれ、書式ボタンが点灯しない場合がある | **あり** | [修正の詳細](#合わせて直したこと確認状況) |
+
+動くサンプルは2つあります。コードをそのまま読めるよう、どちらも1ファイルで完結しています。
+
+- [demo/simple.html](./demo/simple.html) — シンプルUIの最小構成。タイトル欄つきの記事入力画面、通常UIとの切替、画面幅での自動切替、保存されるHTMLの表示
+- [demo/index.html](./demo/index.html) — 全プラグインを載せた例。本文の上の「v0.10.0 の変更を確認する」で、UIの切替と設定画面を試せる。`simple: { ... }` でボタンを通常UIと別に決める例を含む
+
+#### そのまま使えるサンプル
+
+記事入力画面にシンプルUIを入れ、スマホ幅のときだけシンプルUIにする例です（Vite などのバンドラを使うアプリ向け。`/api/images` は利用側で用意する画像アップロードAPIで、`{ "url": "https://..." }` を返す想定）。
+
+```html
+<button type="button" id="ui-toggle"></button>
+<textarea id="content"><p>本文</p></textarea>
+<button type="button" id="save">保存</button>
+```
+
+```js
+import { createRSEditor } from '@sano1023/rs-editor';
+import { divider } from '@sano1023/rs-editor/plugins/divider';
+import { box } from '@sano1023/rs-editor/plugins/box';
+import '@sano1023/rs-editor/rs-editor.css';
+
+// 写真ボタン・貼り付け・ドロップで呼ばれる。画像のURLを返す
+async function uploadImage(file) {
+    const body = new FormData();
+    body.append('file', file);
+    const response = await fetch('/api/images', { method: 'POST', body });
+    if (!response.ok) throw new Error('画像をアップロードできませんでした');
+    return (await response.json()).url;
+}
+
+const phone = matchMedia('(max-width: 640px)');
+const editor = createRSEditor('#content', {
+    plugins: [divider, box],            // どちらのUIでも同じものを登録する（保存形式が共通になる）
+    imageUploadHandler: uploadImage,
+    placeholder: '本文を入力…',
+    toolbar: 'undo redo | bold italic underline | forecolor backcolor | h2 h3 | bullist numlist blockquote | link image table | divider box',
+    ui: phone.matches ? 'simple' : 'standard',
+});
+
+// 画面幅が変わったら切り替える（本文・選択・undo 履歴はそのまま）
+phone.addEventListener('change', () => editor.setUI(phone.matches ? 'simple' : 'standard'));
+
+// 利用者が手動で切り替えるボタン
+const toggle = document.querySelector('#ui-toggle');
+const label = () => { toggle.textContent = editor.ui === 'simple' ? '通常の編集画面にする' : 'シンプルな編集画面にする'; };
+toggle.addEventListener('click', () => editor.setUI(editor.ui === 'simple' ? 'standard' : 'simple'));
+editor.on('uichange', label);
+label();
+
+// 保存。どちらのUIで編集しても同じ形式のHTMLが得られる
+document.querySelector('#save').addEventListener('click', () => {
+    const html = editor.getHTML();
+    // fetch('/api/articles', { method: 'POST', body: JSON.stringify({ html }) }) など
+});
+```
+
+最小限の指定は次のとおりです。以降の節で、切替・互換性・ボタンの変更・表示のルールを順に説明します。
+
+```js
+import { createRSEditor } from '@sano1023/rs-editor';
+import { divider } from '@sano1023/rs-editor/plugins/divider';
+import '@sano1023/rs-editor/rs-editor.css';
+
+const editor = createRSEditor('#content', {
+    plugins: [divider],                 // UIに関係なく1回だけ登録する（区切り線ボタンに必要）
+    imageUploadHandler: uploadImage,    // 写真ボタンに必要。(file) => Promise<画像URL>
+    toolbar: 'undo redo | bold italic | h2 h3 | bullist numlist | link image | divider',  // 通常UIのツールバー
+    ui: 'simple',                       // 最初に表示するUI。省略時は 'standard'（通常UI）
+});
+
+editor.setUI('standard');   // 通常UIへ。本文・選択・undo/redo 履歴はそのまま
+editor.setUI('simple');     // シンプルUIへ
+editor.ui;                  // 現在のUI: 'standard' | 'simple'
+editor.on('uichange', (name) => console.log(name));
+```
+
+script タグ版も同じオプションです（`RSEditor.createRSEditor('#content', { ui: 'simple', plugins: [RSEditor.plugins.divider] })`）。
+
+#### いつ切り替えるかはアプリ側で決める
+
+rs-editor は画面幅を見て自動では切り替えません。「幅は狭いがキーボードとマウスで使うPC」「横向きのタブレット」などをライブラリ側で判定すると、意図しない切替が起きるためです。`setUI()` を好きな条件で呼んでください。
+
+```js
+// 例1: 画面幅で切り替える
+const phone = matchMedia('(max-width: 640px)');
+const apply = () => editor.setUI(phone.matches ? 'simple' : 'standard');
+phone.addEventListener('change', apply);
+apply();
+
+// 例2: 利用者が選ぶ（設定を保存しておき、次回は ui オプションに渡す）
+simpleButton.addEventListener('click', () => editor.setUI('simple'));
+```
+
+`setUI()` は指定したUIになっていれば `true`、未知の名前・破棄後は `false` を返します。ソース表示中に呼ぶと、編集中のソースを本文へ反映してから切り替えます。
+
+#### 通常UIとの互換性
+
+- 2つのUIは同じエディタ・同じプラグイン・同じ保存形式で動きます。通常UIで作った表・文字色・配置・ボックス・目次・リンクカードなどは、シンプルUIでもそのまま表示・編集・保存されます（専用のボタンが出ないだけで、構造は変わりません）。ボックスや目次をタップしたときの「設定／削除」も同じです。
+- シンプルUIのボタンは通常UIと同じコマンドを実行します。シンプルUIで書いた本文を通常UIで開いても、同じHTML・JSONです。
+- 互換になるのは**同じ `plugins` を登録している場合**です。PC用とスマホ用のページで別々に `createRSEditor` する場合も `plugins` を揃えてください（例: `divider` を登録していないエディタは区切り線を読み込みません。これは従来と同じ動作です）。1つのエディタを `setUI()` で切り替える使い方なら、常に揃います。
+
+#### ボタンを変える
+
+| オプション | 既定値 | 説明 |
+|---|---|---|
+| `simple.floatingToolbar` | `'bold italic strikethrough forecolor heading bullist numlist blockquote backcolor underline link'` | シンプルUIの選択時バー。`false` で非表示 |
+| `simple.insertToolbar` | `'photo divider ... h2 h3 bullist numlist checklist blockquote codeblock \| table box callout linkcard toc media'` | シンプルUIの空行ボタン。`false` で非表示 |
+| `simple.toolbar` | `false` | シンプルUIでも固定ツールバーを出す場合に指定 |
+| `insertToolbar` | `false` | 通常UIでも空行ボタンを使う場合に指定 |
+| `insertPlacement` | `'auto'` | 挿入ボタンの位置。下記参照 |
+
+```js
+createRSEditor('#content', {
+    plugins: [divider, box],
+    ui: 'simple',
+    simple: {
+        // 文字を選択したとき。先頭から幅に入るだけ並び、入らない分は自動で「…」メニューへ
+        floatingToolbar: 'bold forecolor backcolor heading link underline',
+        // 空の行。"..." より前は1タップのボタン、後ろは「＋」メニュー（'|' はメニューの区切り線）
+        insertToolbar: 'photo divider ... h2 h3 bullist | table box',
+    },
+});
+editor.setInsertToolbar('photo');        // 後から変更（現在のUIの定義だけが変わる）
+editor.setFloatingToolbar();             // 引数省略・true で、現在のUIの既定に戻す
+```
+
+- ボタン名は通常UIのツールバーと同じもの（標準ボタンと、登録したプラグインのボタン）を使えます。**プラグインを登録していないボタン名は表示されません**（既定の `checklist` `box` `callout` `linkcard` `toc` `media` `divider` は、そのプラグインを `plugins` に入れたときだけ出ます）。
+- **`...` で「その他」メニューにまとめる**: 定義の中に `...` を書くと、それより後ろのボタンは並べずに1つのメニューボタンにまとめます。空の行では「＋」、選択時バーと固定ツールバーでは「…」のボタンになり、メニューにはアイコンと名前が並びます。この書き方は通常UIの `toolbar` / `floatingToolbar` でも使えます（例: `toolbar: 'undo redo | bold italic ... table media code'`）。
+- **選択時バーは1行に収めます**: シンプルUIの選択時バーは折り返さず、画面幅に入らないボタンを後ろから自動で「…」メニューへ移します（先頭に書いたボタンほど優先して並びます）。既定の並びは、PCでは全部、幅390pxのスマホでは7個＋「…」です。「…」から文字色・背景色を選ぶと、続けてパレットが開きます。
+- `setToolbar()` / `setFloatingToolbar()` / `setInsertToolbar()` は**現在のUI**の定義だけを変更します。定義はUIごとに保持され、切り替えて戻っても残ります。
+- 挿入ボタンと「＋」メニューは1回の選択で実行します。メニュー型のボタン（`divider` など）もプリセットのメニューを開かず、既定の動作（`divider` なら標準の線、`table` なら行数・列数の設定画面）を実行します。`toc` は文書の先頭ではなく、その行に目次を入れます。
+- `photo`: 端末のファイル選択を直接開き、選んだ画像を `imageUploadHandler` でアップロードして、押した時点の行に挿入します（複数選択可）。処理中の通知・保留・失敗時の扱いは[画像アップロード](#複数画像のアップロードと保留)と同じです。`imageUploadHandler` が未設定なら `image` と同じURLダイアログを開きます。`pluginOptions: { image: { multiple: false, accept: 'image/png,image/jpeg' } }` で1枚ずつ・種類の限定ができます。
+- `heading`: レベルを選ばない見出しボタンです。段落を h2 にし、見出し（h1〜h3 のどれでも）で押すと段落に戻します。レベルは `pluginOptions: { block: { headingLevel: 3 } }` で変更できます。
+
+#### 表示のルール
+
+- 挿入ボタンは、本文にフォーカスがあり、キャレットが**空の段落**にあるときだけ表示します（見出しの行末で Enter した直後の空行を含みます）。文字を入力する・範囲選択する・本文の外へフォーカスが移ると消えます。readonly・IME変換中・ダイアログ表示中は表示しません。
+- 位置は、行の左に余白があれば行の左外、スマホのように余白がなければ行の右端です。エディタのすぐ左に別のUI（サイドメニューなど）がある画面では `insertPlacement: 'inline'` を指定すると、常に行の右端に出します。
+- 選択時の装飾バーは、マウス・ペンでは選択範囲の上、**指で触れた後は選択範囲の下**に出します（上に出るOSのコピー／貼り付けメニューと、下端の選択ハンドルを避けるため）。通常UIの選択時バーの位置は変更していません。
+- 挿入後の入力行がキーボードの裏や画面外に出る場合は、見える位置までスクロールします。
+- キーボード操作: 空の行で `Tab` を押すと挿入ボタンへ、**文字を選択して `Tab` を押すと選択時の装飾バーへ**移動します（本文中に目次やリンクカードのリンクがあっても、ボタンが出ている間は先にボタンへ移ります）。`←` `→` で選択、`Enter` で実行、`Esc`（または `Shift+Tab`）で本文に戻ります。実行後は本文へフォーカスが戻り、選択は保たれます。文字色のパレットや「＋」「…」のメニューは、開いたあと `Tab` で項目へ移動して `Enter` で選びます。`Esc` はメニューだけを閉じ、開いたボタンへフォーカスを戻します。
+- ドラッグ並べ替え（`dragblock` プラグイン）を併用すると、行の左外には「⠿」ハンドルが出ます。挿入ボタンはその分だけ左に離して表示します。
+
+#### 見た目の調整
+
+シンプルUIは枠・背景・左右の余白を持ちません（アプリ側のカードや記事レイアウトにそのまま置く想定）。必要に応じて CSS 変数で調整します。色は従来の `--rse-accent` `--rse-border` `--rse-bg` などに従います。
+
+```css
+.rse {
+    --rse-accent: #f97316;                       /* 押下中・ホバーの色 */
+    --rse-simple-border: 1px solid #cbd5e1;      /* シンプルUIにも枠を付ける（既定: なし） */
+    --rse-simple-radius: 8px;
+    --rse-simple-bg: #fff;                       /* 既定: transparent */
+    --rse-simple-padding: 12px 14px;             /* 本文の余白（既定: 8px 0） */
+    --rse-insert-size: 36px;                     /* 挿入ボタンの直径（既定: 32px、タッチ端末は 40px） */
+    --rse-insert-color: #64748b;                 /* 挿入ボタンのアイコン色 */
+}
+```
+
+シンプルUIの本文は 16px 未満にならないようにしています（iOS がフォーカス時に画面を拡大しないため）。エディタ本体には `rse-simple` クラスが付くので、`.rse-simple .rse-content` でアプリ側の文字サイズ・行間を指定できます。
+
+#### React / Vue
+
+`ui` を変えるとエディタを作り直さずに `setUI()` します。`simple` / `insertToolbar` / `insertPlacement` はマウント時の設定です。
+
+```jsx
+<RsEditor value={html} onChange={setHtml} plugins={[divider]} imageUploadHandler={upload}
+    ui={isPhone ? 'simple' : 'standard'} simple={{ insertToolbar: 'photo divider' }} />
+```
+
+```vue
+<RsEditor v-model="html" :plugins="plugins" :image-upload-handler="upload"
+    :ui="isPhone ? 'simple' : 'standard'" @uichange="onUiChange" />
+```
+
+ref からは `setUI(name)` も呼べます。
+
+#### やりたいこと別の設定
+
+| やりたいこと | 書き方 |
+|---|---|
+| スマホのときだけシンプルUIにする | `ui: phone.matches ? 'simple' : 'standard'` と `phone.addEventListener('change', …)`（[サンプル](#そのまま使えるサンプル)） |
+| 「＋」メニューの中身を変える | `simple: { insertToolbar: 'photo divider ... h2 h3 \| table box' }`（`...` より後ろがメニュー、`\|` は区切り線） |
+| 「＋」を出さず、ボタンだけ並べる | `simple: { insertToolbar: 'photo divider table' }`（`...` を書かない） |
+| 空の行のボタンを出さない | `simple: { insertToolbar: false }` |
+| 選択時バーを太字・文字色・リンクだけにする | `simple: { floatingToolbar: 'bold forecolor link' }` |
+| 自作プラグインのボタンを入れる | `definePlugin` の `buttons` に付けた名前を、定義の文字列にそのまま書く（例: `'photo ... table stamp'`） |
+| 通常UIでも空の行のボタンを使う | `insertToolbar: 'photo divider ... table box'`（`simple` の外に書く） |
+| 通常UIのツールバーを短くし、残りを「…」に入れる | `toolbar: 'undo redo \| bold italic ... table media code'` |
+| 表示中のエディタのボタンを変える | `editor.setInsertToolbar('photo')` / `editor.setFloatingToolbar('bold link')`（現在のUIの定義だけが変わる） |
+| シンプルUIにも枠を付ける | CSS で `.rse { --rse-simple-border: 1px solid #cbd5e1; --rse-simple-padding: 12px 14px; }` |
+| 設定画面（モーダル）の最低幅を変える | CSS で `.rse { --rse-dialog-width: 560px; }` |
+| エディタの左隣にメニューなどがあり、挿入ボタンが重なる | `insertPlacement: 'inline'`（常に行の右端に出す） |
+
+#### v0.10.0 で増えた設定・API（早見表）
+
+| 分類 | 名前 | 内容 |
+|---|---|---|
+| オプション | `ui` | `'standard'`（既定）/ `'simple'`。最初に表示するUI |
+| オプション | `simple` | `{ toolbar, floatingToolbar, insertToolbar }`。シンプルUI側のボタン定義（省略した項目は既定） |
+| オプション | `insertToolbar` | 通常UIの、空の行の挿入ボタン。既定は `false`（出さない） |
+| オプション | `insertPlacement` | `'auto'`（既定）/ `'inline'`。挿入ボタンの位置 |
+| オプション | `pluginOptions.image` | `{ multiple, accept }`。`photo` のファイル選択（既定は複数選択・`image/*`） |
+| オプション | `pluginOptions.block` | `{ headingLevel }`。`heading` が作る見出しのレベル（既定 2） |
+| メソッド | `setUI(name)` | UIを切り替える。成功は `true` |
+| メソッド | `setInsertToolbar(definition)` | 現在のUIの挿入ボタンを変更。省略・`true` で既定、`false` で非表示 |
+| プロパティ | `ui` | 現在のUI（`'standard'` / `'simple'`） |
+| イベント | `uichange` | UIが切り替わったとき。引数は新しいUIの名前 |
+| ボタン | `photo` / `heading` | 写真・画像ファイルを直接選んで挿入 / 見出し（h2）と段落の切替 |
+| 定義の書き方 | `...` | それ以降のボタンを「その他」メニューにまとめる（全ツールバー共通） |
+| プラグインAPI | `buttons.<名前>.onInsert(editor)` | 空の行の挿入ボタンから押されたときの動作（省略時は通常の動作） |
+| プラグインAPI | `ed.openDialog({ width })` | ダイアログの幅（数値はpx、CSSの長さも可） |
+| CSS | `--rse-simple-border` `--rse-simple-radius` `--rse-simple-bg` `--rse-simple-padding` | シンプルUIの枠・角丸・背景・本文の余白 |
+| CSS | `--rse-insert-size` `--rse-insert-color` `--rse-dialog-width` | 挿入ボタンの直径とアイコン色、モーダルの最低幅 |
+| CSS | `.rse-simple` | シンプルUIのときエディタ本体に付くクラス |
+| React / Vue | `ui` `simple` `insertToolbar` `insertPlacement` | 同名のprops。`ui` は変更に追従。ref から `setUI(name)`、Vue は `@uichange` |
+
+#### 合わせて直したこと・確認状況
+
+- **選択時の装飾バーをキーボードで操作できない問題**を修正しました（通常UIの選択時バーにも適用）。文字を選択して `Tab` を押すと、本文のフォーカスが外れた時点でバーが閉じ、フォーカスがページ先頭（body）へ落ちていました。固定ツールバーのないシンプルUIでは、文字色などをキーボードで選べない状態でした。本文からバー（とバーから開いたメニュー）へ移るときは表示を保ち、エディタの外へフォーカスが出たときに閉じます。また、本文中に目次やリンクカードがあるとブラウザ任せの `Tab` はそのリンクへ先に移るため、バーや挿入ボタンが出ている間の `Tab` は必ずそこへ移動するようにしました（リスト・表の中の `Tab` は従来どおりです）。メニューを `Esc` で閉じたときにフォーカスを失う点も直しました。
+- **ドラッグ並べ替えの「⠿」が文字に重なる問題**を修正しました（`dragblock` プラグイン。通常UIにも適用）。ハンドルは本文にマウスを載せたときだけ、ブロックの左外に出ます。これまでは、非表示のはずのハンドルがエディタの左上に出たままになり、左余白が狭いとホバー時も文字の上に重なっていました。画面の左端で置く場所がないときは表示しません。
+- カラーパレットで「色を解除」が1列目に入り、色見本の列がずれて表示される問題を修正しました（通常UIにも適用）。
+- 単語を選んで太字などを付けた直後に、そのボタンが点灯しないことがある問題を修正しました（選択の端が書式の外側の境界に残る場合）。範囲選択では、最初に選択されている文字の書式も見て判定します。通常UIのツールバーにも適用されます。
+- **設定画面（モーダル）の幅**を広げました。これまでは内容任せの幅で、入力欄だけのダイアログはPCでも200px台でした。幅を指定しないモーダルは最低480px、見本を表示するリンクカード・ボックスは600pxです。画面が狭いときは画面幅に収まり、スマホでは幅いっぱいになります。タッチ端末では入力欄を16pxにしています（iOSがフォーカス時に画面を拡大しないため）。検索・置換（本文を見ながら使う非モーダル）は従来の幅です。
+  - 最低幅は `.rse { --rse-dialog-width: 560px; }` で変更できます。独自プラグインは `ed.openDialog({ title, fields, width: 720 })`（数値はpx、`'40rem'` などのCSS長さも可）で幅を指定できます。
+- 既定のUI（`ui` 未指定）は、上記の修正（モーダルの幅・選択時バーのキーボード操作・ドラッグハンドル・パレット・ボタンの点灯）を除いて従来と同じ表示・動作です。既存のHTML・JSONはそのまま読み込めます。
+- 検証: ユニット162件（今回26件追加）と、Chrome 157 のPC／タッチ表示のブラウザ11ファイル（今回2ファイル追加。追加分は Chrome 122 でも実行）。挿入ボタンの位置・1タップ挿入・「＋」「…」メニュー・ファイル選択からの写真挿入・装飾バーと文字色・UI切替・モーダルの幅・ドラッグハンドルの位置・表示領域を縮めたキーボード表示の模擬・キーボードだけでの挿入と装飾（Tab／矢印／Enter／Esc）・Popover API のないブラウザの模擬を確認しています。
+- **iPhone / Android の実機では未確認**です（接続できる端末がないため）。特に、指で選択したときの装飾バーとOSのメニュー・選択ハンドルの重なり、ソフトウェアキーボード表示中のボタン位置、OSの日本語IMEは、実機で確認してください。ヘッドレスChromeでは長押しによる単語選択を再現できず、指で触れた後の選択として模擬しています。
+
 ### v0.9.3の使い方・更新時の確認
 
 ```bash
 npm install @sano1023/rs-editor@0.9.3
 ```
 
-既存のHTML・JSONを引き続き読み込めます。新しい操作を有効にするフラグは不要です。目次・ボックス・脚注・リンクカード・検索置換は、それぞれのプラグインを登録して利用してください。
+（最新は 0.10.0 です。以下の 0.9.3 の機能はそのまま含まれます。）既存のHTML・JSONを引き続き読み込めます。新しい操作を有効にするフラグは不要です。目次・ボックス・脚注・リンクカード・検索置換は、それぞれのプラグインを登録して利用してください。
 
 #### 選択位置を保存して外部UIから操作する
 

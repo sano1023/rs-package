@@ -82,9 +82,19 @@
     display: block;
 }
 
+/* display を指定しているので、hidden 属性を明示的に効かせる（幅に入らず「その他」メニューへ移したボタンなど） */
+.rse-btn[hidden],
+.rse-sep[hidden] {
+    display: none;
+}
+
 .rse-ic-h {
     font-size: 12px;
     font-weight: 700;
+}
+
+.rse-ic-heading {
+    font-weight: 600;
 }
 
 .rse-sep {
@@ -346,6 +356,11 @@
 
 .rse-menu-swatch:hover {
     outline: 2px solid var(--rse-accent);
+}
+
+/* パレットの下の「色を解除」などは全列にまたがる（1列目に入ると、その列だけ広がって色見本がずれる） */
+.rse-menu-grid .rse-menu-item:not(.rse-menu-swatch) {
+    grid-column: 1 / -1;
 }
 
 /* 文字色 / 背景色ボタン */
@@ -714,7 +729,7 @@
 .rse-drag-handle {
     position: absolute;
     z-index: 30;
-    width: 18px;
+    width: 14px;
     height: 22px;
     display: flex;
     align-items: center;
@@ -725,6 +740,9 @@
     border-radius: 4px;
     user-select: none;
 }
+/* display:flex のため hidden 属性だけでは消えず、左上に出たままになっていた */
+.rse-drag-handle[hidden],
+.rse-drag-indicator[hidden] { display: none; }
 .rse-drag-handle:hover { background: #eef2f7; color: #475569; }
 .rse-drag-handle.rse-drag-active { cursor: grabbing; color: var(--rse-primary, #4e79a7); }
 .rse-drag-indicator {
@@ -1082,3 +1100,97 @@
 }
 .rse-upload-notice button:disabled { opacity: .5; cursor: default; }
 .rse-upload-notice [hidden] { display: none; }
+
+/* ============================================================ v0.10 追加分 */
+
+/* ---- 空の行の挿入ボタン（insertToolbar）。行の左外、余白がなければ行の右端に出る */
+.rse-insert {
+    position: fixed;
+    z-index: 14;
+    width: max-content;
+}
+.rse-insert[popover] { border: 0; padding: 0; background: transparent; color: inherit; overflow: visible; }
+.rse-insert .rse-toolbar {
+    flex-wrap: nowrap;
+    gap: 6px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+}
+.rse-insert .rse-btn {
+    width: var(--rse-insert-size, 32px);
+    min-width: var(--rse-insert-size, 32px);
+    height: var(--rse-insert-size, 32px);
+    padding: 0;
+    border: 1px solid var(--rse-border);
+    border-radius: 50%;
+    background: var(--rse-bg);
+    color: var(--rse-insert-color, #64748b);
+}
+.rse-insert .rse-btn:hover:not(:disabled),
+.rse-insert .rse-btn.rse-active {
+    border-color: var(--rse-accent);
+    background: var(--rse-bg);
+    color: var(--rse-accent);
+}
+.rse-insert .rse-sep { display: none; }
+
+/* ---- 「その他」メニュー（定義の `...` 以降、または幅に入らなかったボタン） */
+.rse-menu-more { min-width: 180px; }
+.rse-menu-more .rse-menu-item { display: flex; align-items: center; gap: 8px; }
+.rse-menu-more .rse-menu-ic {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    margin-right: 0;
+}
+.rse-menu-more .rse-menu-item.rse-active { color: var(--rse-accent); font-weight: 600; }
+/* photo ボタン用のファイル入力。display:none にすると端末のファイル選択が開かないブラウザがあるため、見えない大きさで置く */
+.rse-file-input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: 0;
+    padding: 0;
+    opacity: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    pointer-events: none;
+}
+
+/* ---- シンプルUI（ui: 'simple' / setUI('simple')）
+   固定ツールバーなし。空の行の挿入ボタンと、選択時のツールバーだけで編集する。
+   枠・余白は --rse-simple-* で戻せる（例: --rse-simple-border: 1px solid #cbd5e1）。 */
+.rse.rse-simple {
+    border: var(--rse-simple-border, 0);
+    border-radius: var(--rse-simple-radius, 0);
+    background: var(--rse-simple-bg, transparent);
+}
+.rse-simple .rse-content {
+    padding: var(--rse-simple-padding, 8px 0);
+    /* 16px 未満だと iOS がフォーカス時に画面を拡大する */
+    font-size: max(16px, 1em);
+}
+.rse-simple .rse-content[contenteditable="false"] { background: transparent; }
+.rse-simple .rse-floating { border-radius: 12px; }
+.rse-simple .rse-floating .rse-toolbar { flex-wrap: nowrap; border-radius: 12px; }
+.rse-simple .rse-floating .rse-btn { min-width: 34px; height: 34px; font-size: 15px; }
+.rse-simple .rse-upload-notice { border: 1px solid var(--rse-border, #ddd); border-radius: 8px; margin-top: 8px; }
+
+/* 指で操作する端末では押しやすい大きさにする */
+@media (pointer: coarse) {
+    /* 16px 未満の入力欄は、iOS がフォーカス時に画面を拡大する */
+    .rse-dialog-row input,
+    .rse-dialog-row select { font-size: 16px; }
+    .rse-insert .rse-btn {
+        width: var(--rse-insert-size, 40px);
+        min-width: var(--rse-insert-size, 40px);
+        height: var(--rse-insert-size, 40px);
+    }
+    .rse-simple .rse-floating .rse-btn { min-width: 40px; height: 40px; font-size: 16px; }
+    /* メニューも指で選びやすい高さにする */
+    .rse-simple .rse-menu-item:not(.rse-menu-swatch) { min-height: 44px; font-size: 15px; }
+    .rse-simple .rse-menu-swatch { width: 32px; height: 32px; }
+}

@@ -100,6 +100,8 @@ export class ContentEditableCore {
     /** キャレット位置の文字色/背景色を返す（無ければ null） */
     getColorAtCaret(type: any): any;
     isMarkActive(type: any): boolean;
+    /** 範囲選択で最初に選択されている文字を持つテキストノード（なければ null） */
+    firstSelectedText(range: any): any;
     getActiveBlock(): {
         type: string;
         level: number;
