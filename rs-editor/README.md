@@ -15,7 +15,7 @@ npmjs.com の公開パッケージです。ログインやトークンは不要�
 <summary>npm レジストリを使わない場合（GitHub tarball 直指定）</summary>
 
 ```bash
-npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-editor-0.10.0.tgz
+npm install https://github.com/sano1023/rs-package/raw/main/tarballs/rs-editor-0.10.1.tgz
 ```
 </details>
 
@@ -33,8 +33,8 @@ createRSEditor(document.querySelector('#app'), { /* オプション */ });
 ### `<script>` タグ（CDN・ビルド環境不要）
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sano1023/rs-editor@0.10.0/dist/rs-editor.css">
-<script src="https://cdn.jsdelivr.net/npm/@sano1023/rs-editor@0.10.0/dist/rs-editor.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sano1023/rs-editor@0.10.1/dist/rs-editor.css">
+<script src="https://cdn.jsdelivr.net/npm/@sano1023/rs-editor@0.10.1/dist/rs-editor.min.js"></script>
 <script>
   // 公開APIはグローバル RSEditor に載る
   RSEditor.createRSEditor(document.querySelector('#app'), { /* オプション */ });
@@ -71,7 +71,7 @@ export default function App() {
 
 # rs-editor
 
-プラグインアーキテクチャを持つ、依存ゼロのWYSIWYGエディタライブラリです（現在 v0.10.0）。
+プラグインアーキテクチャを持つ、依存ゼロのWYSIWYGエディタライブラリです（現在 v0.10.1）。
 
 - **依存ゼロ**: ランタイム依存なし。ビルド済みの ESモジュールをパッケージから import できる
 - **プラグインアーキテクチャ**: 太字などの組み込み機能もすべて同じプラグインAPIで実装（利用者が数行で機能を追加できる）
@@ -483,6 +483,20 @@ createRSEditor('#content', {
 
 [ボックス・カードの見本を含むデモ](./demo/index.html)
 
+### v0.10.1: リンクカードの設定画面の修正
+
+0.10.0 の不具合を1件直しました。設定・API・保存形式の変更はありません（0.10.0 からはそのまま更新できます）。
+
+```bash
+npm install @sano1023/rs-editor@0.10.1
+```
+
+- **リンクカードの設定画面で、画像 URL を入力した直後に「適用」をクリックしても効かない問題**を修正しました（`linkcard` プラグイン）。2回目のクリックや `Tab`・`Enter` では適用できていました。
+  - 原因: 見本の画像を、入力欄を離れた時点（`change`）で表示していました。入力欄から直接ボタンを押すと、押した瞬間に見本の画像の分だけダイアログが伸び、マウスを離すまでの間にボタンが下へ動いてクリックが外れます。0.10.0 でこの画面を 600px に広げた結果、見本の画像が大きくなり、ずれが約13px から約90px に増えて起きるようになりました。
+  - 修正: 画像の枠は入力中から同じ大きさで確保し、入力欄を離れたときは枠を画像に置き換えるだけにしました（ダイアログの高さは変わりません）。打ちかけの URL を読み込まない点は従来どおりです。リンク先 URL も入力のたびに見本へ反映します。
+- 独自プラグインでダイアログを作る場合の注意: テキスト欄の `onChange` は欄を離れた瞬間、つまりボタンを押した瞬間にも呼ばれます。そこでダイアログの高さが変わる更新（見本の表示・行の出し入れ）をすると同じ問題が起きるので、`onInput` で行ってください。
+- 検証: 実際の Chrome（PC／タッチ表示）で「入力 → そのまま『適用』を1回クリック」を再現するテストを追加しました（修正前は失敗）。ユニット163件、ブラウザ11ファイル。
+
 ### v0.10.0: シンプルUI（スマホ向け）とUI切替
 
 スマホでは通常のツールバーが数段に折り返して本文が狭くなるため、固定ツールバーを出さないUIを追加しました。
@@ -509,7 +523,7 @@ createRSEditor('#content', {
 動くサンプルは2つあります。コードをそのまま読めるよう、どちらも1ファイルで完結しています。
 
 - [demo/simple.html](./demo/simple.html) — シンプルUIの最小構成。タイトル欄つきの記事入力画面、通常UIとの切替、画面幅での自動切替、保存されるHTMLの表示
-- [demo/index.html](./demo/index.html) — 全プラグインを載せた例。本文の上の「v0.10.0 の変更を確認する」で、UIの切替と設定画面を試せる。`simple: { ... }` でボタンを通常UIと別に決める例を含む
+- [demo/index.html](./demo/index.html) — 全プラグインを載せた例。本文の上の「v0.10 の変更を確認する」で、UIの切替と設定画面を試せる。`simple: { ... }` でボタンを通常UIと別に決める例を含む
 
 #### そのまま使えるサンプル
 
@@ -741,7 +755,7 @@ ref からは `setUI(name)` も呼べます。
 npm install @sano1023/rs-editor@0.9.3
 ```
 
-（最新は 0.10.0 です。以下の 0.9.3 の機能はそのまま含まれます。）既存のHTML・JSONを引き続き読み込めます。新しい操作を有効にするフラグは不要です。目次・ボックス・脚注・リンクカード・検索置換は、それぞれのプラグインを登録して利用してください。
+（最新は 0.10.1 です。以下の 0.9.3 の機能はそのまま含まれます。）既存のHTML・JSONを引き続き読み込めます。新しい操作を有効にするフラグは不要です。目次・ボックス・脚注・リンクカード・検索置換は、それぞれのプラグインを登録して利用してください。
 
 #### 選択位置を保存して外部UIから操作する
 

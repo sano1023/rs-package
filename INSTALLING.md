@@ -1,7 +1,7 @@
 # ライブラリのインストール・更新
 
 <!-- rs-editor-release:start -->
-**rs-editor 0.10.0:** スマホ向けのシンプルUI（`ui: 'simple'` / `editor.setUI()`）、空の行の挿入メニュー、選択時の装飾バー、設定画面（モーダル）の幅を追加しました。npmjs.com・GitHub配布・デモへ反映済みで、`npm install @sano1023/rs-editor@0.10.0` で利用できます。使い方とサンプルは[README](./rs-editor/README.md)の v0.10.0 の節を参照してください。シンプルUIのデモは [simple.html](./rs-editor/demo/simple.html) です。
+**rs-editor 0.10.1:** リンクカードの設定画面で、画像URLを入力した直後の「適用」クリックが1回目に効かない問題を修正しました（設定・API・保存形式の変更なし）。npmjs.com・GitHub配布・デモへ反映済みで、`npm install @sano1023/rs-editor@0.10.1` で利用できます。0.10.0 で追加したシンプルUI（`ui: 'simple'` / `editor.setUI()`）などの使い方は[README](./rs-editor/README.md)を、デモは [simple.html](./rs-editor/demo/simple.html) を参照してください。
 <!-- rs-editor-release:end -->
 
 全32ライブラリを **npmjs.com** (`https://registry.npmjs.org/`) の公開パッケージ **`@sano1023/rs-*`** として配布します。利用者のログイン・トークンは不要です。

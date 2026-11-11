@@ -86,8 +86,8 @@
 </head>
 <body>
 <div class="page">
-    <h1>rs-editor <small>v0.10.0 デモ — 依存ゼロ・プラグイン式WYSIWYGエディタ</small></h1>
-    <p class="review-note">v0.10.0：スマホ向けのシンプルUIを追加し、設定画面（モーダル）の幅を広げました。下の「v0.10.0 の変更を確認する」で切り替えられます → <a href="./simple.html">シンプルUI専用のデモ</a></p>
+    <h1>rs-editor <small>v0.10.1 デモ — 依存ゼロ・プラグイン式WYSIWYGエディタ</small></h1>
+    <p class="review-note">v0.10.0：スマホ向けのシンプルUIを追加し、設定画面（モーダル）の幅を広げました。下の「v0.10 の変更を確認する」で切り替えられます → <a href="./simple.html">シンプルUI専用のデモ</a></p>
     <div class="demo-tabs" role="tablist" aria-label="確認するデモ">
         <button id="tab-all" role="tab" aria-controls="demo-all" aria-selected="true">目次・ボックス・全機能</button>
         <button id="tab-v07" role="tab" aria-controls="demo-v07" aria-selected="false" tabindex="-1">v0.7：外部操作・タッチ</button>
@@ -110,7 +110,7 @@
     </details>
 
     <section class="whats-new" aria-label="今回の変更を確認する">
-        <h2>v0.10.0 の変更を確認する</h2>
+        <h2>v0.10 の変更を確認する</h2>
         <div class="ui-switch" role="group" aria-label="UIの切替">
             <span>UI:</span>
             <button type="button" data-ui="standard" aria-pressed="true">通常</button>
@@ -129,6 +129,7 @@
             <li>どのボタンを並べ、どれをメニューに入れるかは、通常UIのツールバーとは別に <code>simple: { insertToolbar, floatingToolbar }</code> で決められます。このデモでは既定の並びに「ルビ」「コメント」「⭐スタンプ」を足しています。</li>
             <li><strong>ドラッグ並べ替えの「⠿」</strong>: 本文にマウスを載せたときだけ、ブロックの左外に出ます（文字に重なりません）。</li>
             <li><strong>設定画面（モーダル）の幅</strong>: PC では 480px 以上（リンクカード・ボックスは 600px）、スマホでは画面幅いっぱいに広がります。上の「設定画面」のボタンは、どちらのUIでも本文の選択位置のまま開けます。</li>
+            <li><strong>0.10.1 の修正 — リンクカードの「適用」</strong>: 上の「リンクカード」を開き、リンク先とタイトルを入れてから「画像 URL」に <code>./article-sample.svg</code> と入力し、<strong>そのままマウスで「適用」を1回クリック</strong>してください。0.10.0 では、押した瞬間に見本の画像が出てボタンが下へ動き、1回目のクリックが外れていました。入力中から画像の枠を確保するようにしたので、入力欄を離れてもダイアログの高さは変わりません。</li>
         </ul>
     </section>
 
